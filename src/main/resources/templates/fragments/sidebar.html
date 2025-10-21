@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- Sidebar Fragment -->
+<aside class="sidebar" th:fragment="sidebar">
+    <h3>카테고리</h3>
+    <ul class="category-list">
+        <li><a th:href="@{/books/category/fiction}">소설</a></li>
+        <li><a th:href="@{/books/category/poetry}">시/에세이</a></li>
+        <li><a th:href="@{/books/category/humanities}">인문</a></li>
+        <li><a th:href="@{/books/category/economy}">경제/경영</a></li>
+        <li><a th:href="@{/books/category/it}">IT/프로그래밍</a></li>
+        <li><a th:href="@{/books/category/children}">어린이</a></li>
+    </ul>
+    
+    <div class="sidebar-section">
+        <h3>추천</h3>
+        <ul class="category-list">
+            <li><a th:href="@{/books/bestseller}">베스트셀러</a></li>
+            <li><a th:href="@{/books/new}">신간 도서</a></li>
+        </ul>
+    </div>
+</aside>
+</body>
+</html>

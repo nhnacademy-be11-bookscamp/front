@@ -15,4 +15,7 @@ public class ViewController {
     public String templateNoSidebar() {
         return "template-no-siderbar";
     }
+
+    @GetMapping("/image")
+    public String image() { return "image"; }
 }

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>이미지 업로드 테스트</title>
+    <style>
+        body{font-family:system-ui, sans-serif;max-width:680px;margin:40px auto;padding:0 16px}
+        .card{border:1px solid #e5e7eb;border-radius:12px;padding:20px}
+        .row{display:flex;gap:12px;align-items:center}
+        .row > *{flex:1}
+        .actions{margin-top:12px;display:flex;gap:8px}
+        .result{margin-top:16px;padding:12px;border:1px dashed #cbd5e1;border-radius:8px;word-break:break-all}
+        input[type=file]{padding:8px;border:1px solid #d1d5db;border-radius:8px}
+        button{padding:10px 14px;border:0;border-radius:10px;background:#111827;color:#fff;cursor:pointer}
+        a{color:#2563eb}
+    </style>
+</head>
+<body>
+<h1>이미지 업로드</h1>
+
+<div class="card">
+    <form id="bookForm">
+        <div class="row">
+            <input type="file" name="file" id="bookFile" accept="image/*" required/>
+            <button type="submit">Book 업로드</button>
+        </div>
+    </form>
+
+    <form id="reviewForm" style="margin-top:12px">
+        <div class="row">
+            <input type="file" name="file" id="reviewFile" accept="image/*" required/>
+            <button type="submit">Review 업로드</button>
+        </div>
+    </form>
+
+    <div id="result" class="result" style="display:none"></div>
+</div>
+
+<script>
+    async function sendForm(formEl, url) {
+        const fd = new FormData(formEl);
+        const res = await fetch(url, { method: 'POST', body: fd });
+        const text = await res.text();
+        const box = document.getElementById('result');
+        box.style.display='block';
+        box.innerHTML = res.ok
+            ? `업로드 성공!<br/><a href="${text}" target="_blank">${text}</a>`
+            : `업로드 실패<br/>status=${res.status}<br/>body=${text}`;
+    }
+
+    document.getElementById('bookForm').addEventListener('submit', e=>{
+        e.preventDefault();
+        sendForm(e.target, '/books/image');
+    });
+
+    document.getElementById('reviewForm').addEventListener('submit', e=>{
+        e.preventDefault();
+        sendForm(e.target, '/reviews/image');
+    });
+</script>
+</body>
+</html>
+

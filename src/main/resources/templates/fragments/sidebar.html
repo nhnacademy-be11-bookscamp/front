@@ -8,14 +8,12 @@
 <aside class="sidebar" th:fragment="sidebar">
     <h3>카테고리</h3>
     <ul class="category-list">
-        <li><a th:href="@{/books/category/fiction}">소설</a></li>
-        <li><a th:href="@{/books/category/poetry}">시/에세이</a></li>
-        <li><a th:href="@{/books/category/humanities}">인문</a></li>
-        <li><a th:href="@{/books/category/economy}">경제/경영</a></li>
-        <li><a th:href="@{/books/category/it}">IT/프로그래밍</a></li>
-        <li><a th:href="@{/books/category/children}">어린이</a></li>
+        <li th:each="category : ${categories}">
+            <a th:href="@{'/books?categoryId=' + ${category.id}}"
+               th:text="${category.name}"></a>
+        </li>
     </ul>
-    
+
     <div class="sidebar-section">
         <h3>추천</h3>
         <ul class="category-list">

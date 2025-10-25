@@ -22,6 +22,6 @@ public interface BookFeignClient {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
 
-    ResponseEntity<String> uploadBookImage(@RequestParam("file") MultipartFile file);
+    ResponseEntity<String> uploadBookImage(@RequestPart("file") MultipartFile file);
 
 }

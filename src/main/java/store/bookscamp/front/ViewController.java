@@ -6,14 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ViewController {
 
-    @GetMapping("/layout")
-    public String layout() {
-        return "layout";
-    }
-
-    @GetMapping("/template-no-sidebar")
-    public String templateNoSidebar() {
-        return "template-no-siderbar";
+    @GetMapping("/")
+    public String index() {
+        return "index";
     }
 
     @GetMapping("/image")

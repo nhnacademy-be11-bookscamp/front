@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- Header Fragment -->
+<header class="header" th:fragment="header">
+    <div class="header-container">
+        <div class="logo">
+            <a th:href="@{/}">
+                <h1>북스캠프 📚</h1>
+            </a>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a th:href="@{/}">홈</a></li>
+                <li><a th:href="@{/books}">도서 목록</a></li>
+                <li><a th:href="@{/cart}">장바구니</a></li>
+                <li><a th:href="@{/mypage}">마이페이지</a></li>
+            </ul>
+        </nav>
+        <div class="header-actions">
+            <a th:href="@{/login}" class="btn-login">로그인</a>
+        </div>
+    </div>
+</header>
+</body>
+</html>

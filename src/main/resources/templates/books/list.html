@@ -1,24 +1,85 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/default}">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>도서 목록</title>
 </head>
 <body>
-    <div layout:fragment="content">
-        <h1>도서 목록</h1>
-        <p>도서 목록 페이지입니다. API 연동 후 도서 목록을 표시하세요.</p>
-        
-        <!-- TODO: API에서 가져온 도서 목록 표시 -->
-        <div style="margin-top: 2rem;">
-            <p>예시: API 연동 후 아래와 같이 도서 목록을 표시할 수 있습니다.</p>
-            <div style="border: 1px solid #ddd; padding: 1rem; margin-top: 1rem;">
-                <h3>도서 제목</h3>
-                <p>저자 | 출판사 | 가격</p>
-            </div>
-        </div>
+
+<h1>도서 목록</h1>
+
+<!-- 검색 및 정렬 폼 -->
+<form th:action="@{/books}" method="get">
+    <label>카테고리 ID:
+        <input type="text" name="categoryId" th:value="${categoryId}">
+    </label>
+    <label>키워드:
+        <input type="text" name="keyWord" th:value="${keyWord}">
+    </label>
+    <label>정렬:
+        <select name="sortType">
+            <option value="id" th:selected="${sortType == 'id'}">기본</option>
+            <option value="title" th:selected="${sortType == 'title'}">제목순</option>
+            <option value="salePrice" th:selected="${sortType == 'low-price'}">가격순</option>
+            <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
+        </select>
+    </label>
+    <button type="submit">검색</button>
+</form>
+
+<hr/>
+
+<!-- 도서 목록 테이블 -->
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>제목</th>
+        <th>설명</th>
+        <th>출판사</th>
+        <th>출판일</th>
+        <th>정가</th>
+        <th>판매가</th>
+        <th>재고</th>
+        <th>조회수</th>
+        <th>포장 가능</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="book : ${booksPage.content}">
+        <td th:text="${book.id}">1</td>
+        <td th:text="${book.title}">도서 제목</td>
+        <td th:text="${book.explanation}">간단 설명</td>
+        <td th:text="${book.publisher}">출판사</td>
+        <td th:text="${book.publishDate}">2025-01-01</td>
+        <td th:text="${book.regularPrice}">15000</td>
+        <td th:text="${book.salePrice}">12000</td>
+        <td th:text="${book.stock}">10</td>
+        <td th:text="${book.viewCount}">200</td>
+        <td th:text="${book.packable ? '가능' : '불가능'}">가능</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(booksPage.content)}">
+        <td colspan="10">조회된 도서가 없습니다.</td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- 페이지 네비게이션 -->
+<div>
+    <span th:text="'현재 페이지: ' + (${booksPage.number + 1}) + ' / ' + ${booksPage.totalPages}"></span>
+
+    <div>
+        <a th:if="${!booksPage.first}"
+           th:href="@{/books(page=${booksPage.number - 1}, size=${booksPage.size}, categoryId=${categoryId}, keyWord=${keyWord}, sortType=${sortType})}">
+            이전
+        </a>
+
+        <a th:if="${!booksPage.last}"
+           th:href="@{/books(page=${booksPage.number + 1}, size=${booksPage.size}, categoryId=${categoryId}, keyWord=${keyWord}, sortType=${sortType})}">
+            다음
+        </a>
     </div>
+</div>
+
 </body>
 </html>
-

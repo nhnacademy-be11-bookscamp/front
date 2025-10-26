@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<head>
+  <title>Aladin 도서 검색</title>
+
+  <th:block layout:fragment="extra-css">
+    <link rel="stylesheet" th:href="@{/css/book.css}">
+    <style>
+      .search-box {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .search-input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+      .search-btn {
+        padding: 10px 16px;
+        background-color: #4A90E2;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .search-btn:hover {
+        background-color: #357ABD;
+      }
+      .book-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .book-item {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+        background: #fff;
+        transition: 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      }
+      .book-item:hover {
+        box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      }
+      .book-item img {
+        width: 120px;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+      .book-title {
+        font-size: 0.95rem;
+        margin-top: 10px;
+        color: #333;
+        font-weight: 600;
+      }
+      .book-author {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 8px;
+      }
+      .register-btn {
+        display: inline-block;
+        background-color: #FF6F61;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: background 0.2s;
+      }
+      .register-btn:hover {
+        background-color: #E65B50;
+      }
+    </style>
+  </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <h1>📚 Aladin 도서 검색</h1>
+
+  <form class="search-box" th:action="@{/aladin/search}" method="get">
+    <input class="search-input" type="text" name="query" placeholder="도서 제목을 입력하세요" th:value="${param.q}">
+    <button class="search-btn" type="submit">검색</button>
+  </form>
+
+  <div class="book-list">
+    <div th:if="${books != null}" th:each="book : ${books}" class="book-item">
+      <img th:src="${book.cover}" alt="책 표지">
+      <div class="book-title" th:text="${book.title}">제목</div>
+      <div class="book-author" th:text="${book.author}">저자</div>
+      <a class="register-btn"
+         th:href="@{'/book/register'(isbn=${book.isbn13})}">
+        등록
+      </a>
+    </div>
+
+    <div th:if="${books == null}">
+      <p>검색 결과가 없습니다. 검색어를 입력해 주세요.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

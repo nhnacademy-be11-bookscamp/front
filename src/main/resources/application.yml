@@ -1,0 +1,28 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: front
+
+# front는 eureka 미사용, gateway로만 호출
+gateway:
+  base-url: http://localhost:8080
+
+
+
+
+# DDDDD
+# (선택) Feign 로깅/타임아웃
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 3000
+        readTimeout: 5000
+        loggerLevel: BASIC
+
+logging:
+  level:
+    feign: INFO
+    com.netflix.loadbalancer: WARN

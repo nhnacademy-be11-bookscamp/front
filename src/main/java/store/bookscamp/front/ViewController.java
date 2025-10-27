@@ -10,7 +10,4 @@ public class ViewController {
     public String index() {
         return "index";
     }
-
-    @GetMapping("/image")
-    public String image() { return "image"; }
 }

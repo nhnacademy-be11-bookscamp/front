@@ -32,7 +32,7 @@ public class BookViewController {
             @PageableDefault(size = 10, page = 0) Pageable pageable,
             Model model
     ) {
-        // 도서 목록 조회
+
         ResponseEntity<RestPageImpl<BookSortResponse>> response = bookFeignClient.getBooks(
                 categoryId,
                 keyWord,
@@ -44,11 +44,9 @@ public class BookViewController {
         Page<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
 
-        // ✅ 카테고리 목록
         List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         model.addAttribute("categories", categories);
 
-        // 파라미터 유지
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("keyWord", keyWord);
         model.addAttribute("sortType", sortType);

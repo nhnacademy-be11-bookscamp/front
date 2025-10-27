@@ -1,0 +1,25 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: front
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+# feign 로그 출력용
+logging:
+  level:
+    feign.Logger: DEBUG
+    store.bookscamp.front.book.feign: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+
+# 이미지 업로드 타임아웃 초과로 fegin read timeout 늘림
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 15000

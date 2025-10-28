@@ -24,13 +24,13 @@ public class MemberController {
 
     @GetMapping("/sign-up")
     public String showPage(){
-        return "/members/signup-form";
+        return "/member/signup-form";
     }
 
     @GetMapping("/members/edit-info/{id}")
     public ModelAndView editInfo(@PathVariable String id) {
         MemberGetResponse memberInfo = memberFeignClient.getMember(id);
-        ModelAndView mav = new ModelAndView("/members/edit-info");
+        ModelAndView mav = new ModelAndView("/member/edit-info");
         mav.addObject("memberInfo",memberInfo);
         return mav;
     }
@@ -38,7 +38,7 @@ public class MemberController {
     @GetMapping("/members/{id}/change-password")
     public ModelAndView changePassword(@PathVariable String id){
         MemberGetResponse memberInfo = memberFeignClient.getMember(id);
-        ModelAndView mav = new ModelAndView("/members/change-password");
+        ModelAndView mav = new ModelAndView("/member/change-password");
         mav.addObject("memberInfo",memberInfo);
         return mav;
     }
@@ -46,7 +46,7 @@ public class MemberController {
     @GetMapping("/members/{id}")
     public ModelAndView getMember(@PathVariable String id){
         MemberGetResponse memberInfo = memberFeignClient.getMember(id);
-        ModelAndView modelAndView = new ModelAndView("/members/mypage");
+        ModelAndView modelAndView = new ModelAndView("/member/mypage");
         modelAndView.addObject("memberInfo",memberInfo);
         return modelAndView;
     }
@@ -60,7 +60,7 @@ public class MemberController {
     @PostMapping("/members")
     public String createMember(MemberCreateRequest memberCreateRequest){
         memberFeignClient.createMember(memberCreateRequest);
-        return "/login";
+        return "member/login";
     }
 
     @PutMapping("/members/{id}")
@@ -78,7 +78,7 @@ public class MemberController {
     @DeleteMapping("members/{id}")
     public String deleteMember(@PathVariable String id){
         memberFeignClient.deleteMember(id);
-        return "/login";
+        return "member/login";
     }
 
 

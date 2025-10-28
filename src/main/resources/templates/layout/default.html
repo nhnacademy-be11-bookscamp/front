@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>북스캠프</title>
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <!-- 페이지별 추가 CSS -->
+    <th:block layout:fragment="extra-css"></th:block>
+</head>
+<body>
+    <!-- Header -->
+    <th:block th:replace="~{fragment/header :: header}"></th:block>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <th:block th:replace="~{fragment/sidebar :: sidebar}"></th:block>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-area">
+                <!-- 각 페이지의 콘텐츠가 이 영역에 삽입됩니다 -->
+                <div layout:fragment="content">
+                    <h2>콘텐츠 영역</h2>
+                    <p>이 영역에 페이지별 콘텐츠를 작성하세요.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <th:block th:replace="~{fragment/footer :: footer}"></th:block>
+
+    <!-- 페이지별 추가 JavaScript -->
+    <th:block layout:fragment="extra-js"></th:block>
+</body>
+</html>

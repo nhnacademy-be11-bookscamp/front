@@ -28,13 +28,13 @@ public class BookController {
             detail = new BookDetailResponse();
         }
         model.addAttribute("book", detail);
-        return "books/register";
+        return "book/register";
     }
 
     @PostMapping("/register")
     public String registerBook(@ModelAttribute BookRegisterRequest req) {
         bookApiClient.registerBook(req);
-        return "books/list";
+        return "book/list";
     }
   /* @PostMapping("/register")
    @ResponseBody

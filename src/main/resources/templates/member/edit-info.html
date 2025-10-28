@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/no-sidebar}">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 정보 수정</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="email"], input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .action-button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+    </style>
+    <script th:inline="javascript">
+
+        const currentUserId = `[[${memberInfo.username}]]`;
+
+        async function updateMemberInfo() {
+
+            const form = document.getElementById('updateForm');
+            const messageDiv = document.getElementById('message');
+
+
+            const updateData = {
+                name: form.name.value,
+                email: form.email.value,
+                phone: form.phone.value
+            };
+
+
+            const url = `/members/${currentUserId}`;
+
+            if (!updateData.email || !updateData.phone) {
+                messageDiv.textContent = '이메일과 전화번호는 필수 입력 항목입니다.';
+                messageDiv.style.color = 'red';
+                return;
+            }
+
+            messageDiv.textContent = '정보 수정 중...';
+            messageDiv.style.color = 'gray';
+
+            try {
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (response.ok) {
+
+                    alert('정보 수정 완료!');
+
+                    window.location.href = `/members/${currentUserId}`;
+
+                } else {
+
+                    let errorText = await response.text();
+
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorText = errorJson.message || errorJson.error || errorText;
+                    } catch (e) {
+                        errorText = errorText || response.statusText;
+                    }
+
+                    messageDiv.textContent = `정보 수정 실패 (${response.status}): ${errorText}`;
+                    messageDiv.style.color = 'red';
+                }
+            } catch (error) {
+
+                console.error('Network Fetch Error:', error);
+                messageDiv.textContent = '네트워크 오류가 발생했습니다. 서버 연결을 확인하세요.';
+                messageDiv.style.color = 'red';
+            }
+        }
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <h1>회원 정보 수정</h1>
+    <p>내 정보를 수정합니다. 수정 후 저장 버튼을 눌러주세요.</p>
+
+    <form id="updateForm">
+        <div class="form-group">
+            <label for="name">이름:</label>
+            <input type="text" id="name" name="name" th:value="${memberInfo.name}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">이메일:</label>
+            <input type="email" id="email" name="email" th:value="${memberInfo.email}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">전화번호:</label>
+            <input type="text" id="phone" name="phone" th:value="${memberInfo.phone}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="birthDate">생년월일:</label>
+            <input type="date" id="birthDate" name="birthDate" th:value="${memberInfo.birthDate}" disabled>
+        </div>
+
+        <button type="button" class="action-button" onclick="updateMemberInfo()">정보 저장</button>
+        <a th:href="@{/members/{id}(id=${memberInfo.username})}">취소 및 돌아가기</a>
+    </form>
+
+    <div id="message" style="margin-top: 15px;"></div>
+
+    <div style="margin-top: 2rem;">
+        <p>레이아웃: <code>layouts/no-sidebar.html</code></p>
+    </div>
+</div>
+
+</body>
+</html>

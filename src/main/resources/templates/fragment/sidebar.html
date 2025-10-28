@@ -1,0 +1,22 @@
+<!-- sidebar fragment -->
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar" class="sidebar">
+    <!-- 카테고리 영역 -->
+    <section class="sidebar-section">
+        <h3>카테고리</h3>
+        <ul class="category-list">
+            <li th:each="category : ${categories}">
+                <a th:href="@{'/books?categoryId=' + ${category.id}}"
+                   th:text="${category.name}"></a>
+            </li>
+        </ul>
+    </section>
+
+    <!-- 추천 섹션 -->
+    <section class="sidebar-section">
+        <h3>추천</h3>
+        <ul class="category-list">
+            <li><a th:href="@{/books/bestseller}">베스트셀러</a></li>
+            <li><a th:href="@{/books/new}">신간 도서</a></li>
+        </ul>
+    </section>
+</div>

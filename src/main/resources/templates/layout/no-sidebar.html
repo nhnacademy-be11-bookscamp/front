@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title layout:title-pattern="$CONTENT_TITLE - $LAYOUT_TITLE">북스캠프</title>
+    <title>북스캠프</title>
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <!-- 페이지별 추가 CSS -->
     <th:block layout:fragment="extra-css"></th:block>
 </head>
 <body>
     <!-- Header -->
-    <th:block th:replace="~{fragments/header :: header}"></th:block>
+    <th:block th:replace="~{fragment/header :: header}"></th:block>
 
     <!-- Main Container (No Sidebar) -->
     <div class="main-container no-sidebar">
@@ -28,7 +28,7 @@
     </div>
 
     <!-- Footer -->
-    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+    <th:block th:replace="~{fragment/footer :: footer}"></th:block>
 
     <!-- 페이지별 추가 JavaScript -->
     <th:block layout:fragment="extra-js"></th:block>

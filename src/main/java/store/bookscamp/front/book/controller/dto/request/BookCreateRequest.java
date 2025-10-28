@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookRegisterRequest {
+public class BookCreateRequest {
     private String title;
     private String contributors;
     private String publisher;

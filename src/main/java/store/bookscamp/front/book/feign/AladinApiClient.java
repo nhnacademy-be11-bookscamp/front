@@ -16,7 +16,7 @@ import store.bookscamp.front.config.FeignConfig;
 )
 public interface AladinApiClient {
 
-    @GetMapping("/api-server/aladin/search")
+    @GetMapping("/api-server/admin/aladin/search")
     AladinBookResponse search(
             @RequestParam("query") String query,
             @RequestParam(name = "queryType", required = false) String queryType,
@@ -25,6 +25,6 @@ public interface AladinApiClient {
             @RequestParam(name = "sort", required = false) String sort
     );
 
-    @GetMapping("/api-server/aladin/books/{isbn13}")
+    @GetMapping("/api-server/admin/aladin/books/{isbn13}")
     BookDetailResponse getBookDetail(@PathVariable String isbn13);
 }

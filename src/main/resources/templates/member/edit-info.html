@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/no-sidebar}">
+      layout:decorate="~{layouts/no-sidebar}">
 <head>
     <meta charset="UTF-8">
     <title>회원 정보 수정</title>
@@ -28,7 +28,7 @@
     </style>
     <script th:inline="javascript">
 
-        const currentUserId = `[[${memberInfo.userName}]]`;
+        const currentUserId = `[[${memberInfo.username}]]`;
 
         async function updateMemberInfo() {
 
@@ -119,7 +119,7 @@
         </div>
 
         <button type="button" class="action-button" onclick="updateMemberInfo()">정보 저장</button>
-        <a th:href="@{/members/{id}(id=${memberInfo.userName})}">취소 및 돌아가기</a>
+        <a th:href="@{/members/{id}(id=${memberInfo.username})}">취소 및 돌아가기</a>
     </form>
 
     <div id="message" style="margin-top: 15px;"></div>

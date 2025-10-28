@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/default}">
+      layout:decorate="~{layout/default}">
 <head>
     <meta charset="UTF-8">
     <title>마이페이지</title>
@@ -10,7 +10,7 @@
         .info-row { margin-bottom: 10px; }
     </style>
     <script th:inline="javascript">
-        const currentUserId = [[${memberInfo.userName}]];
+        const currentUserId = `[[${memberInfo.userName}]]`;
 
         async function deleteMember() {
             if (!confirm('정말로 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.')) {

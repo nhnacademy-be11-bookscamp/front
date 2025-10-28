@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/no-sidebar}">
+      layout:decorate="~{layout/no-sidebar}">
 <head>
     <meta charset="UTF-8">
     <title>회원 정보 수정</title>
@@ -28,7 +28,7 @@
     </style>
     <script th:inline="javascript">
 
-        const currentUserId = [[${memberInfo.userName}]];
+        const currentUserId = `[[${memberInfo.userName}]]`;
 
         async function updateMemberInfo() {
 

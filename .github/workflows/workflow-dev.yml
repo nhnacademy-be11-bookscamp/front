@@ -36,9 +36,9 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Build and analyze
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_DEV }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=bookscamp-front -Dsonar.projectName='bookscamp-front'
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=bookscamp-front-dev -Dsonar.projectName='bookscamp-front-dev'
 
       # 3️⃣ Maven 빌드
       - name: Build with Maven

@@ -18,11 +18,15 @@ public class AladinController {
         return aladinApiClient.search(q, "Title", 1, 5, "Accuracy");
     }*/
 
-    @GetMapping("/aladin/search")
-    public String search(@RequestParam(value = "query", required = false) String query, Model model) {
+    @GetMapping("/admin/aladin/search")
+    public String search(@RequestParam(value = "query", required = false) String query, @RequestParam(value = "page",defaultValue = "1") int page, Model model) {
+        int size = 10;
         if (query != null && !query.isBlank()) {
-            AladinBookResponse response = aladinApiClient.search(query, "Title", 1, 10, "Accuracy");
+            AladinBookResponse response = aladinApiClient.search(query, "Title", page, 10, "Accuracy");
             model.addAttribute("books", response.getItems());
+            model.addAttribute("page", page);
+            model.addAttribute("totalPages", (int) Math.ceil((double) response.getTotal() / size));
+            model.addAttribute("query", query);
         }
         return "aladin/search";
     }

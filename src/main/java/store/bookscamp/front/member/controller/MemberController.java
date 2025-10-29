@@ -1,8 +1,10 @@
 package store.bookscamp.front.member.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,8 +24,12 @@ public class MemberController {
 
     private final MemberFeignClient memberFeignClient;
 
+    @Value("${app.api.prefix}")
+    private String apiPrefix;
+
     @GetMapping("/sign-up")
-    public String showPage(){
+    public String showPage(Model model){
+        model.addAttribute("apiPrefix", apiPrefix);
         return "/member/signup-form";
     }
 

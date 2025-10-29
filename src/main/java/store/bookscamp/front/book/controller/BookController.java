@@ -34,7 +34,7 @@ public class BookController {
     @PostMapping("/admin/books/create")
     public String createBook(@ModelAttribute BookCreateRequest req) {
         bookApiClient.createBook(req);
-        return "book/list";
+        return "redirect:/books";
     }
   /* @PostMapping("/register")
    @ResponseBody

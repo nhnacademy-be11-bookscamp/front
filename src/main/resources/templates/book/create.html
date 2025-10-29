@@ -118,7 +118,7 @@
             .then(resp => {
                 if (!resp.ok) throw new Error('등록 실패');
                 alert('도서 등록 완료!');
-                window.location.href = '/books/list';
+                window.location.href = '/book/list';
             })
             .catch(err => alert(err.message));
     }

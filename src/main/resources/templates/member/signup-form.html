@@ -50,6 +50,8 @@
 
     <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
+            var pathPrefix = /*[[${apiPrefix}]]*/ '';
+
             var isIdChecked = false;
             var isIdDuplicated = true;
 
@@ -80,7 +82,7 @@
                 }
 
 
-                const url = '/api-server/member/check-id?id=' + encodeURIComponent(id);
+                const url = pathPrefix + '/api-server/member/check-id?id=' + encodeURIComponent(id);
 
                 console.log('--- 아이디 중복 확인 요청 시작 ---');
                 console.log('Request URL:', url);

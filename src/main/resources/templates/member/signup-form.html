@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/no-sidebar}">
+      layout:decorate="~{layout/no-sidebar}">
 <head>
     <meta charset="UTF-8">
     <title>회원 가입</title>
@@ -14,8 +14,8 @@
     <form id="memberCreateForm" th:action="@{/members}" method="post">
         <input type="hidden" name="_method" value="put" />
         <div class="form-group">
-            <label for="userName">아이디 (4~20자):</label>
-            <input type="text" id="userName" name="userName" required minlength="4" maxlength="20">
+            <label for="username">아이디 (4~20자):</label>
+            <input type="text" id="username" name="username" required minlength="4" maxlength="20">
             <button type="button" id="checkIdButton">중복 확인</button>
             <p id="idCheckMessage" class="error">중복 확인이 필요합니다.</p>
         </div>
@@ -50,16 +50,17 @@
 
     <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
+            var pathPrefix = /*[[${apiPrefix}]]*/ '';
+
             var isIdChecked = false;
             var isIdDuplicated = true;
 
-            var idInput = document.getElementById('userName');
+            var idInput = document.getElementById('username');
             var checkIdButton = document.getElementById('checkIdButton');
             var idCheckMessage = document.getElementById('idCheckMessage');
             var submitButton = document.getElementById('submitButton');
             var memberCreateForm = document.getElementById('memberCreateForm');
 
-            // ... (아이디 입력 시 상태 초기화 로직 생략) ...
             idInput.addEventListener('input', function() {
                 submitButton.disabled = true;
                 idCheckMessage.textContent = '중복 확인이 필요합니다.';
@@ -68,7 +69,6 @@
                 isIdChecked = false;
             });
 
-            // 2. 중복 확인 버튼 클릭 처리 (fetch API 및 console log 추가)
             checkIdButton.addEventListener('click', async function() {
                 var id = idInput.value;
 
@@ -81,10 +81,9 @@
                     return;
                 }
 
-                const gatewayBaseUrl = 'http://localhost:8080';
-                const url = gatewayBaseUrl +'/api-server/member/check-id?id=' + encodeURIComponent(id);
 
-                // 💡 요청 URL을 콘솔에 출력
+                const url = pathPrefix + '/api-server/member/check-id?id=' + encodeURIComponent(id);
+
                 console.log('--- 아이디 중복 확인 요청 시작 ---');
                 console.log('Request URL:', url);
 
@@ -96,7 +95,6 @@
                         }
                     });
 
-                    // 💡 응답 상태 코드를 콘솔에 출력
                     console.log('Response Status:', response.status, response.statusText);
 
                     if (!response.ok) {
@@ -105,7 +103,6 @@
 
                         const errorMessage = await response.text();
 
-                        // 💡 오류 응답 본문을 콘솔에 출력
                         console.error('Error Response Body:', errorMessage);
 
                         idCheckMessage.textContent = errorMessage || "서버 오류가 발생했습니다.";
@@ -113,14 +110,12 @@
                         idCheckMessage.classList.add('error');
 
                     } else {
-                        // 성공 (200 OK)
                         isIdChecked = true;
                         isIdDuplicated = false;
                         submitButton.disabled = false;
 
                         const successMessage = await response.text();
 
-                        // 💡 성공 응답 본문을 콘솔에 출력
                         console.log('Success Response Body:', successMessage);
 
                         idCheckMessage.textContent = successMessage;
@@ -131,7 +126,6 @@
                     isIdChecked = true;
 
                 } catch (error) {
-                    // 💡 네트워크 요청 자체의 실패를 콘솔에 출력
                     console.error('Network Fetch Error:', error);
                     idCheckMessage.textContent = "네트워크 오류가 발생했습니다.";
                     idCheckMessage.classList.remove('success');
@@ -144,7 +138,6 @@
                 }
             });
 
-            // ... (폼 제출 시 유효성 검사 로직 생략) ...
             memberCreateForm.addEventListener('submit', function(e) {
                 if (!isIdChecked || isIdDuplicated) {
                     e.preventDefault();

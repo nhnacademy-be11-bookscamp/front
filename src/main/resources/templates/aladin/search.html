@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/default}">
+      layout:decorate="~{layout/default}">
 <head>
   <title>Aladin 도서 검색</title>
 
@@ -82,13 +82,60 @@
       }
     </style>
   </th:block>
+  <style>
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      margin-top: 30px;
+      padding: 10px 0;
+    }
+
+    .page-btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #4A90E2;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .page-btn:hover {
+      background-color: #357ABD;
+      transform: translateY(-1px);
+    }
+
+    .page-btn:active {
+      background-color: #2E6DA4;
+      transform: translateY(1px);
+    }
+
+    .page-info {
+      font-size: 0.9rem;
+      color: #555;
+      font-weight: 500;
+    }
+
+    /* 추가로 페이지네이션 고정 배치(하단 중앙) 옵션 */
+    .pagination-fixed {
+      position: sticky;
+      bottom: 0;
+      background: white;
+      padding: 12px 0;
+      border-top: 1px solid #eee;
+    }
+  </style>
 </head>
 
 <body>
 <div layout:fragment="content">
   <h1>📚 Aladin 도서 검색</h1>
 
-  <form class="search-box" th:action="@{/aladin/search}" method="get">
+  <form class="search-box" th:action="@{/admin/aladin/search}" method="get">
     <input class="search-input" type="text" name="query" placeholder="도서 제목을 입력하세요" th:value="${param.q}">
     <button class="search-btn" type="submit">검색</button>
   </form>
@@ -99,14 +146,30 @@
       <div class="book-title" th:text="${book.title}">제목</div>
       <div class="book-author" th:text="${book.author}">저자</div>
       <a class="register-btn"
-         th:href="@{'/book/register'(isbn=${book.isbn13})}">
+         th:href="@{'/admin/books/create'(isbn=${book.isbn13})}">
         등록
       </a>
     </div>
 
+
     <div th:if="${books == null}">
       <p>검색 결과가 없습니다. 검색어를 입력해 주세요.</p>
     </div>
+  </div>
+  <div class="pagination" th:if="${totalPages > 1}">
+    <a class="page-btn prev"
+       th:if="${page > 1}"
+       th:href="@{'/admin/aladin/search'(query=${query}, page=${page - 1})}">
+      ← 이전
+    </a>
+
+    <span class="page-info" th:text="'페이지 ' + ${page} + ' / ' + ${totalPages}"></span>
+
+    <a class="page-btn next"
+       th:if="${page < totalPages}"
+       th:href="@{'/admin/aladin/search'(query=${query}, page=${page + 1})}">
+      다음 →
+    </a>
   </div>
 </div>
 </body>

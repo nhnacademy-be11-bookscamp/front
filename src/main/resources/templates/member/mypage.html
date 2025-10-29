@@ -10,7 +10,7 @@
         .info-row { margin-bottom: 10px; }
     </style>
     <script th:inline="javascript">
-        const currentUserId = [[${memberInfo.userName}]];
+        const currentUserId = `[[${memberInfo.username}]]`;
 
         async function deleteMember() {
             if (!confirm('정말로 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.')) {
@@ -81,8 +81,8 @@
 
         <hr>
         <div>
-            <a th:href="@{/members/edit-info/{id}(id=${memberInfo.userName})}">정보 수정</a>
-            <a th:href="@{/members/{id}/change-password(id=${memberInfo.userName})}">비밀번호 변경</a>
+            <a th:href="@{/members/edit-info/{id}(id=${memberInfo.username})}">정보 수정</a>
+            <a th:href="@{/members/{id}/change-password(id=${memberInfo.username})}">비밀번호 변경</a>
         </div>
         <div>
             <div class="danger-zone">

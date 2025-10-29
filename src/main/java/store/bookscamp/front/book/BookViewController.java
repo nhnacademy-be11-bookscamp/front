@@ -51,6 +51,6 @@ public class BookViewController {
         model.addAttribute("keyWord", keyWord);
         model.addAttribute("sortType", sortType);
 
-        return "books/list";
+        return "book/list";
     }
 }

@@ -17,7 +17,7 @@ import store.bookscamp.front.member.controller.request.MemberUpdateRequest;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
 
 
-@FeignClient(name = "memberApiClient", url = "http://localhost:8080")
+@FeignClient(name = "memberApiClient", url = "${gateway.base-url}")
 public interface MemberFeignClient {
 
     @GetMapping("/api-server/member/{id}")

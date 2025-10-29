@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import store.bookscamp.front.book.dto.BookSortResponse;
 import store.bookscamp.front.book.dto.RestPageImpl;
 
-@FeignClient(name = "book", url = "http://localhost:8080")
+@FeignClient(name = "book", url = "${gateway.base-url}")
 public interface BookFeignClient {
     @GetMapping("/api-server/books")
     ResponseEntity<RestPageImpl<BookSortResponse>> getBooks(

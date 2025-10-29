@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import store.bookscamp.front.member.controller.request.MemberLoginRequest;
 
-@FeignClient(name = "memberLoginClient", url = "${auth.base-url")
+@FeignClient(name = "memberLoginClient", url = "${auth.base-url}")
 public interface MemberLoginFeignClient {
 
     @PostMapping("/auth-server/login")

@@ -33,7 +33,7 @@ public class MemberController {
         return "member/signup-form";
     }
 
-    @GetMapping
+    @GetMapping("/login")
     public String login(){
         return "member/login";
     }

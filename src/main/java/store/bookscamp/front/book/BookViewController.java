@@ -22,7 +22,7 @@ import java.util.List;
 public class BookViewController {
 
     private final BookFeignClient bookFeignClient;
-    private final CategoryFeignClient categoryFeignClient; // ✅ 추가
+    private final CategoryFeignClient categoryFeignClient;
 
     @GetMapping("/books")
     public String listBook(
@@ -41,7 +41,7 @@ public class BookViewController {
                 pageable.getPageSize()
         );
 
-        Page<BookSortResponse> booksPage = response.getBody();
+        RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
 
         List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();

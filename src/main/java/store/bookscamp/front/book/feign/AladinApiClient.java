@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import store.bookscamp.front.book.controller.dto.response.AladinBookResponse;
 import store.bookscamp.front.book.controller.dto.response.BookDetailResponse;
-import store.bookscamp.front.config.FeignConfig;
+import store.bookscamp.front.common.config.FeignConfig;
 
 
 @FeignClient(

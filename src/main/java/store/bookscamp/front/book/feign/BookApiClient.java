@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import store.bookscamp.front.book.controller.dto.request.BookRegisterRequest;
-import store.bookscamp.front.config.FeignConfig;
+import store.bookscamp.front.common.config.FeignConfig;
 
 @FeignClient(
         name = "api-through-gateway-book",

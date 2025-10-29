@@ -30,7 +30,12 @@ public class MemberController {
     @GetMapping("/sign-up")
     public String showPage(Model model){
         model.addAttribute("apiPrefix", apiPrefix);
-        return "/member/signup-form";
+        return "member/signup-form";
+    }
+
+    @GetMapping
+    public String login(){
+        return "member/login";
     }
 
     @GetMapping("/members/edit-info/{id}")

@@ -22,9 +22,6 @@ public interface TagFeignClient {
     @PostMapping("/api-server/admin/tags")
     TagGetResponse createTag(@RequestBody TagCreateRequest request);
 
-//    @GetMapping("/api-server/admin/tags/{id}")
-//    TagGetResponse getTag(@PathVariable("id") Long id);
-
     @GetMapping("/api-server/admin/tags")
     List<TagGetResponse> getAll();
 

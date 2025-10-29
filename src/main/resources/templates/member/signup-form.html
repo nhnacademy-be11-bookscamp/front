@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/no-sidebar}">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 가입</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <h1>회원 가입</h1>
+    <p>새로운 계정을 생성합니다.</p>
+
+    <form id="memberCreateForm" th:action="@{/members}" method="post">
+        <input type="hidden" name="_method" value="put" />
+        <div class="form-group">
+            <label for="username">아이디 (4~20자):</label>
+            <input type="text" id="username" name="username" required minlength="4" maxlength="20">
+            <button type="button" id="checkIdButton">중복 확인</button>
+            <p id="idCheckMessage" class="error">중복 확인이 필요합니다.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="password">비밀번호 (8~20자):</label>
+            <input type="password" id="password" name="password" required minlength="8" maxlength="20">
+        </div>
+
+        <div class="form-group">
+            <label for="name">이름:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">이메일:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">전화번호:</label>
+            <input type="text" id="phone" name="phone" required>
+        </div>
+
+        <div class="form-group">
+            <label for="birthDate">생년월일:</label>
+            <input type="date" id="birthDate" name="birthDate" required>
+        </div>
+
+        <button type="submit" id="submitButton" disabled>회원 가입</button>
+    </form>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            var pathPrefix = /*[[${apiPrefix}]]*/ '';
+
+            var isIdChecked = false;
+            var isIdDuplicated = true;
+
+            var idInput = document.getElementById('username');
+            var checkIdButton = document.getElementById('checkIdButton');
+            var idCheckMessage = document.getElementById('idCheckMessage');
+            var submitButton = document.getElementById('submitButton');
+            var memberCreateForm = document.getElementById('memberCreateForm');
+
+            idInput.addEventListener('input', function() {
+                submitButton.disabled = true;
+                idCheckMessage.textContent = '중복 확인이 필요합니다.';
+                idCheckMessage.classList.remove('success');
+                idCheckMessage.classList.add('error');
+                isIdChecked = false;
+            });
+
+            checkIdButton.addEventListener('click', async function() {
+                var id = idInput.value;
+
+                if (id.length < 4 || id.length > 20) {
+                    idCheckMessage.textContent = "아이디는 4자 이상 20자 이하여야 합니다.";
+                    idCheckMessage.classList.remove('success');
+                    idCheckMessage.classList.add('error');
+                    isIdChecked = false;
+                    submitButton.disabled = true;
+                    return;
+                }
+
+
+                const url = pathPrefix + '/api-server/member/check-id?id=' + encodeURIComponent(id);
+
+                console.log('--- 아이디 중복 확인 요청 시작 ---');
+                console.log('Request URL:', url);
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'text/plain'
+                        }
+                    });
+
+                    console.log('Response Status:', response.status, response.statusText);
+
+                    if (!response.ok) {
+                        isIdDuplicated = true;
+                        submitButton.disabled = true;
+
+                        const errorMessage = await response.text();
+
+                        console.error('Error Response Body:', errorMessage);
+
+                        idCheckMessage.textContent = errorMessage || "서버 오류가 발생했습니다.";
+                        idCheckMessage.classList.remove('success');
+                        idCheckMessage.classList.add('error');
+
+                    } else {
+                        isIdChecked = true;
+                        isIdDuplicated = false;
+                        submitButton.disabled = false;
+
+                        const successMessage = await response.text();
+
+                        console.log('Success Response Body:', successMessage);
+
+                        idCheckMessage.textContent = successMessage;
+                        idCheckMessage.classList.remove('error');
+                        idCheckMessage.classList.add('success');
+                    }
+
+                    isIdChecked = true;
+
+                } catch (error) {
+                    console.error('Network Fetch Error:', error);
+                    idCheckMessage.textContent = "네트워크 오류가 발생했습니다.";
+                    idCheckMessage.classList.remove('success');
+                    idCheckMessage.classList.add('error');
+                    isIdChecked = false;
+                    isIdDuplicated = true;
+                    submitButton.disabled = true;
+                } finally {
+                    console.log('--- 아이디 중복 확인 요청 종료 ---');
+                }
+            });
+
+            memberCreateForm.addEventListener('submit', function(e) {
+                if (!isIdChecked || isIdDuplicated) {
+                    e.preventDefault();
+                    alert("아이디 중복 검사를 완료하고, 사용 가능한 아이디를 선택해주세요.");
+                }
+            });
+        });
+    </script>
+
+</div>
+</body>
+</html>

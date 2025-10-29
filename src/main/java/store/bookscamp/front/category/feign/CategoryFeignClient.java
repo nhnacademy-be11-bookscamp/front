@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import store.bookscamp.front.category.dto.CategoryListResponse;
 
-@FeignClient(name = "category", url = "http://localhost:8080")
+@FeignClient(name = "category", url = "${gateway.base-url")
 public interface CategoryFeignClient {
 
     @GetMapping("/api-server/categories")

@@ -1,4 +1,4 @@
-package store.bookscamp.front.config;
+package store.bookscamp.front.common.config;
 
 import feign.Logger;
 import org.springframework.context.annotation.Bean;

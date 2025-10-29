@@ -8,6 +8,8 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
+  profiles:
+    active: prod
 
 # front는 eureka 미사용, gateway로만 호출
 gateway:

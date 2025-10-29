@@ -7,6 +7,29 @@
     <title>북스캠프</title>
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <!-- 페이지별 추가 CSS -->
+    <style>
+        .category-list .category-list-child {
+            display: none;
+            padding-left: 20px;
+            list-style-type: none;
+        }
+
+        .category-list li > a.has-children {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .category-list li > a .toggle-icon {
+            float: right;
+            margin-right: 5px;
+            font-family: monospace;
+            color: #888;
+
+            font-size: 1.1rem;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
     <th:block layout:fragment="extra-css"></th:block>
 </head>
 <body>
@@ -16,7 +39,7 @@
     <!-- Main Container with Sidebar -->
     <div class="main-container">
         <!-- Sidebar -->
-        <th:block th:replace="~{fragment/sidebar :: sidebar}"></th:block>
+        <th:block th:replace="~{fragment/categorySidebar :: sidebar}"></th:block>
 
         <!-- Main Content Area -->
         <main class="main-content">
@@ -33,7 +56,38 @@
     <!-- Footer -->
     <th:block th:replace="~{fragment/footer :: footer}"></th:block>
 
-    <!-- 페이지별 추가 JavaScript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const anchors = document.querySelectorAll('.category-list li > a');
+
+            anchors.forEach(function(anchor) {
+
+                const childList = anchor.nextElementSibling;
+
+                if (childList && childList.classList.contains('category-list-child')) {
+
+                    anchor.classList.add('has-children');
+                    const icon = document.createElement('span');
+                    icon.classList.add('toggle-icon');
+                    icon.textContent = ' +';
+                    anchor.appendChild(icon);
+
+                    icon.addEventListener('click', function(event) {
+
+                        event.preventDefault();
+
+                        event.stopPropagation();
+
+                        const isHidden = childList.style.display === 'none' || childList.style.display === '';
+                        childList.style.display = isHidden ? 'block' : 'none';
+                        icon.textContent = isHidden ? ' -' : ' +';
+                    });
+
+                }
+            });
+        });
+    </script>
     <th:block layout:fragment="extra-js"></th:block>
 </body>
 </html>

@@ -1,28 +1,42 @@
-package store.bookscamp.front.book.dto;
+package store.bookscamp.front.book.dto; // (front 앱의 패키지)
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import lombok.Getter;
 
-public class RestPageImpl<T> extends PageImpl<T> {
+@Getter
+public class RestPageImpl<T> {
+
+    private final List<T> content;
+    private final int number;
+    private final int size;
+    private final long totalElements;
+    private final int totalPages;
+    private final boolean last;
+    private final boolean first;
+    private final int numberOfElements;
+    private final boolean empty;
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public RestPageImpl(@JsonProperty("content") List<T> content,
                         @JsonProperty("number") int number,
                         @JsonProperty("size") int size,
                         @JsonProperty("totalElements") Long totalElements,
-                        @JsonProperty("pageable") JsonNode pageable,
-                        @JsonProperty("last") boolean last,
                         @JsonProperty("totalPages") int totalPages,
-                        @JsonProperty("sort") JsonNode sort,
+                        @JsonProperty("last") boolean last,
                         @JsonProperty("first") boolean first,
                         @JsonProperty("numberOfElements") int numberOfElements,
                         @JsonProperty("empty") boolean empty) {
 
-        // PageRequest.of(page, size)를 사용해 Pageable 객체를 생성합니다.
-        super(content, PageRequest.of(number, size), totalElements);
+        this.content = content;
+        this.number = number;
+        this.size = size;
+        this.totalElements = totalElements;
+        this.totalPages = totalPages;
+        this.last = last;
+        this.first = first;
+        this.numberOfElements = numberOfElements;
+        this.empty = empty;
     }
 }

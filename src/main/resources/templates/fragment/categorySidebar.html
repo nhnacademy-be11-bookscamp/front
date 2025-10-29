@@ -1,13 +1,10 @@
-<!-- sidebar fragment -->
 <div xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar" class="sidebar">
-    <!-- 카테고리 영역 -->
     <section class="sidebar-section">
         <h3>카테고리</h3>
         <ul class="category-list">
-            <li th:each="category : ${categories}">
-                <a th:href="@{'/books?categoryId=' + ${category.id}}"
-                   th:text="${category.name}"></a>
-            </li>
+            <th:block th:each="category : ${categories}">
+                <li th:replace="~{category/categoryRecursive :: categoryNode(category=${category})}"></li>
+            </th:block>
         </ul>
     </section>
 
@@ -19,4 +16,5 @@
             <li><a th:href="@{/books/new}">신간 도서</a></li>
         </ul>
     </section>
+
 </div>

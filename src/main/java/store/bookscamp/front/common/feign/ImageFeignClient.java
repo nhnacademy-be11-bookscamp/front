@@ -13,7 +13,7 @@ import java.util.List;
 
 @FeignClient(
         name = "image",
-        url = "http://localhost:8080/api-server",
+        url = "${gateway.base-url}/api-server",
         configuration = FeignMultipartConfig.class
 )
 public interface ImageFeignClient {

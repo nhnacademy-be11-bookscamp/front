@@ -1,6 +1,3 @@
-server:
-  port: 8082
-
 spring:
   application:
     name: front
@@ -10,10 +7,6 @@ spring:
       max-request-size: 20MB
   profiles:
     active: prod
-
-# front는 eureka 미사용, gateway로만 호출
-gateway:
-  base-url: http://localhost:8080
 
 # feign 로그 출력용
 logging:

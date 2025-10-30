@@ -1,4 +1,4 @@
-package store.bookscamp.front.common.advice;
+package store.bookscamp.front.category.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,7 @@ import store.bookscamp.front.category.feign.CategoryFeignClient;
 
 @ControllerAdvice
 @RequiredArgsConstructor
-public class GlobalLayoutAdvice {
+public class CategoryLayoutAdvice {
 
     private final CategoryFeignClient categoryFeignClient;
 

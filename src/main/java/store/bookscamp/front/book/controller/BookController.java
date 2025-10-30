@@ -11,8 +11,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import store.bookscamp.front.book.controller.dto.request.BookCreateRequest;
 import store.bookscamp.front.book.controller.dto.response.BookDetailResponse;
-import store.bookscamp.front.book.dto.BookSortResponse;
-import store.bookscamp.front.book.dto.RestPageImpl;
+import store.bookscamp.front.book.controller.dto.response.BookInfoResponse;
+import store.bookscamp.front.book.controller.dto.response.BookSortResponse;
+import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
 import store.bookscamp.front.category.dto.CategoryListResponse;
@@ -78,6 +79,18 @@ public class BookController {
         model.addAttribute("sortType", sortType);
 
         return "book/list";
+    }
+
+    @GetMapping("/books/{id}")
+    public String bookDetail(
+            @PathVariable("id") Long id,
+            Model model
+    ){
+
+        BookInfoResponse bookDetail = bookFeignClient.getBookDetail(id);
+        model.addAttribute("book", bookDetail);
+
+        return "book/detail";
     }
 }
 

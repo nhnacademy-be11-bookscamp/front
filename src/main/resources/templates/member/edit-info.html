@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/no-sidebar}">
+      layout:decorate="~{layout/no-sidebar}">
 <head>
     <meta charset="UTF-8">
     <title>회원 정보 수정</title>
@@ -28,7 +28,9 @@
     </style>
     <script th:inline="javascript">
 
-        const currentUserId = `[[${memberInfo.username}]]`;
+        var pathPrefix = /*[[${apiPrefix}]]*/ '';
+
+        const currentUserId = [[${memberInfo.username}]];
 
         async function updateMemberInfo() {
 
@@ -43,7 +45,7 @@
             };
 
 
-            const url = `/members/${currentUserId}`;
+            const url = pathPrefix + `/api-server/member/` + currentUserId;
 
             if (!updateData.email || !updateData.phone) {
                 messageDiv.textContent = '이메일과 전화번호는 필수 입력 항목입니다.';

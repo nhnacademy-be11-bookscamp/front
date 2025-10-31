@@ -1,4 +1,4 @@
-package store.bookscamp.front.book.controller.dto.response;
+package store.bookscamp.front.book.controller.response;
 
 
 import lombok.Data;

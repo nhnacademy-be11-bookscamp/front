@@ -14,7 +14,7 @@ import store.bookscamp.front.common.config.FeignConfig;
         url = "${gateway.base-url}",
         configuration = FeignConfig.class
 )
-public interface AladinApiClient {
+public interface AladinFeignClient {
 
     @GetMapping("/api-server/admin/aladin/search")
     AladinBookResponse search(

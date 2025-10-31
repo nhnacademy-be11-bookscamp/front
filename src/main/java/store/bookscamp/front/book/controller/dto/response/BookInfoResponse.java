@@ -1,8 +1,8 @@
-package store.bookscamp.front.book.dto;
+package store.bookscamp.front.book.controller.dto.response;
 
 import java.time.LocalDate;
 
-public record BookSortResponse(
+public record BookInfoResponse(
 
         Long id,
         String title,
@@ -10,8 +10,6 @@ public record BookSortResponse(
         String content,
         String publisher,
         LocalDate publishDate,
-//        Contributor contributor,
-//        BookStatus status,
         boolean packable,
         Integer regularPrice,
         Integer salePrice,

@@ -6,30 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>북스캠프</title>
     <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/category-sidebar.css}">
     <!-- 페이지별 추가 CSS -->
-    <style>
-        .category-list .category-list-child {
-            display: none;
-            padding-left: 20px;
-            list-style-type: none;
-        }
-
-        .category-list li > a.has-children {
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .category-list li > a .toggle-icon {
-            float: right;
-            margin-right: 5px;
-            font-family: monospace;
-            color: #888;
-
-            font-size: 1.1rem;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-    </style>
     <th:block layout:fragment="extra-css"></th:block>
 </head>
 <body>
@@ -38,8 +16,10 @@
 
     <!-- Main Container with Sidebar -->
     <div class="main-container">
-        <!-- Sidebar -->
-        <th:block th:replace="~{fragment/category-sidebar :: sidebar}"></th:block>
+        <!-- Sidebar (child pages can override this fragment) -->
+        <aside class="sidebar" layout:fragment="sidebar">
+            <th:block th:replace="~{fragment/category-sidebar :: sidebar}"></th:block>
+        </aside>
 
         <!-- Main Content Area -->
         <main class="main-content">

@@ -132,6 +132,10 @@
 </head>
 
 <body>
+<div layout:fragment="sidebar">
+  <th:block th:replace="~{fragment/admin-sidebar :: sidebar}"></th:block>
+</div>
+
 <div layout:fragment="content">
   <h1>📚 Aladin 도서 검색</h1>
 
@@ -146,7 +150,7 @@
       <div class="book-title" th:text="${book.title}">제목</div>
       <div class="book-author" th:text="${book.author}">저자</div>
       <a class="register-btn"
-         th:href="@{'/admin/books/create'(isbn=${book.isbn13})}">
+         th:href="@{'/admin/books/new'(isbn=${book.isbn13})}">
         등록
       </a>
     </div>

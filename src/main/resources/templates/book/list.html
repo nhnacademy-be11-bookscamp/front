@@ -22,7 +22,8 @@
             <select name="sortType">
                 <option value="id" th:selected="${sortType == 'id'}">기본</option>
                 <option value="title" th:selected="${sortType == 'title'}">제목순</option>
-                <option value="low-price" th:selected="${sortType == 'low-price'}">가격순</option>
+                <option value="low-price" th:s  elected="${sortType == 'low-price'}">낮은가격순</option>
+                <option value="high-price" th:selected="${sortType == 'high-price'}">높은가격순</option>
                 <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
             </select>
         </label>
@@ -48,7 +49,9 @@
         <tbody>
         <tr th:each="book : ${booksPage.content}">
             <td th:text="${book.id}">1</td>
-            <td th:text="${book.title}">도서 제목</td>
+            <td>
+                <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">도서 제목</a>
+            </td>
             <td th:text="${book.explanation}">간단 설명</td>
             <td th:text="${book.publisher}">출판사</td>
             <td th:text="${book.publishDate}">2025-01-01</td>

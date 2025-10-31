@@ -12,8 +12,4 @@ public interface CategoryFeignClient {
 
     @GetMapping("/api-server/categories")
     List<CategoryListResponse> getAllCategories();
-
-    @DeleteMapping("/api-server/admin/category/delete/{id}")
-    void deleteCategory(@PathVariable Long id);
-
 }

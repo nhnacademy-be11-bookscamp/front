@@ -18,17 +18,9 @@ public class CategoryController {
     @Value("${gateway.base-url}")
     private String pathPrefix;
 
-    private final CategoryFeignClient categoryFeignClient;
-
     @GetMapping
     public String category(Model model){
         model.addAttribute("apiPrefix", pathPrefix);
         return "category/category";
-    }
-
-    @DeleteMapping("/delete/{id}")
-    public String deleteCategory(@PathVariable Long id){
-        categoryFeignClient.deleteCategory(id);
-        return "redirect:/category/category";
     }
 }

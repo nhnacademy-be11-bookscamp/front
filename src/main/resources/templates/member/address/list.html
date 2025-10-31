@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<head>
+    <meta charset="UTF-8">
+    <title>주소 목록</title>
+</head>
+
+<body>
+<div layout:fragment="content" class="content-wrapper">
+    <h2 class="page-title" th:text="'주소 관리 - ' + ${username}"></h2>
+
+    <div class="address-table-container">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>별칭</th>
+                <th>도로명 주소</th>
+                <th>우편번호</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="addr : ${addresses}">
+                <td th:text="${addr.label}">별칭</td>
+                <td th:text="${addr.roadNameAddress}">도로명 주소</td>
+                <td th:text="${addr.zipCode}">우편번호</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="button-container">
+        <a th:href="@{|/member/${username}/addresses/new|}" class="btn btn-primary">새 주소 추가</a>
+    </div>
+</div>
+</body>
+</html>

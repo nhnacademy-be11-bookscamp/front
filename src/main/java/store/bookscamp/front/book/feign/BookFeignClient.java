@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import store.bookscamp.front.book.controller.dto.request.BookCreateRequest;
-import store.bookscamp.front.book.controller.dto.response.BookInfoResponse;
-import store.bookscamp.front.book.controller.dto.response.BookSortResponse;
+import store.bookscamp.front.book.controller.request.BookCreateRequest;
+import store.bookscamp.front.book.controller.response.BookInfoResponse;
+import store.bookscamp.front.book.controller.response.BookSortResponse;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.common.config.FeignConfig;
 

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import store.bookscamp.front.book.controller.dto.response.AladinBookResponse;
+import store.bookscamp.front.book.controller.response.AladinBookResponse;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 
 @Controller

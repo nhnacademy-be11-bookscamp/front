@@ -5,175 +5,75 @@
 <head>
     <title th:text="${book.title} + ' | 북스캠프'">도서 상세</title>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
     <th:block layout:fragment="extra-css">
         <style>
-            .book-detail-wrapper {
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 1.5rem;
-            }
-            .book-detail-container {
-                display: flex;
-                flex-wrap: wrap; /* 모바일 반응형 고려 */
-                gap: 2.5rem;
-                margin-top: 2rem;
-            }
-            .book-cover {
-                flex: 1;
-                min-width: 300px; /* 최소 너비 */
-                max-width: 400px; /* 최대 너비 */
-            }
-            .book-cover img {
-                width: 100%;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-            }
-            .book-info {
-                flex: 2;
-                min-width: 300px;
-            }
-            .book-info h1 {
-                margin-top: 0;
-                font-size: 2.2rem;
-                border-bottom: 2px solid #333;
-                padding-bottom: 1rem;
-            }
-            .info-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-bottom: 1.5rem;
-                font-size: 1rem;
-            }
-            .info-table th, .info-table td {
-                padding: 0.8rem 0.2rem;
-                text-align: left;
-                border-bottom: 1px solid #f0f0f0;
-            }
-            .info-table th {
-                width: 100px;
-                color: #555;
-            }
-            .price-info {
-                background-color: #f9f9f9;
-                padding: 1.5rem;
-                border-radius: 4px;
-                margin: 1.5rem 0;
-            }
-            .regular-price {
-                text-decoration: line-through;
-                color: #888;
-                font-size: 1rem;
-            }
-            .sale-price {
-                font-size: 2rem;
-                font-weight: bold;
-                color: #d9534f;
-            }
-            .discount-rate {
-                color: #d9534f;
-                font-weight: bold;
-                margin-left: 0.75rem;
-                font-size: 1.8rem;
-            }
-            .purchase-actions {
-                display: flex;
-                gap: 1rem;
-                margin-top: 2rem;
-            }
-            .purchase-actions .btn {
-                padding: 1rem 1.5rem;
-                font-size: 1.1rem;
-                font-weight: bold;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                flex-grow: 1;
-            }
-            .btn-cart {
-                background-color: #f0f0f0;
-                color: #333;
-                border: 1px solid #ccc;
-            }
-            .btn-buy {
-                background-color: #007bff;
-                color: white;
-            }
-            .book-explanation {
-                margin-top: 3rem;
-                padding-top: 2rem;
-                border-top: 1px solid #eee;
-                clear: both; /* flex 레이아웃 아래로 내리기 */
-            }
-            .book-explanation h2 {
-                font-size: 1.8rem;
-                border-bottom: 2px solid #555;
-                padding-bottom: 0.5rem;
-            }
-            .book-explanation p {
-                font-size: 1rem;
-                line-height: 1.7;
-            }
+            .book-detail-wrapper { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+            .book-detail-container { display: flex; flex-wrap: wrap; gap: 2.5rem; margin-top: 2rem; }
+            .book-cover { flex: 1; min-width: 300px; max-width: 400px; }
+            .book-cover img { width: 100%; border: 1px solid #ddd; border-radius: 4px; }
+            .book-info { flex: 2; min-width: 300px; }
+            .book-info h1 { margin-top: 0; font-size: 2.2rem; border-bottom: 2px solid #333; padding-bottom: 1rem; }
+            .info-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 1rem; }
+            .info-table th, .info-table td { padding: 0.8rem 0.2rem; text-align: left; border-bottom: 1px solid #f0f0f0; }
+            .info-table th { width: 100px; color: #555; }
+            .price-info { background-color: #f9f9f9; padding: 1.5rem; border-radius: 4px; margin: 1.5rem 0; }
+            .regular-price { text-decoration: line-through; color: #888; font-size: 1rem; }
+            .sale-price { font-size: 2rem; font-weight: bold; color: #d9534f; }
+            .discount-rate { color: #d9534f; font-weight: bold; margin-left: 0.75rem; font-size: 1.8rem; }
+            .purchase-actions { display: flex; gap: 1rem; margin-top: 2rem; }
+            .purchase-actions .btn { padding: 1rem 1.5rem; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
+            .btn-like { background-color: #fff; color: #d9534f; border: 1px solid #d9534f; width: 130px; flex-shrink: 0; transition: all 0.2s ease-in-out; }
+            .btn-like .icon-liked { display: none; }
+            .btn-like .icon-unliked { display: inline-block; }
+            .btn-like.liked { background-color: #d9534f; color: white; }
+            .btn-like.liked .icon-liked { display: inline-block; }
+            .btn-like.liked .icon-unliked { display: none; }
+            .btn-like [class^="icon-"] + span { margin-left: 0.6rem; }
+            .btn-cart { background-color: #f0f0f0; color: #333; border: 1px solid #ccc; flex-grow: 1; }
+            .btn-buy { background-color: #007bff; color: white; flex-grow: 1; }
+            .book-explanation { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee; clear: both; }
+            .book-explanation h2 { font-size: 1.8rem; border-bottom: 2px solid #555; padding-bottom: 0.5rem; }
+            .book-explanation p { font-size: 1rem; line-height: 1.7; }
         </style>
     </th:block>
 </head>
 <body>
 <div layout:fragment="content" class="book-detail-wrapper">
-
     <div class="book-detail-container">
-<!--        <div class="book-cover">-->
-<!--            <img th:src="${book.coverImageUrl ?: 'https://via.placeholder.com/400x600.png?text=Book+Cover+Here'}"-->
-<!--                 alt="도서 표지 이미지">-->
-<!--        </div>-->
-
         <div class="book-info">
-            <h1 th:text="${book.title}">여기에 도서 제목이 표시됩니다</h1>
+            <h1 th:text="${book.title}"></h1>
 
             <table class="info-table">
                 <tbody>
-<!--                <tr>-->
-<!--                    <th>저자</th>-->
-<!--                    <td th:text="${book.contributor ?: '저자 정보 없음'}">저자명</td>-->
-<!--                </tr>-->
-                <tr>
-                    <th>출판사</th>
-                    <td th:text="${book.publisher}">출판사명</td>
-                </tr>
-                <tr>
-                    <th>출판일</th>
-                    <td th:text="${#temporals.format(book.publishDate, 'yyyy-MM-dd')}">2025-01-01</td>
-                </tr>
+                <tr><th>출판사</th><td th:text="${book.publisher}"></td></tr>
+                <tr><th>출판일</th><td th:text="${#temporals.format(book.publishDate, 'yyyy-MM-dd')}"></td></tr>
                 </tbody>
             </table>
 
             <div class="price-info">
+                <div><span class="regular-price" th:text="${#numbers.formatInteger(book.regularPrice, 3, 'COMMA') + '원'}"></span></div>
                 <div>
-                    <span class="regular-price" th:text="${#numbers.formatInteger(book.regularPrice, 3, 'COMMA') + '원'}">15,000원</span>
-                </div>
-                <div>
-                    <span class="sale-price" th:text="${#numbers.formatInteger(book.salePrice, 3, 'COMMA') + '원'}">12,000원</span>
-                    <span class="discount-rate" th:if="${book.regularPrice > book.salePrice}"
-                          th:text="${#numbers.formatDecimal((book.regularPrice - book.salePrice) * 100.0 / book.regularPrice, 0, 'COMMA', 0, 'POINT') + '%'}">20%</span>
+                    <span class="sale-price" th:text="${#numbers.formatInteger(book.salePrice, 3, 'COMMA') + '원'}"></span>
+                    <span class="discount-rate" th:if="${book.regularPrice > book.salePrice}" th:text="${#numbers.formatDecimal((book.regularPrice - book.salePrice) * 100.0 / book.regularPrice, 0, 'COMMA', 0, 'POINT') + '%'}"></span>
                 </div>
             </div>
 
             <table class="info-table">
                 <tbody>
-                <tr>
-                    <th>재고</th>
-                    <td th:text="${book.stock + '권'}">10권</td>
-                </tr>
-                <tr>
-                    <th>포장</th>
-                    <td th:text="${book.packable ? '포장 가능' : '포장 불가능'}">포장 가능</td>
-                </tr>
-                <tr>
-                    <th>조회수</th>
-                    <td th:text="${book.viewCount}">200</td>
-                </tr>
+                <tr><th>재고</th><td th:text="${book.stock + '권'}"></td></tr>
+                <tr><th>포장</th><td th:text="${book.packable ? '포장 가능' : '포장 불가능'}"></td></tr>
+                <tr><th>조회수</th><td th:text="${book.viewCount}"></td></tr>
                 </tbody>
             </table>
 
             <div class="purchase-actions">
+                <button type="button" class="btn btn-like" id="likeButton">
+                    <span class="icon-unliked"><i class="fa-regular fa-heart"></i></span>
+                    <span class="icon-liked"><i class="fa-solid fa-heart"></i></span>
+                    <span>좋아요</span>
+                </button>
                 <button type="button" class="btn btn-cart">장바구니</button>
                 <button type="button" class="btn btn-buy">바로 구매</button>
             </div>
@@ -182,13 +82,39 @@
 
     <div class="book-explanation">
         <h2>도서 소개</h2>
-        <p th:text="${book.explanation}" style="line-height: 1.7;">
-            여기에 도서에 대한 상세 설명이 들어갑니다. (API 연동 후 'explanation' 필드 내용 표시)
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Nullam vitae nisl id nunc scelerisque fringilla.
-            Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
-        </p>
+        <p th:text="${book.explanation}" style="line-height: 1.7;"></p>
     </div>
 </div>
+
+<th:block layout:fragment="extra-script">
+    <script>
+        const pathPrefix = /*[[${apiPrefix}]]*/ '';
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const likeButton = document.getElementById('likeButton');
+            const bookId = [[${book.id}]];
+            const isAlreadyLiked = [[${isLikedByCurrentUser}]];
+            const apiUrl = pathPrefix + `/api-server/books/${bookId}/like`;
+
+            if (isAlreadyLiked) {
+                likeButton.classList.add('liked');
+            }
+
+            likeButton.addEventListener('click', function() {
+                const isLiked = likeButton.classList.toggle('liked');
+
+                fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ liked: isLiked })
+                })
+                    .then(res => res.text())
+                    .then(text => text ? JSON.parse(text) : null)
+                    .then(data => console.log('서버 응답:', data))
+                    .catch(e => console.log('에러:', e));
+            });
+        });
+    </script>
+</th:block>
 </body>
 </html>

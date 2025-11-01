@@ -1,0 +1,22 @@
+.category-list .category-list-child {
+    display: none;
+    padding-left: 20px;
+    list-style-type: none;
+}
+
+.category-list li > a.has-children {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.category-list li > a .toggle-icon {
+    float: right;
+    margin-right: 5px;
+    font-family: monospace;
+    color: #888;
+    font-size: 1.1rem;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+

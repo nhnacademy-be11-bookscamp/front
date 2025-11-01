@@ -27,7 +27,12 @@ public class BookController {
     private final BookFeignClient bookFeignClient;
     private final CategoryFeignClient categoryFeignClient;
 
-    @GetMapping("/admin/books/create")
+    @GetMapping("/admin/books")
+    public String adminBooksHome() {
+        return "admin/books";
+    }
+
+    @GetMapping("/admin/books/new")
     public String showCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
 
         BookDetailResponse detail;
@@ -40,10 +45,10 @@ public class BookController {
         return "book/create";
     }
 
-    @PostMapping("/admin/books/create")
+    @PostMapping("/admin/books")
     public String createBook(@ModelAttribute BookCreateRequest req) {
         bookFeignClient.createBook(req);
-        return "redirect:/books";
+        return "redirect:/admin/books";
     }
   /* @PostMapping("/register")
    @ResponseBody

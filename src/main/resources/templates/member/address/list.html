@@ -1,38 +1,77 @@
+<!-- src/main/resources/templates/address/list.html -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/default}">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>주소 목록</title>
+    <meta charset="UTF-8" />
+    <title th:text="${username} + '님의 주소 목록'">주소 목록</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 24px; }
+        .toolbar { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; }
+        th { background: #f9fafb; }
+        .empty { padding: 24px; text-align:center; color:#6b7280; border:1px dashed #e5e7eb; }
+        .btn { display:inline-block; padding:8px 12px; border:1px solid #e5e7eb; background:#fff; border-radius:8px; text-decoration:none; }
+        .btn.primary { background:#111827; color:#fff; border-color:#111827; }
+    </style>
 </head>
-
 <body>
-<div layout:fragment="content" class="content-wrapper">
-    <h2 class="page-title" th:text="'주소 관리 - ' + ${username}"></h2>
-
-    <div class="address-table-container">
-        <table class="table">
-            <thead>
-            <tr>
-                <th>별칭</th>
-                <th>도로명 주소</th>
-                <th>우편번호</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="addr : ${addresses}">
-                <td th:text="${addr.label}">별칭</td>
-                <td th:text="${addr.roadNameAddress}">도로명 주소</td>
-                <td th:text="${addr.zipCode}">우편번호</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="button-container">
-        <a th:href="@{|/member/${username}/addresses/new|}" class="btn btn-primary">새 주소 추가</a>
-    </div>
+<div class="toolbar">
+    <h1 th:text="${username} + '님의 주소 목록'">주소 목록</h1>
+    <a class="btn primary" th:href="@{/members/{u}/address/new(u=${username})}">+ 새 주소 등록</a>
 </div>
+
+<div th:if="${#lists.isEmpty(addresses)}" class="empty">
+    등록된 주소가 없습니다. “새 주소 등록”을 눌러 추가하세요.
+</div>
+
+<table th:if="${!#lists.isEmpty(addresses)}">
+    <thead>
+    <tr>
+        <th>별칭</th>
+        <th>도로명 주소</th>
+        <th>우편번호</th>
+        <!-- <th>동작</th>  id가 응답에 있으면 수정/삭제 버튼을 여기에 추가 -->
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="addr : ${addresses}">
+        <td th:text="${addr.label}">집</td>
+        <td th:text="${addr.roadNameAddress}">서울시 …</td>
+        <td th:text="${addr.zipCode}">12345</td>
+
+        <!--
+        ✔️ 만약 API 응답에 id가 추가되면 아래와 같이 버튼을 표시하세요.
+        <td>
+          <button class="btn" th:attr="data-id=${addr.id}" onclick="onEdit(this)">수정</button>
+          <button class="btn" th:attr="data-id=${addr.id}" onclick="onDelete(this)">삭제</button>
+        </td>
+        -->
+    </tr>
+    </tbody>
+</table>
+
+<!-- 템플릿에서 JS가 쓸 전역 상수 주입 -->
+<script th:inline="javascript">
+    const API_PREFIX = /*[[${apiPrefix}]]*/ "/api-server";
+    const USERNAME   = /*[[${username}]]*/ "";
+</script>
+
+<!--
+✔️ (옵션) id가 응답에 추가되면 PATCH/DELETE 예시를 이렇게 붙일 수 있어요.
+<script>
+  async function onDelete(btn) {
+    const id = btn.getAttribute('data-id');
+    if (!confirm('정말 삭제하시겠어요?')) return;
+    const res = await fetch(`/members/${USERNAME}/address/${id}`, { method: 'DELETE' });
+    if (res.ok) location.reload(); else alert('삭제 실패');
+  }
+
+  function onEdit(btn) {
+    const id = btn.getAttribute('data-id');
+    // 모달/폼 열고, PATCH로 /members/{username}/address/{id} 에 JSON 전송
+  }
+</script>
+-->
 </body>
 </html>

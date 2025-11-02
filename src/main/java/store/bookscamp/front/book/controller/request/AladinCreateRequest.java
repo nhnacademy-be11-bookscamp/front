@@ -1,4 +1,4 @@
-package store.bookscamp.front.book.controller.dto.request;
+package store.bookscamp.front.book.controller.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,10 +9,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookCreateRequest {
+public class AladinCreateRequest {
     private String title;
     private String contributors;
     private String publisher;
@@ -20,10 +19,12 @@ public class BookCreateRequest {
     private LocalDate publishDate;
     private Integer regularPrice;
     private Integer salePrice;
+    private Integer stock;
+    private boolean packable;
     private String content;
     private String explanation;
-    /*private List<String> imageUrls;
+    private List<String> imgUrls;
+    private List<Long> tagIds;
     private List<Long> categoryIds;
-    private List<String> tagNames;*/
 }
 

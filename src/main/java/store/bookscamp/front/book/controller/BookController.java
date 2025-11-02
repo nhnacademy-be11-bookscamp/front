@@ -9,10 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import store.bookscamp.front.book.controller.dto.request.BookCreateRequest;
-import store.bookscamp.front.book.controller.dto.response.BookDetailResponse;
-import store.bookscamp.front.book.controller.dto.response.BookInfoResponse;
-import store.bookscamp.front.book.controller.dto.response.BookSortResponse;
+import store.bookscamp.front.book.controller.request.AladinCreateRequest;
+import store.bookscamp.front.book.controller.request.BookCreateRequest;
+import store.bookscamp.front.book.controller.response.BookDetailResponse;
+import store.bookscamp.front.book.controller.response.BookInfoResponse;
+import store.bookscamp.front.book.controller.response.BookSortResponse;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
@@ -32,16 +33,10 @@ public class BookController {
         return "admin/books";
     }
 
+    // 수동 등록
+
     @GetMapping("/admin/books/new")
     public String showCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
-
-        BookDetailResponse detail;
-        if (isbn != null && !isbn.isEmpty()) {
-            detail = aladinFeignClient.getBookDetail(isbn);
-        } else {
-            detail = new BookDetailResponse();
-        }
-        model.addAttribute("book", detail);
         return "book/create";
     }
 
@@ -50,11 +45,26 @@ public class BookController {
         bookFeignClient.createBook(req);
         return "redirect:/admin/books";
     }
-  /* @PostMapping("/register")
-   @ResponseBody
-   public void registerBook(@RequestBody BookRegisterRequest req) {
-       bookApiClient.registerBook(req);
-   }*/
+
+    // 알라딘 등록
+
+    @GetMapping("/admin/aladin/books")
+    public String aladinShowCreateBook(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
+
+        BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
+
+        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
+
+        model.addAttribute("aladinBook", detail);
+        model.addAttribute("categories", categories);
+        return "/aladin/create";
+    }
+
+    @PostMapping("/admin/aladin/books")
+    public String aladinCreateBook(@ModelAttribute AladinCreateRequest req) {
+        bookFeignClient.createAladinBook(req);
+        return "redirect:/admin/aladin/search";
+    }
 
     @GetMapping("/books")
     public String listBook(

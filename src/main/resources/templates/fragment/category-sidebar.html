@@ -3,7 +3,7 @@
         <h3>카테고리</h3>
         <ul class="category-list">
             <th:block th:each="category : ${categories}">
-                <li th:replace="~{category/categoryRecursive :: categoryNode(category=${category})}"></li>
+                <li th:replace="~{category/category-recursive :: categoryNode(category=${category})}"></li>
             </th:block>
         </ul>
     </section>
@@ -16,5 +16,4 @@
             <li><a th:href="@{/books/new}">신간 도서</a></li>
         </ul>
     </section>
-
 </div>

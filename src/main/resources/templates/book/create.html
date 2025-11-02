@@ -57,10 +57,14 @@
 </head>
 
 <body>
+<div layout:fragment="sidebar">
+    <th:block th:replace="~{fragment/admin-sidebar :: sidebar}"></th:block>
+</div>
+
 <div layout:fragment="content">
     <h1>📖 도서 등록</h1>
 
-    <form th:action="@{/admin/books/create}" method="post" class="register-form">
+    <form th:action="@{/admin/books}" method="post" class="register-form">
         <label>제목</label>
         <input type="text" name="title" th:value="${book.title ?: ''}" required>
 

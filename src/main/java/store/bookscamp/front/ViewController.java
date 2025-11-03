@@ -10,5 +10,4 @@ public class ViewController {
     public String index() {
         return "index";
     }
-
 }

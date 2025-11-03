@@ -36,7 +36,7 @@ public interface BookFeignClient {
 
     @PostMapping(value ="/api-server/admin/books/create",consumes = {"multipart/form-data"})
     void createBook(
-            @RequestPart("request")BookCreateRequest request,
+            @RequestPart("request") BookCreateRequest request,
             @RequestParam LocalDate publishDate,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     );

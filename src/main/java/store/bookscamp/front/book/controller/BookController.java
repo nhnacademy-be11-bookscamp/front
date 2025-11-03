@@ -16,10 +16,10 @@ import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookDetailResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
+import store.bookscamp.front.category.controller.response.CategoryListResponse;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
-import store.bookscamp.front.category.dto.CategoryListResponse;
 import store.bookscamp.front.category.feign.CategoryFeignClient;
 
 @Controller

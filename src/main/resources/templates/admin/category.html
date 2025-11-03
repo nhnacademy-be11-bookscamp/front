@@ -190,6 +190,7 @@
             const newName = form.querySelector('input[name="name"]').value;
 
             const apiUrl = pathPrefix + '/api-server/admin/category/update';
+            console.log(apiUrl);
 
             try {
                 const response = await fetch(`${apiUrl}/${categoryId}`, {

@@ -31,6 +31,7 @@
             .btn-like.liked .icon-liked { display: inline-block; }
             .btn-like.liked .icon-unliked { display: none; }
             .btn-like [class^="icon-"] + span { margin-left: 0.6rem; }
+            .btn-like .like-count {margin-left: 0.5rem; font-size: 1rem; font-weight: 500; vertical-align: middle;}
             .btn-cart { background-color: #f0f0f0; color: #333; border: 1px solid #ccc; flex-grow: 1; }
             .btn-buy { background-color: #007bff; color: white; flex-grow: 1; }
             .book-explanation { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee; clear: both; }
@@ -73,6 +74,7 @@
                     <span class="icon-unliked"><i class="fa-regular fa-heart"></i></span>
                     <span class="icon-liked"><i class="fa-solid fa-heart"></i></span>
                     <span>좋아요</span>
+                    <span id="likeCount" class="like-count" th:text="${bookLike.likeCount}">0</span>
                 </button>
                 <button type="button" class="btn btn-cart">장바구니</button>
                 <button type="button" class="btn btn-buy">바로 구매</button>
@@ -86,15 +88,22 @@
     </div>
 </div>
 
-<th:block layout:fragment="extra-script">
-    <script>
+<th:block layout:fragment="extra-js">
+    <script th:inline="javascript">
         const pathPrefix = /*[[${apiPrefix}]]*/ '';
+        /*<![CDATA[*/
+        console.log(pathPrefix);
 
         document.addEventListener("DOMContentLoaded", function() {
             const likeButton = document.getElementById('likeButton');
+            const likeCountElement = document.getElementById('likeCount');
+
             const bookId = [[${book.id}]];
             const isAlreadyLiked = [[${isLikedByCurrentUser}]];
-            const apiUrl = pathPrefix + `/api-server/books/${bookId}/like`;
+            const apiUrl = pathPrefix + '/api-server/books/like';
+            console.log(apiUrl);
+
+            let currentLikeCount = parseInt(likeCountElement.innerText, 10);
 
             if (isAlreadyLiked) {
                 likeButton.classList.add('liked');
@@ -103,15 +112,44 @@
             likeButton.addEventListener('click', function() {
                 const isLiked = likeButton.classList.toggle('liked');
 
-                fetch(apiUrl, {
+                if (isLiked) {
+                    currentLikeCount++;
+                } else {
+                    currentLikeCount--;
+                }
+
+                likeCountElement.innerText = currentLikeCount;
+
+                fetch(`${apiUrl}/${bookId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ liked: isLiked })
                 })
-                    .then(res => res.text())
-                    .then(text => text ? JSON.parse(text) : null)
-                    .then(data => console.log('서버 응답:', data))
-                    .catch(e => console.log('에러:', e));
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Server response was not ok');
+                        }
+                        return res.text();
+                    })
+                    .then(text => {
+                        if (text) {
+                            console.log('서버 응답:', JSON.parse(text));
+                        } else {
+                            console.log('서버 응답 성공 (본문 없음)');
+                        }
+                    })
+                    .catch(e => {
+                        console.error('에러:', e);
+                        alert('좋아요 처리에 실패했습니다.');
+                        likeButton.classList.toggle('liked');
+
+                        if (isLiked) {
+                            currentLikeCount--;
+                        } else {
+                            currentLikeCount++;
+                        }
+                        likeCountElement.innerText = currentLikeCount;
+                    });
             });
         });
     </script>

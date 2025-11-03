@@ -1,8 +1,10 @@
 package store.bookscamp.front.member.controller;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +25,7 @@ import store.bookscamp.front.member.controller.response.MemberGetResponse;
 public class MemberController {
 
     private final MemberFeignClient memberFeignClient;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${app.api.prefix}")
     private String apiPrefix;
@@ -34,7 +37,8 @@ public class MemberController {
     }
 
     @GetMapping("/login")
-    public String login(){
+    public String login(Model model){
+        model.addAttribute("apiPrefix", apiPrefix);
         return "member/login";
     }
 
@@ -69,9 +73,39 @@ public class MemberController {
     }
 
     @PostMapping("/members")
-    public String createMember(MemberCreateRequest memberCreateRequest){
-        memberFeignClient.createMember(memberCreateRequest);
-        return "member/login";
+    public String createMember(MemberCreateRequest memberCreateRequest, Model model){
+        try{
+            String rawPassword = memberCreateRequest.password();
+
+            String encodedPassword = passwordEncoder.encode(rawPassword);
+
+            MemberCreateRequest encodedRequest = new MemberCreateRequest(
+                    memberCreateRequest.username(),
+                    encodedPassword,
+                    memberCreateRequest.name(),
+                    memberCreateRequest.email(),
+                    memberCreateRequest.phone(),
+                    memberCreateRequest.birthDate()
+            );
+
+            memberFeignClient.createMember(encodedRequest);
+
+            return "member/login";
+        } catch(FeignException e){
+            String errorMessage = "회원가입 중 알 수 없는 서버 오류가 발생했습니다. (" + e.status() + ")";
+            try {
+                errorMessage = e.contentUTF8();
+
+            } catch (Exception ex) {
+            }
+
+            model.addAttribute("errorMessage", errorMessage);
+
+            model.addAttribute("memberCreateRequest", memberCreateRequest);
+
+
+            return "member/signup-form";
+        }
     }
 
     @PutMapping("/members/{id}")

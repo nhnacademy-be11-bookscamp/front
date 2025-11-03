@@ -3,36 +3,111 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default}">
 <head>
-    <meta charset="UTF-8">
-    <title>관리자 - 도서 관리</title>
-    <th:block layout:fragment="extra-css"></th:block>
-    <style>
-        .admin-actions { display: flex; gap: 12px; margin-bottom: 16px; }
-        .admin-actions a { display: inline-block; padding: 10px 14px; border-radius: 6px; background: #4A90E2; color: #fff; font-weight: 600; }
-        .admin-actions a.secondary { background: #6c757d; }
-    </style>
-    <th:block layout:fragment="extra-js"></th:block>
-    
-</head>
-<body>
+    <title>도서 수동 등록</title>
 
+    <th:block layout:fragment="extra-css">
+        <link rel="stylesheet" th:href="@{/css/book.css}">
+        <style>
+            .register-form {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 10px 20px;
+                max-width: 700px;
+                background: #fff;
+                padding: 30px;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            label {
+                text-align: right;
+                padding-top: 6px;
+                font-weight: 600;
+                color: #333;
+            }
+            input, textarea, select {
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-family: inherit;
+            }
+            button {
+                grid-column: span 2;
+                padding: 10px;
+                border: none;
+                border-radius: 6px;
+                background: #4A90E2;
+                color: white;
+                cursor: pointer;
+                font-size: 1rem;
+                font-weight: 600;
+                transition: background 0.2s;
+            }
+            button:hover { background: #357ABD; }
+            h1 { margin-bottom: 20px;
+                color: #333;
+                font-size: 1.5rem;
+                text-align: center;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
 <div layout:fragment="sidebar">
     <th:block th:replace="~{fragment/admin-sidebar :: sidebar}"></th:block>
-    
 </div>
 
 <div layout:fragment="content">
-    <h2>도서 관리</h2>
+    <h1>도서 수동 등록</h1>
 
-    <div class="admin-actions">
-        <a th:href="@{/admin/books/new}">도서 등록</a>
-        <a class="secondary" th:href="@{/admin/aladin/search}">Aladin 검색으로 등록</a>
-    </div>
+    <form th:action="@{/admin/books}" method="post" enctype="multipart/form-data" class="register-form">
 
-    <p>좌측 메뉴에서 다른 관리 기능을 선택할 수 있습니다.</p>
+        <label>제목</label>
+        <input type="text" name="title" required>
+
+        <label>기여자</label>
+        <input type="text" name="contributors" required>
+
+        <label>출판사</label>
+        <input type="text" name="publisher" required>
+
+        <label>출판일</label>
+        <input type="date" name="publishDate">
+
+        <label>ISBN</label>
+        <input type="text" name="isbn">
+
+        <label>정가</label>
+        <input type="number" name="regularPrice">
+
+        <label>판매가</label>
+        <input type="number" name="salePrice">
+
+        <label>재고</label>
+        <input type="number" name="stock" placeholder="예: 50">
+
+        <label>포장 가능 여부</label>
+        <input type="checkbox" name="packable" value="true">
+
+        <label>목차</label>
+        <textarea name="content" rows="3"></textarea>
+
+        <label>설명</label>
+        <textarea name="explanation" rows="3"></textarea>
+
+        <label>이미지 업로드</label>
+        <input type="file" name="files" multiple accept="image/*">
+
+        <label>카테고리</label>
+        <select name="categoryIds" multiple>
+            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+        </select>
+
+        <label>태그</label>
+        <input type="text" name="tagIds" placeholder="1,2,3 (쉼표 구분)">
+
+        <button type="submit">등록</button>
+    </form>
 </div>
-
 </body>
 </html>
-
-

@@ -5,7 +5,6 @@
 <head>
     <title>도서 등록</title>
 
-    <!-- 페이지 전용 스타일 -->
     <th:block layout:fragment="extra-css">
         <link rel="stylesheet" th:href="@{/css/book.css}">
         <style>
@@ -25,7 +24,7 @@
                 font-weight: 600;
                 color: #333;
             }
-            input, textarea {
+            input, textarea, select {
                 padding: 8px;
                 border: 1px solid #ccc;
                 border-radius: 6px;
@@ -43,9 +42,7 @@
                 font-weight: 600;
                 transition: background 0.2s;
             }
-            button:hover {
-                background: #357ABD;
-            }
+            button:hover { background: #357ABD; }
             h1 {
                 margin-bottom: 20px;
                 color: #333;
@@ -62,69 +59,57 @@
 </div>
 
 <div layout:fragment="content">
-    <h1>📖 도서 등록</h1>
+    <h1>도서 등록</h1>
 
-    <form th:action="@{/admin/books}" method="post" class="register-form">
+    <!-- form-data 전송 -->
+    <form th:action="@{/admin/books}" method="post" enctype="multipart/form-data" class="register-form">
+
         <label>제목</label>
-        <input type="text" name="title" th:value="${book.title ?: ''}" required>
+        <input type="text" name="title" required>
 
-        <label>저자</label>
-        <input type="text" name="contributors" th:value="${book.author ?: ''}" required>
+        <label>기여자</label>
+        <input type="text" name="contributors" required>
 
         <label>출판사</label>
-        <input type="text" name="publisher" th:value="${book.publisher ?: ''}" required>
+        <input type="text" name="publisher" required>
 
         <label>출판일</label>
-        <input type="text" name="publishDate" th:value="${book.publishDate ?: ''}">
+        <input type="date" name="publishDate">
 
         <label>ISBN</label>
-        <input type="text" name="isbn" th:value="${book.isbn13 ?: ''}">
+        <input type="text" name="isbn">
 
         <label>정가</label>
-        <input type="number" name="regularPrice" th:value="${book.regularPrice ?: ''}">
+        <input type="number" name="regularPrice">
 
         <label>판매가</label>
-        <input type="number" name="salePrice" th:value="${book.salePrice ?: ''}">
+        <input type="number" name="salePrice">
+
+        <label>재고</label>
+        <input type="number" name="stock" placeholder="예: 50">
+
+        <label>포장 가능 여부</label>
+        <input type="checkbox" name="packable" value="true">
 
         <label>목차</label>
-        <textarea name="content" rows="3" th:text="${book.content ?: ''}"></textarea>
+        <textarea name="content" rows="3"></textarea>
 
         <label>설명</label>
-        <textarea name="explanation" rows="3" th:text="${book.explanation ?: ''}"></textarea>
+        <textarea name="explanation" rows="3"></textarea>
 
-       <!-- <label>이미지 URL</label>
-        <input type="text" name="imageUrls" th:value="${book.cover ?: ''}" placeholder="쉼표로 구분 가능">
+        <label>이미지 업로드</label>
+        <input type="file" name="files" multiple accept="image/*">
 
         <label>카테고리</label>
-        <input type="text" name="categoryIds" placeholder="1,2,3">
+        <select name="categoryIds" multiple>
+            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+        </select>
 
         <label>태그</label>
-        <input type="text" name="tagNames" placeholder="태그1,태그2">
--->
+        <input type="text" name="tagIds" placeholder="1,2,3 (쉼표 구분)">
+
         <button type="submit">등록</button>
     </form>
 </div>
 </body>
-<script>
-    function submitBook() {
-        const form = document.getElementById('registerForm');
-        const data = Object.fromEntries(new FormData(form).entries());
-
-        data.imageUrls = data.imageUrls ? data.imageUrls.split(',').map(s => s.trim()) : [];
-        data.categoryIds = data.categoryIds ? data.categoryIds.split(',').map(s => Number(s.trim())) : [];
-        data.tagNames = data.tagNames ? data.tagNames.split(',').map(s => s.trim()) : [];
-
-        fetch('/admin/books/create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-            .then(resp => {
-                if (!resp.ok) throw new Error('등록 실패');
-                alert('도서 등록 완료!');
-                window.location.href = '/book/list';
-            })
-            .catch(err => alert(err.message));
-    }
-</script>
 </html>

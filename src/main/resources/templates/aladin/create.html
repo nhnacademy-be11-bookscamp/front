@@ -18,7 +18,12 @@
                 border-radius: 12px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             }
-            label { text-align: right; padding-top: 6px; font-weight: 600; color: #333; }
+            label {
+                text-align: right;
+                padding-top: 6px;
+                font-weight: 600;
+                color: #333;
+            }
             input, textarea, select {
                 padding: 8px;
                 border: 1px solid #ccc;
@@ -37,17 +42,27 @@
                 font-weight: 600;
                 transition: background 0.2s;
             }
-            button:hover { background: #357ABD; }
-            h1 { margin-bottom: 20px; color: #333; font-size: 1.5rem; text-align: center; }
+            button:hover {
+                background: #357ABD;
+            }
+            h1 { margin-bottom: 20px;
+                color: #333;
+                font-size: 1.5rem;
+                text-align: center;
+            }
         </style>
     </th:block>
 </head>
 
 <body>
+<div layout:fragment="sidebar">
+    <th:block th:replace="~{fragment/admin-sidebar :: sidebar}"></th:block>
+</div>
+
 <div layout:fragment="content">
     <h1>알라딘 도서 등록</h1>
 
-    <!-- ✅ 이제는 form submit으로 전송 (@ModelAttribute 매핑) -->
+    <!-- 이제는 form submit으로 전송 (@ModelAttribute 매핑) -->
     <form th:action="@{/admin/aladin/books}" method="post" class="register-form">
 
         <label>제목</label>

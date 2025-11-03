@@ -2,7 +2,7 @@ package store.bookscamp.front.address.controller.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record AddressCreateResponse(Long id, String label, @JsonProperty("road_name_address") String address,
+public record AddressCreateResponse(Long id, String label, @JsonProperty("road_name_address") String roadNameaddress,
                                     String zipCode) {
 
 }

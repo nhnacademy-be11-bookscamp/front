@@ -8,6 +8,7 @@ public record AddressListResponse(
         @JsonProperty("addresses") List<AddressResponse> addresses
 ) {
     public record AddressResponse(
+            Long id,
             String label,
             @JsonProperty("road_name_address") String roadNameAddress,
             @JsonProperty("zip_code") Integer zipCode

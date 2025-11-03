@@ -14,17 +14,17 @@ public interface AddressFeignClient {
     @GetMapping("/api-server/member/{username}/address")
     ResponseEntity<AddressListResponse> getAddresses(@PathVariable("username") String username);
 
-    @PostMapping("/api-server/member/{username}/address")
+    @PostMapping(value = "/api-server/member/{username}/address")
     ResponseEntity<Void> createAddress(@PathVariable("username") String username,
                                        @RequestBody AddressCreateRequest request);
 
-    @PatchMapping("/api-server/member/{username}/address/{addressId}")
+    @PutMapping("/api-server/member/{username}/address/{addressId}")
     ResponseEntity<AddressResponse> updateAddress(
             @PathVariable("username") String username,
-            @PathVariable("addressId") Long addressId,
+            @PathVariable("addressId") Integer addressId,
             @RequestBody AddressUpdateRequest request);
 
     @DeleteMapping("/api-server/member/{username}/address/{addressId}")
     ResponseEntity<Void> deleteAddress(@PathVariable("username") String username,
-                                       @PathVariable("addressId") Long addressId);
+                                       @PathVariable("addressId") Integer addressId);
 }

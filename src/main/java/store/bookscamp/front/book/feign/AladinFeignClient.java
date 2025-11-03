@@ -4,8 +4,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import store.bookscamp.front.book.controller.dto.response.AladinBookResponse;
-import store.bookscamp.front.book.controller.dto.response.BookDetailResponse;
+import store.bookscamp.front.book.controller.response.AladinBookResponse;
+import store.bookscamp.front.book.controller.response.BookDetailResponse;
 import store.bookscamp.front.common.config.FeignConfig;
 
 
@@ -14,7 +14,7 @@ import store.bookscamp.front.common.config.FeignConfig;
         url = "${gateway.base-url}",
         configuration = FeignConfig.class
 )
-public interface AladinApiClient {
+public interface AladinFeignClient {
 
     @GetMapping("/api-server/admin/aladin/search")
     AladinBookResponse search(

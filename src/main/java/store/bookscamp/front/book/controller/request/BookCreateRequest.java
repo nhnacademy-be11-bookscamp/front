@@ -1,4 +1,4 @@
-package store.bookscamp.front.book.controller.dto.request;
+package store.bookscamp.front.book.controller.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

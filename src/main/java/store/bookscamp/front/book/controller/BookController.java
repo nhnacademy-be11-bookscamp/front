@@ -21,6 +21,8 @@ import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
 import store.bookscamp.front.category.feign.CategoryFeignClient;
+import store.bookscamp.front.tag.TagFeignClient;
+import store.bookscamp.front.tag.controller.response.TagGetResponse;
 
 @Controller
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class BookController {
     private final AladinFeignClient aladinFeignClient;
     private final BookFeignClient bookFeignClient;
     private final CategoryFeignClient categoryFeignClient;
+    private final TagFeignClient tagFeignClient;
 
     @GetMapping("/admin/books")
     public String adminBooksHome() {
@@ -41,8 +44,10 @@ public class BookController {
     public String showCreatePage(Model model) {
 
         List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
+        List<TagGetResponse> tags = tagFeignClient.getAll();
 
         model.addAttribute("categories", categories);
+        model.addAttribute("tags", tags);
 
         return "book/create";
     }
@@ -66,9 +71,11 @@ public class BookController {
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
 
         List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
+        List<TagGetResponse> tags = tagFeignClient.getAll();
 
         model.addAttribute("aladinBook", detail);
         model.addAttribute("categories", categories);
+        model.addAttribute("tags", tags);
 
         return "/aladin/create";
     }

@@ -1,7 +1,6 @@
 package store.bookscamp.front.book.controller.request;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,6 +24,6 @@ public class AladinCreateRequest {
     private String explanation;
     private List<String> imgUrls;
     private List<Long> tagIds;
-    private List<Long> categoryIds;
+    private Long categoryId;
 }
 

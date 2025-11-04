@@ -27,10 +27,24 @@ public class TagController {
     @GetMapping("/tags")
     public ModelAndView showTagPage() {
         List<TagGetResponse> tags = tagFeignClient.getAll();
+
         ModelAndView modelAndView = new ModelAndView("tags/tag");
         modelAndView.addObject("tags", tags);
         return modelAndView;
     }
+
+//    @Value("${gateway.base-url}") //${ui.apiPrefix:}
+//    private String apiPrefix;
+//
+//    @GetMapping("/tags")
+//    public ModelAndView showTagPage() {
+//        List<TagGetResponse> tags = tagFeignClient.getAll();
+//
+//        ModelAndView mv = new ModelAndView("tags/tag"); // templates/tags/tag.html 경로와 일치
+//        mv.addObject("tags", tags);
+//        mv.addObject("apiPrefix", apiPrefix);
+//        return mv;
+//    }
 
     // 태그 생성
     @PostMapping("/tags")
@@ -39,9 +53,10 @@ public class TagController {
             tagFeignClient.createTag(new TagCreateRequest(name));
         } catch (FeignException e) {
             model.addAttribute("error", "이미 존재하는 태그입니다.");
-            return "/tags/tag";
+            model.addAttribute("tags", tagFeignClient.getAll()); // ← 리스트 다시 채우기
+            return "tags/tag";
         }
-         return "redirect:/admin/tags";
+        return "redirect:/admin/tags";
     }
 
     // 단일 태그 조회
@@ -64,5 +79,4 @@ public class TagController {
         tagFeignClient.deleteTag(id);
         return "redirect:/admin/tags";
     }
-
 }

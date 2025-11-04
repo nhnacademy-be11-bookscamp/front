@@ -66,7 +66,7 @@ public class BookController {
     // 알라딘 등록
 
     @GetMapping("/admin/aladin/books")
-    public String ShowAladinCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
+    public String showAladinCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
 

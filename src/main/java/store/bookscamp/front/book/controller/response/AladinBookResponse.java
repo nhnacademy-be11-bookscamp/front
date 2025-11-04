@@ -11,13 +11,6 @@ public class AladinBookResponse {
     private int count;
     private List<Item> items; // ✅ 필드명 통일
 
-    /*@Data
-    public static class Item {
-        private String title;
-        private String author;
-        private String publisher;
-        private String cover;
-    }*/
     @Data
     public static class Item {
         private String title;

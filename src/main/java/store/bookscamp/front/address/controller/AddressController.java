@@ -45,7 +45,7 @@ public class AddressController {
         ModelAndView mav = new ModelAndView("/member/address/new");
         mav.addObject("apiPrefix", apiPrefix);
         mav.addObject("username", username);
-        mav.addObject("form", new AddressCreateRequest(null, null, null));
+        mav.addObject("form", new AddressCreateRequest(null, null, null, null, null));
         return mav;
     }
 
@@ -63,13 +63,15 @@ public class AddressController {
                                      @PathVariable Integer id,
                                      @RequestParam String label,
                                      @RequestParam String roadNameAddress,
-                                     @RequestParam Integer zipCode) {
+                                     @RequestParam Integer zipCode,
+                                     @RequestParam boolean isDefault,
+                                     @RequestParam String detailAddress) {
 
         ModelAndView mav = new ModelAndView("/member/address/edit");
         mav.addObject("apiPrefix", apiPrefix);
         mav.addObject("username", username);
         mav.addObject("id", id);
-        mav.addObject("form", new AddressUpdateRequest(label, roadNameAddress, zipCode));
+        mav.addObject("form", new AddressUpdateRequest(label, roadNameAddress, zipCode, isDefault, detailAddress));
         return mav;
 
 
@@ -77,7 +79,7 @@ public class AddressController {
 
     @PostMapping("/{id}/edit")
     public String update(@PathVariable String username,
-                         @PathVariable Integer id,
+                         @PathVariable Long id,
                          @ModelAttribute("form") AddressUpdateRequest form,
                          RedirectAttributes ra) {
         addressFeignClient.updateAddress(username, id, form);
@@ -87,7 +89,7 @@ public class AddressController {
 
     @PostMapping("{id}/delete")
     public String delete(@PathVariable String username,
-                         @PathVariable Integer id,
+                         @PathVariable Long id,
                          RedirectAttributes ra) {
         addressFeignClient.deleteAddress(username, id);
         ra.addFlashAttribute("message", "주소가 삭제되었습니다!");

@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import store.bookscamp.front.address.controller.request.AddressCreateRequest;
 import store.bookscamp.front.address.controller.request.AddressUpdateRequest;
 import store.bookscamp.front.address.controller.response.AddressListResponse;
-import store.bookscamp.front.address.controller.response.AddressResponse;
 
 @FeignClient(name = "addressApiClient", url = "${gateway.base-url}")
 public interface AddressFeignClient {
@@ -19,12 +18,12 @@ public interface AddressFeignClient {
                                        @RequestBody AddressCreateRequest request);
 
     @PutMapping("/api-server/member/{username}/address/{addressId}")
-    ResponseEntity<AddressResponse> updateAddress(
+    ResponseEntity<Void> updateAddress(
             @PathVariable("username") String username,
-            @PathVariable("addressId") Integer addressId,
+            @PathVariable("addressId") Long addressId,
             @RequestBody AddressUpdateRequest request);
 
     @DeleteMapping("/api-server/member/{username}/address/{addressId}")
     ResponseEntity<Void> deleteAddress(@PathVariable("username") String username,
-                                       @PathVariable("addressId") Integer addressId);
+                                       @PathVariable("addressId") Long addressId);
 }

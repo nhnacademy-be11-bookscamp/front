@@ -1,4 +1,3 @@
-/*
 package store.bookscamp.front.category.advice;
 
 import java.util.List;
@@ -20,4 +19,3 @@ public class CategoryLayoutAdvice {
         return categoryFeignClient.getAllCategories();
     }
 }
-*/

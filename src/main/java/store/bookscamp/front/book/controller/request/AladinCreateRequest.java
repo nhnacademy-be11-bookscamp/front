@@ -10,8 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookCreateRequest {
-
+public class AladinCreateRequest {
     private String title;
     private String contributors;
     private String publisher;
@@ -23,6 +22,7 @@ public class BookCreateRequest {
     private boolean packable;
     private String content;
     private String explanation;
+    private List<String> imgUrls;
     private List<Long> tagIds;
     private Long categoryId;
 }

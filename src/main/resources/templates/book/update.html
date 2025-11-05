@@ -76,12 +76,17 @@
 <div layout:fragment="content">
     <h1>도서 수정</h1>
 
+    <!-- ✅ form-data 형식 -->
     <form th:action="@{'/admin/books/' + ${book.id} + '/update'}"
-          method="post" enctype="multipart/form-data"
+          method="post"
+          enctype="multipart/form-data"
           class="register-form">
 
-<!--        <input type="hidden" name="_method" value="put">-->
-        <input type="hidden" id="removedUrls" name="removedUrls"/>
+        <!-- Spring PUT 처리용 hidden field -->
+        <input type="hidden" name="_method" value="put">
+
+        <!-- ✅ removedUrls hidden input -->
+        <input type="hidden" id="removedUrls" name="removedUrls">
 
         <label>제목</label>
         <input type="text" name="title" th:value="${book.title}" required>
@@ -97,12 +102,6 @@
 
         <label>ISBN</label>
         <input type="text" name="isbn" th:value="${book.isbn}">
-
-        <label>목차</label>
-        <textarea name="content" rows="3" th:text="${book.content}"></textarea>
-
-        <label>설명</label>
-        <textarea name="explanation" rows="3" th:text="${book.explanation}"></textarea>
 
         <label>정가</label>
         <input type="number" name="regularPrice" th:value="${book.regularPrice}">
@@ -125,11 +124,11 @@
 
         <label>기존 이미지</label>
         <div class="preview-container">
-            <div th:each="imgUrl : ${book.imageUrls}" class="image-item">
-                <img th:src="${imgUrl}" alt="도서 이미지">
-                <!-- ✅ 안전한 data 속성 방식으로 변경 -->
-                <button type="button" class="delete-btn"
-                        th:data-url="${imgUrl}"
+            <div th:each="url : ${book.imageUrls}" class="image-item">
+                <img th:src="${url}" alt="도서 이미지">
+                <button type="button"
+                        class="delete-btn"
+                        th:data-url="${url}"
                         onclick="removeImage(this.dataset.url, this)">×</button>
             </div>
         </div>
@@ -162,6 +161,7 @@
 
     <script>
         const removedUrls = [];
+
         function removeImage(url, el) {
             removedUrls.push(url);
             document.getElementById('removedUrls').value = JSON.stringify(removedUrls);

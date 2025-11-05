@@ -27,6 +27,7 @@ public class BookUpdateRequest {
 
     private List<Long> tagIds;
     private Long categoryId;
+    private List<String> imageUrls;
     private List<String> removedUrls;
     private BookStatus status;
 }

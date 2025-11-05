@@ -1,6 +1,5 @@
 package store.bookscamp.front.book.controller;
 
-
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +20,7 @@ import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
 import store.bookscamp.front.category.feign.CategoryFeignClient;
+import store.bookscamp.front.common.service.MinioService;
 import store.bookscamp.front.tag.TagFeignClient;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
 
@@ -28,6 +28,7 @@ import store.bookscamp.front.tag.controller.response.TagGetResponse;
 @RequiredArgsConstructor
 public class BookController {
 
+    private final MinioService minioService;
     private final AladinFeignClient aladinFeignClient;
     private final BookFeignClient bookFeignClient;
     private final CategoryFeignClient categoryFeignClient;
@@ -52,13 +53,19 @@ public class BookController {
         return "book/create";
     }
 
-    @PostMapping(value = "/admin/books", consumes = "multipart/form-data")
+    @PostMapping(value = "/admin/books")
     public String createBook(
             @ModelAttribute BookCreateRequest req,
-            @RequestPart("files") List<MultipartFile> files
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
 
-        bookFeignClient.createBook(req, req.getPublishDate(), files);
+        List<String> imageUrls;
+        if (files != null && !files.isEmpty()) {
+            imageUrls = minioService.uploadFiles(files, "book");
+            req.setImageUrls(imageUrls);
+        }
+
+        bookFeignClient.createBook(req, req.getPublishDate());
 
         return "redirect:/admin/books";
     }
@@ -69,7 +76,6 @@ public class BookController {
     public String showAladinCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
-
         List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         List<TagGetResponse> tags = tagFeignClient.getAll();
 
@@ -104,14 +110,26 @@ public class BookController {
         return "book/update";
     }
 
-    @PostMapping(value = "/admin/books/{id}/update", consumes = "multipart/form-data")
+    @PutMapping(value = "/admin/books/{id}/update")
     public String updateBook(
             @PathVariable Long id,
             @ModelAttribute BookUpdateRequest req,
-            @RequestPart("files") List<MultipartFile> files
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
 
-        bookFeignClient.updateBook(id, req, req.getPublishDate(), files);
+        if (files != null && !files.isEmpty()) {
+            List<String> imageUrls = minioService.uploadFiles(files, "book");
+            req.setImageUrls(imageUrls);
+        }
+
+        List<String> removedUrls = req.getRemovedUrls();
+        if (removedUrls != null && !removedUrls.isEmpty()) {
+            for (String url : removedUrls) {
+                minioService.deleteFile(url, "book");
+            }
+        }
+
+        bookFeignClient.updateBook(id, req, req.getPublishDate());
 
         return "redirect:/books/" + id;
     }

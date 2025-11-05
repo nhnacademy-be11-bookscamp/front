@@ -1,7 +1,9 @@
 package store.bookscamp.front.book.controller;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
@@ -17,11 +19,11 @@ import store.bookscamp.front.book.controller.response.BookSortResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
 import store.bookscamp.front.booklike.feign.BookLikeFeginClient;
+import store.bookscamp.front.category.service.CategoryService;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
 import store.bookscamp.front.category.controller.response.CategoryListResponse;
-import store.bookscamp.front.category.feign.CategoryFeignClient;
 
 @Controller
 @RequiredArgsConstructor
@@ -32,8 +34,8 @@ public class BookController {
 
     private final AladinFeignClient aladinFeignClient;
     private final BookFeignClient bookFeignClient;
-    private final CategoryFeignClient categoryFeignClient;
     private final BookLikeFeginClient bookLikeFeginClient;
+    private final CategoryService categoryService;
 
     @GetMapping("/admin/books")
     public String adminBooksHome() {
@@ -84,7 +86,7 @@ public class BookController {
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
 
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
+        List<CategoryListResponse> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
 
         model.addAttribute("categoryId", categoryId);
@@ -94,9 +96,10 @@ public class BookController {
         return "book/list";
     }
 
-    @GetMapping("/books/{id}")
+    @GetMapping({"/books/{id}","/admin/books/{id}"})
     public String bookDetail(
             @PathVariable("id") Long id,
+            HttpServletRequest request,
             Model model
     ){
 
@@ -108,13 +111,20 @@ public class BookController {
         model.addAttribute("bookLike", countResponse);
 
         ResponseEntity<BookLikeStatusResponse> likeStatus = bookLikeFeginClient.getLikeStatus(id);
-        assert likeStatus.getBody() != null;
-        boolean likedByCurrentUser = likeStatus.getBody().liked();
+        boolean likedByCurrentUser = Optional.ofNullable(likeStatus.getBody())
+                .map(BookLikeStatusResponse::liked)
+                .orElse(false);
         model.addAttribute("isLikedByCurrentUser", likedByCurrentUser);
 
         model.addAttribute("apiPrefix", pathPrefix);
 
-        return "book/detail";
+        String uri = request.getRequestURI();
+
+        if (uri.startsWith("/admin")) {
+            return "admin/books";
+        } else {
+            return "book/detail";
+        }
     }
 }
 

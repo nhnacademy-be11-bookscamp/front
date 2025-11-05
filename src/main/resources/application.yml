@@ -7,6 +7,12 @@ spring:
       max-request-size: 20MB
   profiles:
     active: prod
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            logger-level: FULL
 
 # feign 로그 출력용
 logging:
@@ -15,11 +21,4 @@ logging:
     store.bookscamp.front.book.feign: DEBUG
     org.springframework.cloud.openfeign: DEBUG
 
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 3000
-        readTimeout: 5000
-        loggerLevel: BASIC
 

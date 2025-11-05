@@ -150,7 +150,7 @@
       <div class="book-title" th:text="${book.title}">제목</div>
       <div class="book-author" th:text="${book.author}">저자</div>
       <a class="register-btn"
-         th:href="@{'/admin/books/new'(isbn=${book.isbn13})}">
+         th:href="@{'/admin/aladin/books'(isbn=${book.isbn13})}">
         등록
       </a>
     </div>

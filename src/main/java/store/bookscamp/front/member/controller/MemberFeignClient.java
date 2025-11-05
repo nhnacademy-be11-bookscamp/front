@@ -4,6 +4,7 @@ package store.bookscamp.front.member.controller;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,26 +21,24 @@ import store.bookscamp.front.member.controller.response.MemberGetResponse;
 @FeignClient(name = "memberApiClient", url = "${gateway.base-url}")
 public interface MemberFeignClient {
 
-    @GetMapping("/api-server/member/{id}")
-    MemberGetResponse getMember(@PathVariable("id") String id);
+    @GetMapping("/api-server/member")
+    MemberGetResponse getMember();
 
     @GetMapping("/api-server/member/check-id")
-    ResponseEntity<String> checkIdDuplicate(@RequestParam("id") String id);
+    ResponseEntity<String> checkIdDuplicate();
 
     @PostMapping("/api-server/member")
     ResponseEntity<Void> createMember(@RequestBody MemberCreateRequest memberCreateRequest);
 
 
-    @PutMapping("/api-server/member/{id}")
+    @PutMapping("/api-server/member")
     ResponseEntity<MemberGetResponse> updateMember(
-            @PathVariable("id") String id,
             @RequestBody MemberUpdateRequest memberUpdateRequest);
 
-    @PutMapping("/api-server/member/{id}/change-password")
+    @PutMapping("/api-server/member/change-password")
     ResponseEntity<Void> updatePassword(
-            @PathVariable("id") String id,
             @RequestBody MemberPasswordUpdateRequest memberPasswordUpdateRequest);
 
-    @DeleteMapping("/api-server/member/{id}")
-    ResponseEntity<Void> deleteMember(@PathVariable("id") String id);
+    @DeleteMapping("/api-server/member")
+    ResponseEntity<Void> deleteMember();
 }

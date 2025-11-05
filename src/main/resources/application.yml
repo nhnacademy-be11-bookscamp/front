@@ -14,7 +14,6 @@ spring:
           default:
             logger-level: FULL
 
-# feign 로그 출력용
 logging:
   level:
     feign.Logger: DEBUG

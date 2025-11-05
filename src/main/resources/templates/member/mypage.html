@@ -17,7 +17,7 @@
                 return;
             }
 
-            const url = `/members/${currentUserId}`;
+            const url = `/members`;
 
             try {
                 const response = await fetch(url, {
@@ -81,8 +81,8 @@
 
         <hr>
         <div>
-            <a th:href="@{/members/edit-info/{id}(id=${memberInfo.username})}">정보 수정</a>
-            <a th:href="@{/members/{id}/change-password(id=${memberInfo.username})}">비밀번호 변경</a>
+            <a th:href="@{/mypage/edit-info}">정보 수정</a>
+            <a th:href="@{/mypage/change-password}">비밀번호 변경</a>
         </div>
         <div>
             <div class="danger-zone">

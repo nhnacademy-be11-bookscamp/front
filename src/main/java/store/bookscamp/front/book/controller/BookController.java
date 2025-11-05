@@ -3,6 +3,7 @@ package store.bookscamp.front.book.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,9 @@ import store.bookscamp.front.book.controller.response.BookDetailResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
 import store.bookscamp.front.category.controller.response.CategoryListResponse;
+import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
+import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
+import store.bookscamp.front.booklike.feign.BookLikeFeginClient;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
@@ -28,10 +32,14 @@ import store.bookscamp.front.tag.controller.response.TagGetResponse;
 @RequiredArgsConstructor
 public class BookController {
 
+    @Value("${gateway.base-url}")
+    private String pathPrefix;
+
     private final AladinFeignClient aladinFeignClient;
     private final BookFeignClient bookFeignClient;
     private final CategoryFeignClient categoryFeignClient;
     private final TagFeignClient tagFeignClient;
+    private final BookLikeFeginClient bookLikeFeginClient;
 
     @GetMapping("/admin/books")
     public String adminBooksHome() {
@@ -151,6 +159,17 @@ public class BookController {
 
         BookInfoResponse bookDetail = bookFeignClient.getBookDetail(id);
         model.addAttribute("book", bookDetail);
+
+        ResponseEntity<BookLikeCountResponse> count = bookLikeFeginClient.getLikeCount(id);
+        BookLikeCountResponse countResponse = count.getBody();
+        model.addAttribute("bookLike", countResponse);
+
+        ResponseEntity<BookLikeStatusResponse> likeStatus = bookLikeFeginClient.getLikeStatus(id);
+        assert likeStatus.getBody() != null;
+        boolean likedByCurrentUser = likeStatus.getBody().liked();
+        model.addAttribute("isLikedByCurrentUser", likedByCurrentUser);
+
+        model.addAttribute("apiPrefix", pathPrefix);
 
         return "book/detail";
     }

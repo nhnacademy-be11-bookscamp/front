@@ -15,7 +15,6 @@ public class CategoryLayoutAdvice {
 
     @ModelAttribute("categories")
     public List<CategoryListResponse> addCategoriesToModel() {
-
         return categoryService.getAllCategories();
     }
 }

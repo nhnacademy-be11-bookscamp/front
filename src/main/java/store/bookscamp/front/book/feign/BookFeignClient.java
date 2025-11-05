@@ -28,11 +28,13 @@ import java.util.List;
 )
 public interface BookFeignClient {
 
-    @PutMapping(value = "/api-server/admin/books/{id}/update", consumes = {"multipart/form-data"})
+    @PostMapping(value = "/api-server/admin/books/{id}/update", consumes = {"multipart/form-data"})
     void updateBook(
             @PathVariable Long id,
-            @RequestPart("request") BookUpdateRequest request
-            );
+            @RequestPart("request") BookUpdateRequest request,
+            @RequestParam LocalDate publishDate,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    );
 
     @PostMapping(value ="/api-server/admin/books/create",consumes = {"multipart/form-data"})
     void createBook(
@@ -55,5 +57,4 @@ public interface BookFeignClient {
 
     @GetMapping("/api-server/bookDetail/{id}")
     BookInfoResponse getBookDetail(@PathVariable Long id);
-    // BookGetResponse
 }

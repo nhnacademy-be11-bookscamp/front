@@ -23,6 +23,7 @@ public class BookCreateRequest {
     private boolean packable;
     private String content;
     private String explanation;
+
     private List<Long> tagIds;
     private Long categoryId;
 }

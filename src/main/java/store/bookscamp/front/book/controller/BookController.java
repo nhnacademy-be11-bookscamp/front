@@ -85,7 +85,7 @@ public class BookController {
 
         bookFeignClient.createAladinBook(req);
 
-        return "redirect:/admin/aladin/search";
+        return "redirect:/admin/books";
     }
 
     // 도서 수정
@@ -94,21 +94,26 @@ public class BookController {
     public String showUpdatePage(@PathVariable Long id, Model model) {
 
         BookInfoResponse book = bookFeignClient.getBookDetail(id);
-
         List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
+        List<TagGetResponse> tags = tagFeignClient.getAll();
 
         model.addAttribute("book", book);
         model.addAttribute("categories", categories);
+        model.addAttribute("tags", tags);
 
         return "book/update";
     }
 
     @PostMapping(value = "/admin/books/{id}/update", consumes = "multipart/form-data")
-    public String updateBook(@PathVariable Long id, @ModelAttribute BookUpdateRequest req) {
+    public String updateBook(
+            @PathVariable Long id,
+            @ModelAttribute BookUpdateRequest req,
+            @RequestPart("files") List<MultipartFile> files
+    ) {
 
-        bookFeignClient.updateBook(id, req);
+        bookFeignClient.updateBook(id, req, req.getPublishDate(), files);
 
-        return "redirect:/admin/books/" + id;
+        return "redirect:/books/" + id;
     }
 
     // 도서 목록 조회, 상세페이지
@@ -154,10 +159,6 @@ public class BookController {
 
         return "book/detail";
     }
-
-    // 관리자 도서 목록 조회, 상세페이지
-
-
 }
 
 

@@ -18,6 +18,12 @@ spring:
     type: redis
     redis:
       time-to-live: 600000
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            logger-level: FULL
 
 # feign 로그 출력용
 logging:
@@ -26,6 +32,15 @@ logging:
     store.bookscamp.front.book.feign: DEBUG
     org.springframework.cloud.openfeign: DEBUG
 
+minio:
+  # 브라우저에서 접근 가능한 public base URL (리턴용)
+  url: http://storage.java21.net:8000
+  access-key: EvJ2FP8gy27lDYolEWGQ
+  secret-key: h9uzw85pZPDchOTHzslEOUlNd5cDPFLQnJCofZfH
+  bucket:
+    book: bookscamp-book-image
+    review: bookscamp-review-image
+
 feign:
   client:
     config:
@@ -33,4 +48,3 @@ feign:
         connectTimeout: 3000
         readTimeout: 5000
         loggerLevel: BASIC
-

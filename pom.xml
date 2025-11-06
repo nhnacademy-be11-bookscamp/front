@@ -123,7 +123,15 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
-    </dependencies>
+        <!-- Minio -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.10</version>
+        </dependency>
+
+
+	</dependencies>
 
 	<build>
 		<plugins>

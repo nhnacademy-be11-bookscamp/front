@@ -2,9 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default}">
-
 <head>
-    <title>도서 등록</title>
+    <title>알라딘 도서 등록</title>
 
     <th:block layout:fragment="extra-css">
         <link rel="stylesheet" th:href="@{/css/book.css}">
@@ -43,9 +42,10 @@
                 font-weight: 600;
                 transition: background 0.2s;
             }
-            button:hover { background: #357ABD; }
-            h1 {
-                margin-bottom: 20px;
+            button:hover {
+                background: #357ABD;
+            }
+            h1 { margin-bottom: 20px;
                 color: #333;
                 font-size: 1.5rem;
                 text-align: center;
@@ -60,46 +60,49 @@
 </div>
 
 <div layout:fragment="content">
-    <h1>도서 등록</h1>
+    <h1>알라딘 도서 등록</h1>
 
-    <!-- ✅ multipart/form-data로 전송 -->
-    <form th:action="@{/admin/books}" method="post" enctype="multipart/form-data" class="register-form">
+    <!-- 이제는 form submit으로 전송 (@ModelAttribute 매핑) -->
+    <form th:action="@{/admin/aladin/books}" method="post" class="register-form">
 
         <label>제목</label>
-        <input type="text" name="title" required>
+        <input type="text" name="title" th:value="${aladinBook.title}" required>
 
         <label>기여자</label>
-        <input type="text" name="contributors" required>
+        <input type="text" name="contributors" th:value="${aladinBook.author}" required>
 
         <label>출판사</label>
-        <input type="text" name="publisher" required>
+        <input type="text" name="publisher" th:value="${aladinBook.publisher}" required>
 
         <label>출판일</label>
-        <input type="date" name="publishDate">
+        <input type="text" name="publishDate" th:value="${aladinBook.publishDate}">
 
         <label>ISBN</label>
-        <input type="text" name="isbn">
+        <input type="text" name="isbn" th:value="${aladinBook.isbn13}" readonly>
 
         <label>정가</label>
-        <input type="number" name="regularPrice">
+        <input type="number" name="regularPrice" th:value="${aladinBook.regularPrice}">
 
         <label>판매가</label>
-        <input type="number" name="salePrice">
+        <input type="number" name="salePrice" th:value="${aladinBook.salePrice}">
+
+        <label>목차</label>
+        <textarea name="content" rows="3" th:text="${aladinBook.content}"></textarea>
+
+        <label>설명</label>
+        <textarea name="explanation" rows="3" th:text="${aladinBook.explanation}"></textarea>
+
+        <label>이미지 URL</label>
+        <div>
+            <img th:src="${aladinBook.cover}" alt="도서 표지" style="width:150px; border-radius:8px;">
+            <input type="hidden" name="imgUrls" th:value="${aladinBook.cover}">
+        </div>
 
         <label>재고</label>
-        <input type="number" name="stock">
+        <input type="number" name="stock" placeholder="예: 50">
 
         <label>포장 가능 여부</label>
         <input type="checkbox" name="packable" value="true">
-
-        <label>목차</label>
-        <textarea name="content" rows="3"></textarea>
-
-        <label>설명</label>
-        <textarea name="explanation" rows="3"></textarea>
-
-        <label>이미지 업로드</label>
-        <input type="file" name="files" multiple accept="image/*">
 
         <label>카테고리</label>
         <select name="categoryId" required>

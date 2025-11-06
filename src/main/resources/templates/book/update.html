@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+
+<head>
+    <title>도서 수정</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .register-form {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 10px 20px;
+                max-width: 700px;
+                background: #fff;
+                padding: 30px;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            label {
+                text-align: right;
+                padding-top: 6px;
+                font-weight: 600;
+                color: #333;
+            }
+            input, textarea, select {
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-family: inherit;
+            }
+            button {
+                grid-column: span 2;
+                padding: 10px;
+                border: none;
+                border-radius: 6px;
+                background: #4A90E2;
+                color: white;
+                cursor: pointer;
+                font-size: 1rem;
+                font-weight: 600;
+            }
+            .preview-container {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .image-item {
+                position: relative;
+            }
+            .image-item img {
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 6px;
+                border: 1px solid #ddd;
+            }
+            .delete-btn {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                background: red;
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 22px;
+                height: 22px;
+                font-size: 12px;
+                cursor: pointer;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <h1>도서 수정</h1>
+
+    <!-- ✅ form-data 형식 -->
+    <form th:action="@{'/admin/books/' + ${book.id} + '/update'}"
+          method="post"
+          enctype="multipart/form-data"
+          class="register-form">
+
+        <!-- Spring PUT 처리용 hidden field -->
+        <input type="hidden" name="_method" value="put">
+
+        <!-- ✅ removedUrls hidden input -->
+        <input type="hidden" id="removedUrls" name="removedUrls">
+
+        <label>제목</label>
+        <input type="text" name="title" th:value="${book.title}" required>
+
+        <label>기여자</label>
+        <input type="text" name="contributors" th:value="${book.contributors}">
+
+        <label>출판사</label>
+        <input type="text" name="publisher" th:value="${book.publisher}">
+
+        <label>출판일</label>
+        <input type="date" name="publishDate" th:value="${book.publishDate}">
+
+        <label>ISBN</label>
+        <input type="text" name="isbn" th:value="${book.isbn}">
+
+        <label>정가</label>
+        <input type="number" name="regularPrice" th:value="${book.regularPrice}">
+
+        <label>판매가</label>
+        <input type="number" name="salePrice" th:value="${book.salePrice}">
+
+        <label>재고</label>
+        <input type="number" name="stock" th:value="${book.stock}">
+
+        <label>포장 가능 여부</label>
+        <input type="checkbox" name="packable" th:checked="${book.packable}">
+
+        <label>판매 상태</label>
+        <select name="status">
+            <option th:value="AVAILABLE" th:selected="${book.status == 'AVAILABLE'}">판매 가능</option>
+            <option th:value="SOLD_OUT" th:selected="${book.status == 'SOLD_OUT'}">품절</option>
+            <option th:value="DISCONTINUED" th:selected="${book.status == 'DISCONTINUED'}">판매 중지</option>
+        </select>
+
+        <label>기존 이미지</label>
+        <div class="preview-container">
+            <div th:each="url : ${book.imageUrls}" class="image-item">
+                <img th:src="${url}" alt="도서 이미지">
+                <button type="button"
+                        class="delete-btn"
+                        th:data-url="${url}"
+                        onclick="removeImage(this.dataset.url, this)">×</button>
+            </div>
+        </div>
+
+        <label>새 이미지 업로드</label>
+        <input type="file" name="files" multiple accept="image/*" onchange="previewNewImages(event)">
+        <div id="newPreview" class="preview-container"></div>
+
+        <label>카테고리</label>
+        <select name="categoryId" required>
+            <option disabled>카테고리를 선택하세요</option>
+            <optgroup th:each="parent : ${categories}" th:label="${parent.name}">
+                <option th:each="child : ${parent.children()}"
+                        th:value="${child.id}"
+                        th:text="${child.name}"
+                        th:selected="${book.categoryId == child.id}"></option>
+            </optgroup>
+        </select>
+
+        <label>태그</label>
+        <select name="tagIds" multiple>
+            <option th:each="t : ${tags}"
+                    th:value="${t.id}"
+                    th:text="${t.name}"
+                    th:selected="${book.tagIds.contains(t.id)}"></option>
+        </select>
+
+        <button type="submit">수정 완료</button>
+    </form>
+
+    <script>
+        const removedUrls = [];
+
+        function removeImage(url, el) {
+            removedUrls.push(url);
+            document.getElementById('removedUrls').value = JSON.stringify(removedUrls);
+            el.closest('.image-item').remove();
+        }
+
+        function previewNewImages(e) {
+            const preview = document.getElementById('newPreview');
+            preview.innerHTML = '';
+            Array.from(e.target.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    img.style.width = '100px';
+                    img.style.height = '100px';
+                    img.style.objectFit = 'cover';
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
+</div>
+</body>
+</html>

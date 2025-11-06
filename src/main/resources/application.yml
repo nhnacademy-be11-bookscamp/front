@@ -6,7 +6,7 @@ spring:
       max-file-size: 20MB
       max-request-size: 20MB
   profiles:
-    active: prod
+    active: dev
   session:
     redis:
       flush-mode: on_save
@@ -50,3 +50,4 @@ feign:
         connectTimeout: 3000
         readTimeout: 5000
         loggerLevel: BASIC
+

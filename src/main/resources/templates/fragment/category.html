@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- 재귀적 카테고리 리스트 Fragment (접기/펼치기 지원) -->
+    <ul th:fragment="categoryList(categoryList)"
+        th:if="${categoryList != null and !categoryList.isEmpty()}"
+        class="category-list">
+        <li th:each="category : ${categoryList}"
+            class="category-item"
+            th:classappend="${category.children != null and !category.children.isEmpty()} ? 'has-children' : ''">
+
+            <div class="category-content">
+                <a th:href="@{/books(categoryId=${category.id})}"
+                   class="category-link"
+                   th:text="${category.name}">카테고리명</a>
+
+                <!-- 하위 카테고리가 있으면 펼침/접기 버튼 표시 -->
+                <span th:if="${category.children != null and !category.children.isEmpty()}"
+                      class="category-toggle"
+                      th:data-category-id="${category.id}">
+                    <i class="fa fa-angle-down"></i>
+                </span>
+            </div>
+
+            <!-- 하위 카테고리 (기본적으로 숨김) -->
+            <div th:if="${category.children != null and !category.children.isEmpty()}"
+                 th:id="'category-' + ${category.id}"
+                 class="category-children"
+                 style="display: none;">
+                <ul class="category-list category-sublist"
+                    th:insert="~{fragment/category :: categoryList(${category.children})}">
+                </ul>
+            </div>
+        </li>
+    </ul>
+</body>
+</html>

@@ -4,20 +4,149 @@
       layout:decorate="~{layout/default}">
 <head>
     <meta charset="UTF-8">
-    <title>마이페이지</title>
-    <style>
-        .info-label { font-weight: bold; margin-right: 10px; }
-        .info-row { margin-bottom: 10px; }
-    </style>
+    <title>마이페이지 | 북스캠프</title>
+</head>
+<body>
+<!-- Hero 섹션 숨김 -->
+<section layout:fragment="hero" class="hero" style="display: none;">
+</section>
+
+<div layout:fragment="content">
+    <section class="checkout spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 offset-lg-2">
+                    <div th:if="${memberInfo}" style="background: #ffffff; padding: 40px; border: 1px solid #ebebeb; border-radius: 4px;">
+                        <!-- 헤더 -->
+                        <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #ebebeb;">
+                            <h4 style="font-weight: 700; margin-bottom: 10px;">
+                                <i class="fa fa-user-circle" style="margin-right: 10px; color: #7fad39;"></i>
+                                마이페이지
+                            </h4>
+                            <p style="color: #6f6f6f; margin: 0;">
+                                <span th:text="${memberInfo.name}" style="font-weight: 600; color: #7fad39;">회원 이름</span>님의 정보입니다.
+                            </p>
+                        </div>
+
+                        <!-- 회원 정보 -->
+                        <div style="margin-bottom: 30px;">
+                            <h5 style="font-weight: 700; margin-bottom: 20px; color: #333;">
+                                <i class="fa fa-id-card" style="margin-right: 8px; color: #7fad39;"></i>
+                                내 정보
+                            </h5>
+
+                            <div style="background: #f8f8f8; padding: 25px; border-radius: 4px;">
+                                <div class="row">
+                                    <div class="col-lg-6" style="margin-bottom: 15px;">
+                                        <div style="display: flex; align-items: center;">
+                                            <span style="width: 100px; color: #6f6f6f; font-weight: 600;">이름</span>
+                                            <span th:text="${memberInfo.name}" style="color: #333; font-weight: 500;">홍길동</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6" style="margin-bottom: 15px;">
+                                        <div style="display: flex; align-items: center;">
+                                            <span style="width: 100px; color: #6f6f6f; font-weight: 600;">아이디</span>
+                                            <span th:text="${memberInfo.username}" style="color: #333; font-weight: 500;">user123</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6" style="margin-bottom: 15px;">
+                                        <div style="display: flex; align-items: center;">
+                                            <span style="width: 100px; color: #6f6f6f; font-weight: 600;">이메일</span>
+                                            <span th:text="${memberInfo.email}" style="color: #333; font-weight: 500;">test@example.com</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6" style="margin-bottom: 15px;">
+                                        <div style="display: flex; align-items: center;">
+                                            <span style="width: 100px; color: #6f6f6f; font-weight: 600;">전화번호</span>
+                                            <span th:text="${memberInfo.phone}" style="color: #333; font-weight: 500;">010-1234-5678</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6" style="margin-bottom: 15px;">
+                                        <div style="display: flex; align-items: center;">
+                                            <span style="width: 100px; color: #6f6f6f; font-weight: 600;">생년월일</span>
+                                            <span th:text="${#temporals.format(memberInfo.birthDate, 'yyyy-MM-dd')}" style="color: #333; font-weight: 500;">1990-01-01</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6" style="margin-bottom: 15px;">
+                                        <div style="display: flex; align-items: center;">
+                                            <span style="width: 100px; color: #6f6f6f; font-weight: 600;">포인트</span>
+                                            <span style="color: #7fad39; font-weight: 700; font-size: 18px;">
+                                                <i class="fa fa-coins"></i>
+                                                <span th:text="${#numbers.formatInteger(memberInfo.point, 1, 'COMMA')}">10000</span> P
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 액션 버튼 -->
+                        <div style="margin-bottom: 30px;">
+                            <div class="row">
+                                <div class="col-lg-6" style="margin-bottom: 10px;">
+                                    <a th:href="@{/mypage/edit-info}"
+                                       class="site-btn"
+                                       style="display: block; text-align: center; background: #0064FF; text-decoration: none; padding: 12px;">
+                                        <i class="fa fa-edit"></i> 정보 수정
+                                    </a>
+                                </div>
+                                <div class="col-lg-6" style="margin-bottom: 10px;">
+                                    <a th:href="@{/members/{id}/change-password(id=${memberInfo.username})}"
+                                       class="site-btn"
+                                       style="display: block; text-align: center; background: #6f6f6f; text-decoration: none; padding: 12px;">
+                                        <i class="fa fa-key"></i> 비밀번호 변경
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 회원 탈퇴 -->
+                        <div style="padding: 20px; background: #fff3cd; border: 1px solid #dc3545; border-radius: 4px;">
+                            <h5 style="font-weight: 700; margin-bottom: 10px; color: #dc3545;">
+                                <i class="fa fa-exclamation-triangle"></i> 회원 탈퇴
+                            </h5>
+                            <p style="color: #6f6f6f; font-size: 14px; margin-bottom: 15px;">
+                                회원 탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.
+                            </p>
+                            <button type="button"
+                                    class="site-btn"
+                                    onclick="deleteMember()"
+                                    style="background: #dc3545; padding: 10px 20px;">
+                                <i class="fa fa-user-times"></i> 회원 탈퇴
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 회원 정보 없을 때 -->
+                    <div th:unless="${memberInfo}" style="background: #ffffff; padding: 40px; border: 1px solid #ebebeb; border-radius: 4px; text-align: center;">
+                        <i class="fa fa-exclamation-circle" style="font-size: 60px; color: #dc3545; margin-bottom: 20px;"></i>
+                        <h4 style="font-weight: 700; margin-bottom: 10px; color: #333;">회원 정보를 불러올 수 없습니다</h4>
+                        <p style="color: #6f6f6f; margin-bottom: 20px;">로그인 후 다시 시도해주세요.</p>
+                        <a th:href="@{/login}" class="site-btn" style="text-decoration: none; display: inline-block; padding: 12px 30px;">
+                            <i class="fa fa-sign-in-alt"></i> 로그인하기
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="extra-js">
     <script th:inline="javascript">
-        const currentUserId = `[[${memberInfo.username}]]`;
+        const currentUserId = /*[[${memberInfo?.username}]]*/ '';
 
         async function deleteMember() {
+            if (!currentUserId) {
+                alert('회원 정보를 찾을 수 없습니다.');
+                return;
+            }
+
             if (!confirm('정말로 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.')) {
                 return;
             }
 
-            const url = `/members`;
+            const url = `/members/${currentUserId}`;
 
             try {
                 const response = await fetch(url, {
@@ -26,9 +155,7 @@
 
                 if (response.ok) {
                     alert('회원 탈퇴가 성공적으로 처리되었습니다. 이용해 주셔서 감사합니다.');
-
                     window.location.href = '/login';
-
                 } else {
                     let errorText = await response.text();
 
@@ -47,57 +174,6 @@
             }
         }
     </script>
-</head>
-<body>
-
-<div layout:fragment="content">
-    <h1>마이페이지</h1>
-    <p th:if="${memberInfo}">
-        <span th:text="${memberInfo.name}">회원 이름</span>님의 정보입니다.
-    </p>
-
-    <div th:if="${memberInfo}">
-        <h2>내 정보</h2>
-        <div class="info-row">
-            <span class="info-label">이름:</span>
-            <span th:text="${memberInfo.name}">홍길동</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">이메일:</span>
-            <span th:text="${memberInfo.email}">test@example.com</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">전화번호:</span>
-            <span th:text="${memberInfo.phone}">010-1234-5678</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">생년월일:</span>
-            <span th:text="${#temporals.format(memberInfo.birthDate, 'yyyy-MM-dd')}">1990-01-01</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">포인트:</span>
-            <span th:text="${#numbers.formatInteger(memberInfo.point, 1, 'COMMA')}">10000</span> 점
-        </div>
-
-        <hr>
-        <div>
-            <a th:href="@{/mypage/edit-info}">정보 수정</a>
-            <a th:href="@{/mypage/change-password}">비밀번호 변경</a>
-        </div>
-        <div>
-            <div class="danger-zone">
-                <h3>회원 탈퇴</h3>
-                <button type="button" class="delete-button" id="deleteMemberButton" onclick="deleteMember()">회원 탈퇴</button>
-            </div>
-        </div>
-
-    </div>
-
-    <div th:unless="${memberInfo}">
-        <p>회원 정보를 불러오지 못했습니다.</p>
-    </div>
-
-</div>
-
+</th:block>
 </body>
 </html>

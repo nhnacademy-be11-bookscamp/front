@@ -1,13 +1,103 @@
-<div xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar" class="sidebar">
-    <section class="sidebar-section">
-        <h3>관리자 메뉴</h3>
-        <ul class="category-list">
-            <li><a th:href="@{/admin/tags}">태그 관리</a></li>
-            <li><a th:href="@{/admin/books}">도서 관리</a></li>
-            <li><a th:href="@{/admin/categories}">카테고리 관리</a></li>
-            <li><a th:href="@{/admin/members}">회원 관리</a></li>
-        </ul>
-    </section>
-</div>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- 관리자 사이드바 Fragment (카테고리 스타일) -->
+    <ul th:fragment="sidebar" class="category-list admin-menu">
+        <!-- 도서 관리 -->
+        <li class="category-item admin-category-item has-children">
+            <div class="category-content admin-category-header" data-admin-menu="books">
+                <span class="category-link" style="pointer-events: none;">도서 관리</span>
+                <span class="admin-toggle" data-admin-target="books">
+                    <i class="fa fa-angle-down"></i>
+                </span>
+            </div>
+            <div id="admin-menu-books" class="category-children admin-submenu" style="display: none;">
+                <ul class="category-list category-sublist">
+                    <li class="category-item">
+                        <div class="category-content">
+                            <a th:href="@{/admin/books/new}" class="category-link">도서 등록</a>
+                        </div>
+                    </li>
+                    <li class="category-item">
+                        <div class="category-content">
+                            <a th:href="@{/admin/aladin/search}" class="category-link">알라딘 도서 검색</a>
+                        </div>
+                    </li>
+                    <li class="category-item">
+                        <div class="category-content">
+                            <a th:href="@{/admin/books}" class="category-link">도서 조회</a>
+                        </div>
+                    </li>
+                    <li class="category-item">
+                        <div class="category-content">
+                            <a th:href="@{/admin/categories}" class="category-link">카테고리</a>
+                        </div>
+                    </li>
+                    <li class="category-item">
+                        <div class="category-content">
+                            <a th:href="@{/admin/tags}" class="category-link">태그</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </li>
 
+        <!-- 회원 관리 -->
+        <li class="category-item admin-category-item has-children">
+            <div class="category-content admin-category-header" data-admin-menu="members">
+                <span class="category-link" style="pointer-events: none;">회원 관리</span>
+                <span class="admin-toggle" data-admin-target="members">
+                    <i class="fa fa-angle-down"></i>
+                </span>
+            </div>
+            <div id="admin-menu-members" class="category-children admin-submenu" style="display: none;">
+                <ul class="category-list category-sublist">
+                    <li class="category-item">
+                        <div class="category-content">
+                            <a th:href="@{/admin/members}" class="category-link">회원 조회</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </li>
 
+        <!-- 주문 관리 -->
+        <li class="category-item admin-category-item has-children">
+            <div class="category-content admin-category-header" data-admin-menu="orders">
+                <span class="category-link" style="pointer-events: none;">주문 관리</span>
+                <span class="admin-toggle" data-admin-target="orders">
+                    <i class="fa fa-angle-down"></i>
+                </span>
+            </div>
+            <div id="admin-menu-orders" class="category-children admin-submenu" style="display: none;">
+                <ul class="category-list category-sublist">
+                    <li class="category-item">
+                        <div class="category-content">
+                            <a th:href="@{/admin/orders}" class="category-link">주문 조회</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
+        <!-- 쿠폰 관리 -->
+        <li class="category-item admin-category-item has-children">
+            <div class="category-content admin-category-header" data-admin-menu="coupons">
+                <span class="category-link" style="pointer-events: none;">쿠폰 관리</span>
+                <span class="admin-toggle" data-admin-target="coupons">
+                    <i class="fa fa-angle-down"></i>
+                </span>
+            </div>
+            <div id="admin-menu-coupons" class="category-children admin-submenu" style="display: none;">
+                <ul class="category-list category-sublist">
+                    <li class="category-item">
+                        <div class="category-content">
+                            <a th:href="@{/admin/coupons/new}" class="category-link">쿠폰 등록</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</body>
+</html>

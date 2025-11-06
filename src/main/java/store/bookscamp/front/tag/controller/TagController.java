@@ -2,6 +2,7 @@ package store.bookscamp.front.tag.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +14,8 @@ import org.springframework.web.servlet.ModelAndView;
 import store.bookscamp.front.tag.TagFeignClient;
 import store.bookscamp.front.tag.controller.request.TagCreateRequest;
 import store.bookscamp.front.tag.controller.request.TagUpdateRequest;
-import store.bookscamp.front.tag.controller.response.TagGetResponse;
 import feign.FeignException;
+import store.bookscamp.front.tag.controller.response.TagGetResponse;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,7 +24,23 @@ public class TagController {
 
     private final TagFeignClient tagFeignClient;
 
-    // 태그 전체 목록 보여줌
+    @Value("${gateway.base-url}")
+    private String pathPrefix;
+
+    // 태그 전체 목록 보여줌 : Ajax를 위해 작성됨 버전2
+    @GetMapping("/tags")
+    public ModelAndView showTagPage() {
+        List<TagGetResponse> tags = tagFeignClient.getAll();
+
+        ModelAndView mv = new ModelAndView("/tags/tag");
+        mv.addObject("tags", tags);
+        mv.addObject("apiPrefix", pathPrefix);
+        return mv;
+    }
+
+
+    // 태그 전체 목록 보여줌 : 버전1
+    /*
     @GetMapping("/tags")
     public ModelAndView showTagPage() {
         List<TagGetResponse> tags = tagFeignClient.getAll();
@@ -33,18 +50,7 @@ public class TagController {
         return modelAndView;
     }
 
-//    @Value("${gateway.base-url}") //${ui.apiPrefix:}
-//    private String apiPrefix;
-//
-//    @GetMapping("/tags")
-//    public ModelAndView showTagPage() {
-//        List<TagGetResponse> tags = tagFeignClient.getAll();
-//
-//        ModelAndView mv = new ModelAndView("tags/tag"); // templates/tags/tag.html 경로와 일치
-//        mv.addObject("tags", tags);
-//        mv.addObject("apiPrefix", apiPrefix);
-//        return mv;
-//    }
+     */
 
     // 태그 생성
     @PostMapping("/tags")
@@ -58,14 +64,6 @@ public class TagController {
         }
         return "redirect:/admin/tags";
     }
-
-    // 단일 태그 조회
-//    @GetMapping("/tags/{id}")
-//    public String getTag(@PathVariable("id") Long id) {
-//        TagGetResponse tag = tagFeignClient.getTag(id);
-//        ModelAndView modelAndView = new ModelAndView("/tags/tag-detail");
-//        return "redirect:/tags/{id}";
-//    }
 
     @PostMapping("/tags/{id}")
     public String updateTag(@PathVariable Long id,

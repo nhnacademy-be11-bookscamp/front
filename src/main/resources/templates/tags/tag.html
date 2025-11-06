@@ -6,11 +6,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>태그 관리</title>
-    <!-- 페이지별 추가 CSS -->
-    <th:block layout:fragment="extra-css"></th:block>
+
+    <meta name="_csrf" th:content="${_csrf?.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+
+    <meta name="api-prefix" th:content="${apiPrefix}"/>
+
+    <th:block layout:fragment="extra-css">
+        <style>
+            .tag-table-row form { margin: 0; }
+            .tag-table-row input[type="text"] { width: 100%; box-sizing: border-box; }
+            .muted { color:#777; }
+        </style>
+    </th:block>
 </head>
 <body>
-<!-- 관리자 사이드바 주입 -->
+
 <div layout:fragment="sidebar">
     <th:block th:replace="~{fragment/admin-sidebar :: sidebar}"></th:block>
 </div>
@@ -18,43 +29,33 @@
 <div layout:fragment="content">
     <h2>태그 관리</h2>
 
-    <!-- 에러 메시지 표시 -->
-    <div th:if="${error != null}" style="color: red;">
-        <p th:text="${error}"></p>
-    </div>
-
-    <!-- 태그 추가 폼 -->
-    <form method="post" th:action="@{/admin/tags}">
-        <input type="text" name="name" placeholder="새 태그 이름" required>
+    <form id="tag-create-form">
+        <input type="text" id="create-tag-name" name="name" placeholder="새 태그 이름" required>
         <button type="submit">추가</button>
     </form>
 
-    <!-- 태그 목록 테이블 -->
     <table border="1" style="margin-top: 1rem; width: 100%; text-align: center;">
         <thead>
         <tr>
-            <th>ID</th>
-            <th>이름</th>
-            <th>수정</th>
-            <th>삭제</th>
+            <th style="width: 10%;">ID</th>
+            <th style="width: 50%;">이름</th>
+            <th style="width: 20%;">수정</th>
+            <th style="width: 20%;">삭제</th>
         </tr>
         </thead>
-        <tbody>
-        <tr th:each="tag : ${tags}">
+        <tbody id="tag-list-body">
+        <!-- 초기 Thymeleaf 렌더(있어도 되고 없어도 됨) -->
+        <tr th:each="tag : ${tags}" class="tag-table-row" th:id="'tag-row-' + ${tag.id}">
             <td th:text="${tag.id}">1</td>
-            <td th:text="${tag.name}">태그 이름</td>
-
-            <!-- 수정 버튼 -->
+            <td th:id="'tag-name-' + ${tag.id}" th:text="${tag.name}">태그 이름</td>
             <td>
-                <form method="post" th:action="@{'/admin/tags/' + ${tag.id}}">
-                    <input type="text" name="name" th:value="${tag.name}" required>
+                <form th:onsubmit="|submitUpdate(event, ${tag.id})|">
+                    <input type="text" name="name" class="tag-update-input" th:value="${tag.name}" required>
                     <button type="submit" class="button button-update">수정</button>
                 </form>
             </td>
-
-            <!-- 삭제 버튼 -->
             <td>
-                <form method="post" th:action="@{'/admin/tags/' + ${tag.id} + '/delete'}">
+                <form th:onsubmit="|submitDelete(event, ${tag.id})|">
                     <button type="submit" class="button button-delete">삭제</button>
                 </form>
             </td>
@@ -63,7 +64,151 @@
     </table>
 </div>
 
-<!-- 페이지별 추가 JavaScript -->
-<th:block layout:fragment="extra-js"></th:block>
+<th:block layout:fragment="extra-js">
+    <script th:inline="javascript">
+        const apiPrefix = document.querySelector('meta[name="api-prefix"]')?.content || '';
+        const TAG_FULL_URL = apiPrefix + '/api-server/admin/tags';
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || null;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || null;
+
+        const commonHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        };
+        if (csrfToken && csrfHeader) {
+            commonHeaders[csrfHeader] = csrfToken;
+        }
+
+        function tagRowHtml(tag) {
+            const esc = (s)=>String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+            return `
+    <tr class="tag-table-row" id="tag-row-${tag.id}">
+      <td>${tag.id}</td>
+      <td id="tag-name-${tag.id}">${esc(tag.name)}</td>
+      <td>
+        <form onsubmit="submitUpdate(event, ${tag.id})">
+          <input type="text" name="name" class="tag-update-input" value="${esc(tag.name)}" required>
+          <button type="submit" class="button button-update">수정</button>
+        </form>
+      </td>
+      <td>
+        <form onsubmit="submitDelete(event, ${tag.id})">
+          <button type="submit" class="button button-delete">삭제</button>
+        </form>
+      </td>
+    </tr>
+  `;
+        }
+
+        function renderList(list) {
+            const tbody = document.getElementById('tag-list-body');
+            if (!Array.isArray(list) || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="muted">데이터 없음</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = list.map(tagRowHtml).join('');
+        }
+
+        async function loadTags() {
+            const tbody = document.getElementById('tag-list-body');
+            tbody.innerHTML = `<tr><td colspan="4" class="muted">로딩 중…</td></tr>`;
+            try {
+                const res = await fetch(TAG_FULL_URL, { method: 'GET', headers: commonHeaders });
+                if (!res.ok) throw new Error('목록 조회 실패');
+                const data = await res.json(); // 백: List<TagGetResponse>
+                renderList(Array.isArray(data) ? data : (data?.content ?? []));
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="4" class="muted">불러오기 실패</td></tr>`;
+                alert(e.message || '불러오기 실패');
+            }
+        }
+
+        async function submitCreate(event) {
+            event.preventDefault();
+            const input = document.getElementById('create-tag-name');
+            const name = input.value.trim();
+            if (!name) return;
+
+            try {
+                const res = await fetch(TAG_FULL_URL, {
+                    method: 'POST',
+                    headers: commonHeaders,
+                    body: JSON.stringify({ name })
+                });
+                if (!res.ok) {
+                    // 400 중복 등
+                    let msg = '태그 생성에 실패했습니다.';
+                    try { const j = await res.json(); msg = j?.message || msg; } catch {}
+                    throw new Error(msg);
+                }
+                input.value = '';
+                await loadTags(); // 목록 갱신
+            } catch (e) {
+                console.error('Error creating tag:', e);
+                alert(e.message || '태그 생성 실패');
+            }
+        }
+
+        async function submitUpdate(event, tagId) {
+            event.preventDefault();
+            const form = event.target;
+            const newName = form.querySelector('.tag-update-input').value.trim();
+            if (!newName) return;
+            if (!confirm(`ID ${tagId}를 '${newName}'(으)로 수정할까요?`)) return;
+
+            try {
+                const res = await fetch(`${TAG_FULL_URL}/${tagId}`, {
+                    method: 'PUT', // 백엔드 컨트롤러 시그니처와 일치
+                    headers: commonHeaders,
+                    body: JSON.stringify({ name: newName })
+                });
+                if (!res.ok) {
+                    let msg = '태그 수정 실패';
+                    try { const j = await res.json(); msg = j?.message || msg; } catch {}
+                    throw new Error(msg);
+                }
+                const updated = await res.json(); // TagGetResponse
+                const cell = document.getElementById(`tag-name-${tagId}`);
+                if (cell) cell.textContent = updated.name;
+                // 인풋에도 반영(사용자 UX)
+                form.querySelector('.tag-update-input').value = updated.name;
+                alert('수정되었습니다.');
+            } catch (e) {
+                console.error('Error updating tag:', e);
+                alert(e.message || '태그 수정 실패');
+            }
+        }
+
+        async function submitDelete(event, tagId) {
+            event.preventDefault();
+            if (!confirm(`태그 ID ${tagId}를 삭제하시겠습니까?`)) return;
+
+            try {
+                const res = await fetch(`${TAG_FULL_URL}/${tagId}`, {
+                    method: 'DELETE',
+                    headers: commonHeaders
+                });
+                if (!res.ok) throw new Error('태그 삭제에 실패했습니다.');
+                const row = document.getElementById(`tag-row-${tagId}`);
+                if (row) row.remove();
+                alert('삭제되었습니다.');
+                // 필요하면 loadTags(); // 전체 새로고침 방식
+            } catch (e) {
+                console.error('Error deleting tag:', e);
+                alert(e.message || '태그 삭제 실패');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('tag-create-form').addEventListener('submit', submitCreate);
+            loadTags();
+        });
+
+        window.submitUpdate = submitUpdate;
+        window.submitDelete = submitDelete;
+    </script>
+</th:block>
 </body>
 </html>

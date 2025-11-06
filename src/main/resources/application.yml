@@ -7,6 +7,17 @@ spring:
       max-request-size: 20MB
   profiles:
     active: prod
+  session:
+    redis:
+      flush-mode: on_save
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000
   cloud:
     openfeign:
       client:
@@ -23,4 +34,19 @@ logging:
     store.bookscamp.front.book.feign: DEBUG
     org.springframework.cloud.openfeign: DEBUG
 
+minio:
+  # 브라우저에서 접근 가능한 public base URL (리턴용)
+  url: http://storage.java21.net:8000
+  access-key: EvJ2FP8gy27lDYolEWGQ
+  secret-key: h9uzw85pZPDchOTHzslEOUlNd5cDPFLQnJCofZfH
+  bucket:
+    book: bookscamp-book-image
+    review: bookscamp-review-image
 
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 3000
+        readTimeout: 5000
+        loggerLevel: BASIC

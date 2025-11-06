@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default}">
+
 <head>
     <title>도서 등록</title>
 
@@ -61,7 +62,7 @@
 <div layout:fragment="content">
     <h1>도서 등록</h1>
 
-    <!-- form-data 전송 -->
+    <!-- ✅ multipart/form-data로 전송 -->
     <form th:action="@{/admin/books}" method="post" enctype="multipart/form-data" class="register-form">
 
         <label>제목</label>
@@ -86,7 +87,7 @@
         <input type="number" name="salePrice">
 
         <label>재고</label>
-        <input type="number" name="stock" placeholder="예: 50">
+        <input type="number" name="stock">
 
         <label>포장 가능 여부</label>
         <input type="checkbox" name="packable" value="true">

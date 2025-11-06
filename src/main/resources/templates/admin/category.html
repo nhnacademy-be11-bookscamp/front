@@ -300,10 +300,16 @@
     </ul>
 
     <th:block th:fragment="categoryItem(category)">
-        <li class="category-item" th:id="'category-item-' + ${category.id}">
+        <li class="category-item"
+            th:if="${category != null}"
+            th:id="'category-item-' + ${category.id}">
 
-            <div class="category-row" th:id="'category-row-' + ${category.id}">
-                <span class="category-label" onclick="toggleCategory(this)">
+            <div class="category-row"
+                 th:id="'category-row-' + ${category.id}"
+                 th:if="${category != null}">
+            <span class="category-label"
+                  th:if="${category != null}"
+                  onclick="toggleCategory(this)">
                     <span th:text="${(category.children != null and !category.children.isEmpty()) ? '📁' : ''}"></span>
                     <span class="category-name" th:text="${category.name}">카테고리</span>
                 </span>

@@ -2,6 +2,7 @@ package store.bookscamp.front.book.controller;
 
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
@@ -21,10 +22,12 @@ import store.bookscamp.front.category.controller.response.CategoryListResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
 import store.bookscamp.front.booklike.feign.BookLikeFeginClient;
+import store.bookscamp.front.category.service.CategoryService;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
 import store.bookscamp.front.category.feign.CategoryFeignClient;
+import store.bookscamp.front.common.service.MinioService;
 import store.bookscamp.front.tag.TagFeignClient;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
 
@@ -35,11 +38,13 @@ public class BookController {
     @Value("${gateway.base-url}")
     private String pathPrefix;
 
+    private final MinioService minioService;
     private final AladinFeignClient aladinFeignClient;
     private final BookFeignClient bookFeignClient;
     private final CategoryFeignClient categoryFeignClient;
     private final TagFeignClient tagFeignClient;
     private final BookLikeFeginClient bookLikeFeginClient;
+    private final CategoryService categoryService;
 
     @GetMapping("/admin/books")
     public String adminBooksHome() {
@@ -60,13 +65,19 @@ public class BookController {
         return "book/create";
     }
 
-    @PostMapping(value = "/admin/books", consumes = "multipart/form-data")
+    @PostMapping(value = "/admin/books")
     public String createBook(
             @ModelAttribute BookCreateRequest req,
-            @RequestPart("files") List<MultipartFile> files
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
 
-        bookFeignClient.createBook(req, req.getPublishDate(), files);
+        List<String> imageUrls;
+        if (files != null && !files.isEmpty()) {
+            imageUrls = minioService.uploadFiles(files, "book");
+            req.setImageUrls(imageUrls);
+        }
+
+        bookFeignClient.createBook(req, req.getPublishDate());
 
         return "redirect:/admin/books";
     }
@@ -77,7 +88,6 @@ public class BookController {
     public String showAladinCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
-
         List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         List<TagGetResponse> tags = tagFeignClient.getAll();
 
@@ -93,7 +103,7 @@ public class BookController {
 
         bookFeignClient.createAladinBook(req);
 
-        return "redirect:/admin/aladin/search";
+        return "redirect:/admin/books";
     }
 
     // 도서 수정
@@ -102,21 +112,38 @@ public class BookController {
     public String showUpdatePage(@PathVariable Long id, Model model) {
 
         BookInfoResponse book = bookFeignClient.getBookDetail(id);
-
         List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
+        List<TagGetResponse> tags = tagFeignClient.getAll();
 
         model.addAttribute("book", book);
         model.addAttribute("categories", categories);
+        model.addAttribute("tags", tags);
 
         return "book/update";
     }
 
-    @PostMapping(value = "/admin/books/{id}/update", consumes = "multipart/form-data")
-    public String updateBook(@PathVariable Long id, @ModelAttribute BookUpdateRequest req) {
+    @PutMapping(value = "/admin/books/{id}/update")
+    public String updateBook(
+            @PathVariable Long id,
+            @ModelAttribute BookUpdateRequest req,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
 
-        bookFeignClient.updateBook(id, req);
+        if (files != null && !files.isEmpty()) {
+            List<String> imageUrls = minioService.uploadFiles(files, "book");
+            req.setImageUrls(imageUrls);
+        }
 
-        return "redirect:/admin/books/" + id;
+        List<String> removedUrls = req.getRemovedUrls();
+        if (removedUrls != null && !removedUrls.isEmpty()) {
+            for (String url : removedUrls) {
+                minioService.deleteFile(url, "book");
+            }
+        }
+
+        bookFeignClient.updateBook(id, req, req.getPublishDate());
+
+        return "redirect:/books/" + id;
     }
 
     // 도서 목록 조회, 상세페이지
@@ -141,7 +168,7 @@ public class BookController {
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
 
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
+        List<CategoryListResponse> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
 
         model.addAttribute("categoryId", categoryId);
@@ -151,7 +178,7 @@ public class BookController {
         return "book/list";
     }
 
-    @GetMapping("/books/{id}")
+    @GetMapping({"/books/{id}","/admin/books/{id}"})
     public String bookDetail(
             @PathVariable("id") Long id,
             Model model
@@ -165,18 +192,15 @@ public class BookController {
         model.addAttribute("bookLike", countResponse);
 
         ResponseEntity<BookLikeStatusResponse> likeStatus = bookLikeFeginClient.getLikeStatus(id);
-        assert likeStatus.getBody() != null;
-        boolean likedByCurrentUser = likeStatus.getBody().liked();
+        boolean likedByCurrentUser = Optional.ofNullable(likeStatus.getBody())
+                .map(BookLikeStatusResponse::liked)
+                .orElse(false);
         model.addAttribute("isLikedByCurrentUser", likedByCurrentUser);
 
         model.addAttribute("apiPrefix", pathPrefix);
 
         return "book/detail";
     }
-
-    // 관리자 도서 목록 조회, 상세페이지
-
-
 }
 
 

@@ -7,61 +7,86 @@
     <title>로그인 | 북스캠프</title>
 </head>
 <body>
+<!-- Hero 섹션 숨김 -->
+<section layout:fragment="hero" class="hero" style="display: none;">
+</section>
+
 <div layout:fragment="content">
-    <!-- 로그인 섹션 -->
     <section class="checkout spad">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-5">
-                    <div class="checkout__form">
-                        <h4 style="margin-bottom: 30px;">로그인</h4>
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3">
+                    <div style="background: #ffffff; padding: 40px; border: 1px solid #ebebeb; border-radius: 4px;">
+                        <h4 style="margin-bottom: 15px; font-weight: 700; text-align: center;">
+                            <i class="fa fa-sign-in-alt" style="margin-right: 10px; color: #7fad39;"></i>
+                            로그인
+                        </h4>
+                        <p style="text-align: center; color: #6f6f6f; margin-bottom: 30px;">북스캠프에 오신 것을 환영합니다.</p>
 
-                        <form id="loginForm">
-                            <div class="checkout__input">
-                                <p>아이디<span>*</span></p>
-                                <input type="text"
-                                       id="username"
-                                       name="username"
-                                       placeholder="아이디를 입력하세요"
-                                       required>
-                            </div>
-
-                            <div class="checkout__input">
-                                <p>비밀번호<span>*</span></p>
-                                <input type="password"
-                                       id="password"
-                                       name="password"
-                                       placeholder="비밀번호를 입력하세요"
-                                       required>
-                            </div>
-
-                            <div id="loginMessage" style="margin: 15px 0; padding: 10px; border-radius: 4px; display: none;"></div>
-
-                            <button type="submit"
-                                    id="loginButton"
-                                    class="site-btn"
-                                    style="width: 100%; margin-top: 20px;">
-                                로그인
-                            </button>
-                        </form>
-
-                        <div class="text-center mt-4">
-                            <p>
-                                아직 회원이 아니신가요?
-                                <a th:href="@{/signup}"
-                                   style="color: #0064FF; font-weight: 600; text-decoration: underline; margin-left: 5px;">
-                                    회원가입
-                                </a>
+                        <!-- 에러 메시지 -->
+                        <div th:if="${param.error}" style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border: 1px solid #dc3545; border-radius: 4px;">
+                            <p style="color: #dc3545; margin: 0; font-weight: 600;">
+                                <i class="fa fa-exclamation-circle"></i> 아이디 또는 비밀번호가 올바르지 않습니다.
                             </p>
                         </div>
+
+                        <!-- 로그아웃 메시지 -->
+                        <div th:if="${param.logout}" style="margin-bottom: 20px; padding: 15px; background: #d4edda; border: 1px solid #7fad39; border-radius: 4px;">
+                            <p style="color: #155724; margin: 0; font-weight: 600;">
+                                <i class="fa fa-check-circle"></i> 로그아웃되었습니다.
+                            </p>
+                        </div>
+
+                        <form action="/login" method="post">
+                            <div class="row">
+                                <!-- 사용자명 -->
+                                <div class="col-lg-12">
+                                    <div class="checkout__input">
+                                        <p>아이디<span>*</span></p>
+                                        <input type="text"
+                                               id="username"
+                                               name="username"
+                                               placeholder="아이디를 입력하세요"
+                                               required
+                                               autofocus>
+                                    </div>
+                                </div>
+
+                                <!-- 비밀번호 -->
+                                <div class="col-lg-12">
+                                    <div class="checkout__input">
+                                        <p>비밀번호<span>*</span></p>
+                                        <input type="password"
+                                               id="password"
+                                               name="password"
+                                               placeholder="비밀번호를 입력하세요"
+                                               required>
+                                    </div>
+                                </div>
+
+                                <!-- 로그인 버튼 -->
+                                <div class="col-lg-12" style="margin-top: 20px; text-align: center;">
+                                    <button type="submit"
+                                            class="site-btn"
+                                            style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600;">
+                                        <i class="fa fa-sign-in-alt"></i> 로그인
+                                    </button>
+                                </div>
+
+                                <!-- 회원가입 링크 -->
+                                <div class="col-lg-12" style="margin-top: 15px; text-align: center;">
+                                    <p style="color: #6f6f6f; font-size: 14px;">
+                                        아직 계정이 없으신가요?
+                                        <a th:href="@{/members/signup}" style="color: #7fad39; font-weight: 600; text-decoration: none;">회원가입</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-</div>
-
-<div layout:fragment="extra-js">
 </div>
 </body>
 </html>

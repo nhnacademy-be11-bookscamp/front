@@ -4,37 +4,43 @@
       layout:decorate="~{layout/no-sidebar}">
 <head>
     <meta charset="UTF-8">
-    <title>회원가입 | 북스캠프</title>
+    <title>회원 가입 | 북스캠프</title>
 </head>
 <body>
+<!-- Hero 섹션 숨김 -->
+<section layout:fragment="hero" class="hero" style="display: none;">
+</section>
+
 <div layout:fragment="content">
-    <!-- 회원가입 섹션 -->
     <section class="checkout spad">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="checkout__form">
-                        <h4 style="margin-bottom: 30px;">회원 정보 입력</h4>
+            <div class="row">
+                <div class="col-lg-8 offset-lg-2">
+                    <div style="background: #ffffff; padding: 40px; border: 1px solid #ebebeb; border-radius: 4px;">
+                        <h4 style="margin-bottom: 15px; font-weight: 700; text-align: center;">
+                            <i class="fa fa-user-plus" style="margin-right: 10px; color: #7fad39;"></i>
+                            회원 가입
+                        </h4>
+                        <p style="text-align: center; color: #6f6f6f; margin-bottom: 30px;">새로운 계정을 생성합니다.</p>
 
-                        <!-- 에러 메시지 표시 -->
-                        <div th:if="${errorMessage}"
-                             style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px;">
-                            <strong>오류!</strong>
-                            <p th:text="${errorMessage}" style="margin: 5px 0 0 0;"></p>
+                        <!-- 에러 메시지 -->
+                        <div th:if="${errorMessage}" style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border: 1px solid #dc3545; border-radius: 4px;">
+                            <p th:text="${errorMessage}" style="color: #dc3545; margin: 0; font-weight: 600;">
+                                <i class="fa fa-exclamation-circle"></i> 여기에 오류 메시지가 표시됩니다.
+                            </p>
                         </div>
 
                         <form id="memberCreateForm" th:action="@{/members}" method="post">
-                            <input type="hidden" name="_method" value="put" />
-
                             <div class="row">
+                                <!-- 아이디 -->
                                 <div class="col-lg-12">
                                     <div class="checkout__input">
-                                        <p>아이디 (4~20자)<span>*</span></p>
+                                        <p>아이디<span>*</span></p>
                                         <div style="display: flex; gap: 10px;">
                                             <input type="text"
                                                    id="username"
                                                    name="username"
-                                                   placeholder="4-20자의 영문, 숫자 조합"
+                                                   placeholder="4~20자 이내로 입력하세요"
                                                    required
                                                    minlength="4"
                                                    maxlength="20"
@@ -42,27 +48,32 @@
                                             <button type="button"
                                                     id="checkIdButton"
                                                     class="site-btn"
-                                                    style="width: 120px; padding: 13px 20px;">
-                                                중복확인
+                                                    style="width: 120px; padding: 12px;">
+                                                중복 확인
                                             </button>
                                         </div>
-                                        <p id="idCheckMessage"
-                                           style="margin-top: 8px; font-size: 14px; color: #dd2222;">
-                                            중복 확인이 필요합니다.
+                                        <p id="idCheckMessage" style="margin-top: 8px; font-size: 14px; color: #dc3545;">
+                                            <i class="fa fa-info-circle"></i> 중복 확인이 필요합니다.
                                         </p>
                                     </div>
+                                </div>
 
+                                <!-- 비밀번호 -->
+                                <div class="col-lg-12">
                                     <div class="checkout__input">
-                                        <p>비밀번호 (8~20자)<span>*</span></p>
+                                        <p>비밀번호<span>*</span></p>
                                         <input type="password"
                                                id="password"
                                                name="password"
-                                               placeholder="8-20자의 영문, 숫자 조합"
+                                               placeholder="8~20자 이내로 입력하세요"
                                                required
                                                minlength="8"
                                                maxlength="20">
                                     </div>
+                                </div>
 
+                                <!-- 이름 -->
+                                <div class="col-lg-12">
                                     <div class="checkout__input">
                                         <p>이름<span>*</span></p>
                                         <input type="text"
@@ -71,7 +82,10 @@
                                                placeholder="이름을 입력하세요"
                                                required>
                                     </div>
+                                </div>
 
+                                <!-- 이메일 -->
+                                <div class="col-lg-12">
                                     <div class="checkout__input">
                                         <p>이메일<span>*</span></p>
                                         <input type="email"
@@ -80,7 +94,10 @@
                                                placeholder="example@email.com"
                                                required>
                                     </div>
+                                </div>
 
+                                <!-- 전화번호 -->
+                                <div class="col-lg-12">
                                     <div class="checkout__input">
                                         <p>전화번호<span>*</span></p>
                                         <input type="text"
@@ -89,7 +106,10 @@
                                                placeholder="010-1234-5678"
                                                required>
                                     </div>
+                                </div>
 
+                                <!-- 생년월일 -->
+                                <div class="col-lg-12">
                                     <div class="checkout__input">
                                         <p>생년월일<span>*</span></p>
                                         <input type="date"
@@ -97,21 +117,21 @@
                                                name="birthDate"
                                                required>
                                     </div>
+                                </div>
 
-                                    <div class="text-center mt-4">
-                                        <button type="submit"
-                                                id="submitButton"
-                                                class="site-btn"
-                                                style="width: 200px;"
-                                                disabled>
-                                            회원가입
-                                        </button>
-                                        <a th:href="@{/login}"
-                                           class="site-btn"
-                                           style="width: 200px; background: #6f6f6f; display: inline-block; text-align: center; margin-left: 10px; text-decoration: none;">
-                                            취소
-                                        </a>
-                                    </div>
+                                <!-- 버튼 -->
+                                <div class="col-lg-12" style="margin-top: 20px; text-align: center;">
+                                    <button type="submit"
+                                            id="submitButton"
+                                            class="site-btn"
+                                            disabled
+                                            style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; opacity: 0.6; cursor: not-allowed;">
+                                        <i class="fa fa-user-plus"></i> 회원 가입
+                                    </button>
+                                    <p style="margin-top: 15px; color: #6f6f6f; font-size: 14px;">
+                                        이미 계정이 있으신가요?
+                                        <a th:href="@{/login}" style="color: #7fad39; font-weight: 600; text-decoration: none;">로그인</a>
+                                    </p>
                                 </div>
                             </div>
                         </form>
@@ -122,7 +142,22 @@
     </section>
 </div>
 
-<div layout:fragment="extra-js">
+<th:block layout:fragment="extra-css">
+    <style>
+        #idCheckMessage.success {
+            color: #7fad39 !important;
+        }
+        #idCheckMessage.error {
+            color: #dc3545 !important;
+        }
+        #submitButton:not(:disabled) {
+            opacity: 1;
+            cursor: pointer;
+        }
+    </style>
+</th:block>
+
+<th:block layout:fragment="extra-js">
     <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
             var pathPrefix = /*[[${apiPrefix}]]*/ '';
@@ -136,25 +171,26 @@
             var submitButton = document.getElementById('submitButton');
             var memberCreateForm = document.getElementById('memberCreateForm');
 
-            // 아이디 입력 시 중복확인 초기화
             idInput.addEventListener('input', function() {
                 submitButton.disabled = true;
                 idCheckMessage.textContent = '중복 확인이 필요합니다.';
-                idCheckMessage.style.color = '#dd2222';
+                idCheckMessage.classList.remove('success');
+                idCheckMessage.classList.add('error');
                 isIdChecked = false;
             });
 
-            // 중복 확인 버튼 클릭
             checkIdButton.addEventListener('click', async function() {
                 var id = idInput.value;
 
                 if (id.length < 4 || id.length > 20) {
                     idCheckMessage.textContent = "아이디는 4자 이상 20자 이하여야 합니다.";
-                    idCheckMessage.style.color = '#dd2222';
+                    idCheckMessage.classList.remove('success');
+                    idCheckMessage.classList.add('error');
                     isIdChecked = false;
                     submitButton.disabled = true;
                     return;
                 }
+
 
                 const url = pathPrefix + '/api-server/member/check-id?id=' + encodeURIComponent(id);
 
@@ -180,7 +216,8 @@
                         console.error('Error Response Body:', errorMessage);
 
                         idCheckMessage.textContent = errorMessage || "서버 오류가 발생했습니다.";
-                        idCheckMessage.style.color = '#dd2222';
+                        idCheckMessage.classList.remove('success');
+                        idCheckMessage.classList.add('error');
 
                     } else {
                         isIdChecked = true;
@@ -192,7 +229,8 @@
                         console.log('Success Response Body:', successMessage);
 
                         idCheckMessage.textContent = successMessage;
-                        idCheckMessage.style.color = '#0064FF';
+                        idCheckMessage.classList.remove('error');
+                        idCheckMessage.classList.add('success');
                     }
 
                     isIdChecked = true;
@@ -200,7 +238,8 @@
                 } catch (error) {
                     console.error('Network Fetch Error:', error);
                     idCheckMessage.textContent = "네트워크 오류가 발생했습니다.";
-                    idCheckMessage.style.color = '#dd2222';
+                    idCheckMessage.classList.remove('success');
+                    idCheckMessage.classList.add('error');
                     isIdChecked = false;
                     isIdDuplicated = true;
                     submitButton.disabled = true;
@@ -209,7 +248,6 @@
                 }
             });
 
-            // 폼 제출 전 검증
             memberCreateForm.addEventListener('submit', function(e) {
                 if (!isIdChecked || isIdDuplicated) {
                     e.preventDefault();
@@ -218,6 +256,6 @@
             });
         });
     </script>
-</div>
+</th:block>
 </body>
 </html>

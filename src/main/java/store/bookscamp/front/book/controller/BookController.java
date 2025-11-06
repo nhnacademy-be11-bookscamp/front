@@ -2,6 +2,7 @@ package store.bookscamp.front.book.controller;
 
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +22,7 @@ import store.bookscamp.front.category.controller.response.CategoryListResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
 import store.bookscamp.front.booklike.feign.BookLikeFeginClient;
-import store.bookscamp.front.category.controller.response.CategoryListResponse;
+import store.bookscamp.front.category.service.CategoryService;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
@@ -29,22 +30,21 @@ import store.bookscamp.front.category.feign.CategoryFeignClient;
 import store.bookscamp.front.common.service.MinioService;
 import store.bookscamp.front.tag.TagFeignClient;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
-import store.bookscamp.front.tag.TagFeignClient;
-import store.bookscamp.front.tag.controller.response.TagGetResponse;
 
 @Controller
 @RequiredArgsConstructor
 public class BookController {
 
-    private final MinioService minioService;
     @Value("${gateway.base-url}")
     private String pathPrefix;
 
+    private final MinioService minioService;
     private final AladinFeignClient aladinFeignClient;
     private final BookFeignClient bookFeignClient;
     private final CategoryFeignClient categoryFeignClient;
     private final TagFeignClient tagFeignClient;
     private final BookLikeFeginClient bookLikeFeginClient;
+    private final CategoryService categoryService;
 
     @GetMapping("/admin/books")
     public String adminBooksHome() {
@@ -168,7 +168,7 @@ public class BookController {
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
 
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
+        List<CategoryListResponse> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
 
         model.addAttribute("categoryId", categoryId);
@@ -178,7 +178,7 @@ public class BookController {
         return "book/list";
     }
 
-    @GetMapping("/books/{id}")
+    @GetMapping({"/books/{id}","/admin/books/{id}"})
     public String bookDetail(
             @PathVariable("id") Long id,
             Model model
@@ -192,18 +192,15 @@ public class BookController {
         model.addAttribute("bookLike", countResponse);
 
         ResponseEntity<BookLikeStatusResponse> likeStatus = bookLikeFeginClient.getLikeStatus(id);
-        assert likeStatus.getBody() != null;
-        boolean likedByCurrentUser = likeStatus.getBody().liked();
+        boolean likedByCurrentUser = Optional.ofNullable(likeStatus.getBody())
+                .map(BookLikeStatusResponse::liked)
+                .orElse(false);
         model.addAttribute("isLikedByCurrentUser", likedByCurrentUser);
 
         model.addAttribute("apiPrefix", pathPrefix);
 
         return "book/detail";
     }
-
-    // 관리자 도서 목록 조회, 상세페이지
-
-
 }
 
 

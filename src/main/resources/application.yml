@@ -13,7 +13,10 @@ spring:
         config:
           default:
             logger-level: FULL
-
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled=true:
 logging:
   level:
     feign.Logger: DEBUG

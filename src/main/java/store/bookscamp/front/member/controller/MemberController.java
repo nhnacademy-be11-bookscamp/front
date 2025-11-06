@@ -120,11 +120,11 @@ public class MemberController {
             }
 
             model.addAttribute("errorMessage", errorMessage);
-
+            model.addAttribute("apiPrefix", apiPrefix);
             model.addAttribute("memberCreateRequest", memberCreateRequest);
 
 
-            return "member/signup-form";
+            return "/member/signup-form";
         }
     }
 

@@ -27,9 +27,8 @@ public interface MemberFeignClient {
     @GetMapping("/api-server/member/check-id")
     ResponseEntity<String> checkIdDuplicate();
 
-    @PostMapping("/api-server/member")
+    @PostMapping("/api-server/member/sign-up")
     ResponseEntity<Void> createMember(@RequestBody MemberCreateRequest memberCreateRequest);
-
 
     @PutMapping("/api-server/member")
     ResponseEntity<MemberGetResponse> updateMember(

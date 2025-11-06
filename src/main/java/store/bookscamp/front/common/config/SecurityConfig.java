@@ -2,12 +2,14 @@ package store.bookscamp.front.common.config;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 import store.bookscamp.front.auth.handler.CustomAuthenticationSuccessHandler;
 import store.bookscamp.front.auth.provider.CustomAuthenticationProvider;
 import store.bookscamp.front.member.controller.MemberLoginFeignClient;

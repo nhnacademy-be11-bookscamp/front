@@ -2,6 +2,13 @@ app:
   api:
     prefix: http://localhost:8080
 
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD}
+
 server:
   port: 8082
 

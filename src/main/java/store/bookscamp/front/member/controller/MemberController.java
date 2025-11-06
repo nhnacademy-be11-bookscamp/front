@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import store.bookscamp.front.member.controller.request.MemberCreateRequest;
 import store.bookscamp.front.member.controller.request.MemberLoginRequest;
@@ -36,10 +35,10 @@ public class MemberController {
     @Value("${app.api.prefix}")
     private String apiPrefix;
 
-    @GetMapping("/sign-up")
+    @GetMapping("/signup")
     public String showPage(Model model){
         model.addAttribute("apiPrefix", apiPrefix);
-        return "member/signup-form";
+        return "member/signup";
     }
 
     @GetMapping("/login")
@@ -124,7 +123,7 @@ public class MemberController {
             model.addAttribute("memberCreateRequest", memberCreateRequest);
 
 
-            return "/member/signup-form";
+            return "/member/signup";
         }
     }
 
@@ -151,9 +150,4 @@ public class MemberController {
         memberFeignClient.deleteMember();
         return "member/login";
     }
-
-
-
-
-
 }

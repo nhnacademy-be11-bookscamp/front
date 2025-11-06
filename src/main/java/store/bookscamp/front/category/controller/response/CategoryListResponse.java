@@ -2,6 +2,7 @@ package store.bookscamp.front.category.controller.response;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public record CategoryListResponse(

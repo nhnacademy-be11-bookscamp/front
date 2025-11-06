@@ -11,7 +11,7 @@ public class WebConfig {
     public FilterRegistrationBean<HiddenHttpMethodFilter> hiddenHttpMethodFilterRegistration() {
         FilterRegistrationBean<HiddenHttpMethodFilter> registration =
                 new FilterRegistrationBean<>(new HiddenHttpMethodFilter());
-        registration.setOrder(Integer.MIN_VALUE);
+        registration.setOrder(Integer.MIN_VALUE + 1);
 
         return registration;
     }

@@ -4,66 +4,106 @@
       layout:decorate="~{layout/no-sidebar}">
 <head>
     <meta charset="UTF-8">
-    <title>회원 정보 수정</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="email"], input[type="date"] {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .action-button {
-            padding: 10px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-    </style>
+    <title>회원 정보 수정 | 북스캠프</title>
 </head>
 <body>
+<!-- Hero 섹션 숨김 -->
+<section layout:fragment="hero" class="hero" style="display: none;">
+</section>
+
 <div layout:fragment="content">
-    <h1>회원 정보 수정</h1>
-    <p>내 정보를 수정합니다. 수정 후 저장 버튼을 눌러주세요.</p>
+    <section class="checkout spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 offset-lg-2">
+                    <div style="background: #ffffff; padding: 40px; border: 1px solid #ebebeb; border-radius: 4px;">
+                        <h4 style="margin-bottom: 15px; font-weight: 700; text-align: center;">
+                            <i class="fa fa-edit" style="margin-right: 10px; color: #0064FF;"></i>
+                            회원 정보 수정
+                        </h4>
+                        <p style="text-align: center; color: #6f6f6f; margin-bottom: 30px;">내 정보를 수정합니다. 수정 후 저장 버튼을 눌러주세요.</p>
 
-    <form action="/members/update-info" method="post">
-        <input type="hidden" name="_method" value="PUT">
-        <div class="form-group">
-            <label for="name">이름:</label>
-            <input type="text" id="name" name="name" th:value="${memberInfo.name}" required>
+                        <form action="/members/update-info" method="post">
+                            <input type="hidden" name="_method" value="PUT">
+
+                            <div class="row">
+                                <!-- 이름 -->
+                                <div class="col-lg-12">
+                                    <div class="checkout__input">
+                                        <p>이름<span>*</span></p>
+                                        <input type="text"
+                                               id="name"
+                                               name="name"
+                                               th:value="${memberInfo.name}"
+                                               placeholder="이름을 입력하세요"
+                                               required>
+                                    </div>
+                                </div>
+
+                                <!-- 이메일 -->
+                                <div class="col-lg-12">
+                                    <div class="checkout__input">
+                                        <p>이메일<span>*</span></p>
+                                        <input type="email"
+                                               id="email"
+                                               name="email"
+                                               th:value="${memberInfo.email}"
+                                               placeholder="example@email.com"
+                                               required>
+                                    </div>
+                                </div>
+
+                                <!-- 전화번호 -->
+                                <div class="col-lg-12">
+                                    <div class="checkout__input">
+                                        <p>전화번호<span>*</span></p>
+                                        <input type="text"
+                                               id="phone"
+                                               name="phone"
+                                               th:value="${memberInfo.phone}"
+                                               placeholder="010-1234-5678"
+                                               required>
+                                    </div>
+                                </div>
+
+                                <!-- 생년월일 (수정 불가) -->
+                                <div class="col-lg-12">
+                                    <div class="checkout__input">
+                                        <p>생년월일 <span style="color: #6f6f6f; font-size: 13px; font-weight: normal;">(수정 불가)</span></p>
+                                        <input type="date"
+                                               id="birthDate"
+                                               th:value="${memberInfo.birthDate}"
+                                               disabled
+                                               style="background: #f8f8f8; cursor: not-allowed;">
+                                    </div>
+                                </div>
+
+                                <!-- 버튼 -->
+                                <div class="col-lg-12" style="margin-top: 20px;">
+                                    <div class="row">
+                                        <div class="col-lg-6" style="margin-bottom: 10px;">
+                                            <button type="submit"
+                                                    class="site-btn"
+                                                    style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; background: #0064FF;">
+                                                <i class="fa fa-save"></i> 정보 저장
+                                            </button>
+                                        </div>
+                                        <div class="col-lg-6" style="margin-bottom: 10px;">
+                                            <a th:href="@{/mypage}"
+                                               class="site-btn"
+                                               style="display: block; text-align: center; width: 100%; padding: 14px; font-size: 16px; font-weight: 600; background: #6f6f6f; text-decoration: none;">
+                                                <i class="fa fa-times"></i> 취소
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label for="email">이메일:</label>
-            <input type="email" id="email" name="email" th:value="${memberInfo.email}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="phone">전화번호:</label>
-            <input type="text" id="phone" name="phone" th:value="${memberInfo.phone}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="birthDate">생년월일:</label>
-            <input type="date" id="birthDate" th:value="${memberInfo.birthDate}" disabled>
-        </div>
-
-        <button type="submit" class="action-button">정보 저장</button>
-        <a th:href="@{/mypage}">취소 및 돌아가기</a>
-    </form>
-
-    <div id="message" style="margin-top: 15px;"></div>
-
-    <div style="margin-top: 2rem;">
-        <p>레이아웃: <code>layouts/no-sidebar.html</code></p>
-    </div>
+    </section>
 </div>
-
 </body>
 </html>

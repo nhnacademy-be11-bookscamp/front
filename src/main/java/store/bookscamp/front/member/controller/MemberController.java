@@ -1,19 +1,25 @@
 package store.bookscamp.front.member.controller;
 
+import feign.FeignException;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import store.bookscamp.front.member.controller.request.MemberCreateRequest;
+import store.bookscamp.front.member.controller.request.MemberLoginRequest;
 import store.bookscamp.front.member.controller.request.MemberPasswordUpdateRequest;
 import store.bookscamp.front.member.controller.request.MemberUpdateRequest;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
@@ -23,14 +29,16 @@ import store.bookscamp.front.member.controller.response.MemberGetResponse;
 public class MemberController {
 
     private final MemberFeignClient memberFeignClient;
+    private final PasswordEncoder passwordEncoder;
+    private final MemberLoginFeignClient memberLoginFeignClient;
 
     @Value("${app.api.prefix}")
     private String apiPrefix;
 
-    @GetMapping("/sign-up")
+    @GetMapping("/signup")
     public String showPage(Model model){
         model.addAttribute("apiPrefix", apiPrefix);
-        return "member/signup-form";
+        return "member/signup";
     }
 
     @GetMapping("/login")
@@ -38,62 +46,108 @@ public class MemberController {
         return "member/login";
     }
 
-    @GetMapping("/members/edit-info/{id}")
-    public ModelAndView editInfo(@PathVariable String id) {
-        MemberGetResponse memberInfo = memberFeignClient.getMember(id);
+    @PostMapping("/login")
+    public String doLogin(@Valid MemberLoginRequest memberLoginRequest, HttpServletResponse response) {
+        try {
+            ResponseEntity<Void> responseEntity = memberLoginFeignClient.doLogin(memberLoginRequest);
+
+            String jwtToken = responseEntity.getHeaders().getFirst("X-Auth-Token");
+            Cookie cookie = new Cookie("Authorization", jwtToken);
+            response.addCookie(cookie);
+            return "redirect:/";
+
+        } catch (FeignException e) {
+            return "redirect:/login?error";
+        }
+    }
+
+    @GetMapping("/mypage/edit-info")
+    public ModelAndView editInfo() {
+        MemberGetResponse memberInfo = memberFeignClient.getMember();
         ModelAndView mav = new ModelAndView("/member/edit-info");
         mav.addObject("memberInfo",memberInfo);
         return mav;
     }
 
-    @GetMapping("/members/{id}/change-password")
-    public ModelAndView changePassword(@PathVariable String id){
-        MemberGetResponse memberInfo = memberFeignClient.getMember(id);
+    @GetMapping("/mypage/change-password")
+    public ModelAndView changePassword(){
+        MemberGetResponse memberInfo = memberFeignClient.getMember();
         ModelAndView mav = new ModelAndView("/member/change-password");
         mav.addObject("memberInfo",memberInfo);
         return mav;
     }
 
-    @GetMapping("/members/{id}")
-    public ModelAndView getMember(@PathVariable String id){
-        MemberGetResponse memberInfo = memberFeignClient.getMember(id);
+    @GetMapping("/mypage")
+    public ModelAndView getMember(){
+        MemberGetResponse memberInfo = memberFeignClient.getMember();
         ModelAndView modelAndView = new ModelAndView("/member/mypage");
         modelAndView.addObject("memberInfo",memberInfo);
         return modelAndView;
     }
 
     @GetMapping("/members/check-id")
-    public String checkId(@RequestParam String id){
-        String response = String.valueOf(memberFeignClient.checkIdDuplicate(id));
+    public String checkId(){
+        String response = String.valueOf(memberFeignClient.checkIdDuplicate());
         return response;
     }
 
     @PostMapping("/members")
-    public String createMember(MemberCreateRequest memberCreateRequest){
-        memberFeignClient.createMember(memberCreateRequest);
-        return "member/login";
+    public String createMember(MemberCreateRequest memberCreateRequest, Model model){
+        try{
+            String rawPassword = memberCreateRequest.password();
+
+            String encodedPassword = passwordEncoder.encode(rawPassword);
+
+            MemberCreateRequest encodedRequest = new MemberCreateRequest(
+                    memberCreateRequest.username(),
+                    encodedPassword,
+                    memberCreateRequest.name(),
+                    memberCreateRequest.email(),
+                    memberCreateRequest.phone(),
+                    memberCreateRequest.birthDate()
+            );
+
+            memberFeignClient.createMember(encodedRequest);
+
+            return "member/login";
+        } catch(FeignException e){
+            String errorMessage = "회원가입 중 알 수 없는 서버 오류가 발생했습니다. (" + e.status() + ")";
+            try {
+                errorMessage = e.contentUTF8();
+
+            } catch (Exception ex) {
+            }
+
+            model.addAttribute("errorMessage", errorMessage);
+            model.addAttribute("apiPrefix", apiPrefix);
+            model.addAttribute("memberCreateRequest", memberCreateRequest);
+
+
+            return "/member/signup";
+        }
     }
 
-    @PutMapping("/members/{id}")
-    public ResponseEntity<Void> updateMember(@PathVariable String id,@RequestBody MemberUpdateRequest request){
-        memberFeignClient.updateMember(id, request);
-        return ResponseEntity.ok().build();
+    @PutMapping("/members/update-info")
+    public String updateMemberByForm(@ModelAttribute MemberUpdateRequest request, Model model) {
+        try {
+            memberFeignClient.updateMember(request);
+            return "redirect:/mypage";
+        } catch (FeignException e) {
+            String errorMessage = "회원 정보 수정 중 오류가 발생했습니다. 다시 시도해 주세요.";
+            model.addAttribute("errorMessage", errorMessage);
+            return "redirect:/mypage/edit-info";
+        }
     }
 
-    @PutMapping("/members/{id}/change-password")
+    @PutMapping("/members/change-password")
     public ResponseEntity<Void> updatePassword(@PathVariable String id,@RequestBody MemberPasswordUpdateRequest request){
-        memberFeignClient.updatePassword(id, request);
+        memberFeignClient.updatePassword(request);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("members/{id}")
-    public String deleteMember(@PathVariable String id){
-        memberFeignClient.deleteMember(id);
+    @DeleteMapping("/member")
+    public String deleteMember(){
+        memberFeignClient.deleteMember();
         return "member/login";
     }
-
-
-
-
-
 }

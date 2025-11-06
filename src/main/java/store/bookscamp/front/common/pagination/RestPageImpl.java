@@ -2,8 +2,9 @@ package store.bookscamp.front.common.pagination; // (front 앱의 패키지)
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 public class RestPageImpl<T> {

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>도서 목록</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <h1>도서 목록</h1>
+
+    <!-- 검색 및 정렬 폼 -->
+    <form th:action="@{/books}" method="get" style="margin-bottom: 1.5rem;">
+        <label>카테고리 ID:
+            <input type="text" name="categoryId" th:value="${categoryId}">
+        </label>
+        <label>키워드:
+            <input type="text" name="keyWord" th:value="${keyWord}">
+        </label>
+        <label>정렬:
+            <select name="sortType">
+                <option value="id" th:selected="${sortType == 'id'}">기본</option>
+                <option value="title" th:selected="${sortType == 'title'}">제목순</option>
+                <option value="low-price" th:selected="${sortType == 'low-price'}">낮은가격순</option>
+                <option value="high-price" th:selected="${sortType == 'high-price'}">높은가격순</option>
+                <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
+                <option value="bookLike" th:selected="${sortType == 'bookLike'}">좋아요순</option>
+            </select>
+        </label>
+        <button type="submit">검색</button>
+    </form>
+
+    <!-- 도서 목록 테이블 -->
+    <table border="1" cellspacing="0" cellpadding="8" style="width: 100%; border-collapse: collapse;">
+        <thead style="background-color: #f3f3f3;">
+        <tr>
+            <th>ID</th>
+            <th>제목</th>
+            <th>설명</th>
+            <th>출판사</th>
+            <th>출판일</th>
+            <th>정가</th>
+            <th>판매가</th>
+            <th>재고</th>
+            <th>조회수</th>
+            <th>포장 가능</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${booksPage.content}">
+            <td th:text="${book.id}">1</td>
+            <td>
+                <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">도서 제목</a>
+            </td>
+            <td th:text="${book.explanation}">간단 설명</td>
+            <td th:text="${book.publisher}">출판사</td>
+            <td th:text="${book.publishDate}">2025-01-01</td>
+            <td th:text="${book.regularPrice}">15000</td>
+            <td th:text="${book.salePrice}">12000</td>
+            <td th:text="${book.stock}">10</td>
+            <td th:text="${book.viewCount}">200</td>
+            <td th:text="${book.packable ? '가능' : '불가능'}">가능</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(booksPage.content)}">
+            <td colspan="10" style="text-align:center;">조회된 도서가 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 페이지 네비게이션 -->
+    <div style="margin-top: 1.5rem; text-align: center;">
+        <span th:text="'현재 페이지: ' + (${booksPage.number + 1}) + ' / ' + ${booksPage.totalPages}"></span>
+
+        <div style="margin-top: 0.5rem;">
+            <a th:if="${!booksPage.first}"
+               th:href="@{/books(page=${booksPage.number - 1}, size=${booksPage.size}, categoryId=${categoryId}, keyWord=${keyWord}, sortType=${sortType})}">
+                이전
+            </a>
+            <span th:if="${!booksPage.first && !booksPage.last}"> | </span>
+            <a th:if="${!booksPage.last}"
+               th:href="@{/books(page=${booksPage.number + 1}, size=${booksPage.size}, categoryId=${categoryId}, keyWord=${keyWord}, sortType=${sortType})}">
+                다음
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>도서 목록</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <h1>도서 목록</h1>
+
+    <!-- 검색 및 정렬 폼 -->
+    <form th:action="@{/books}" method="get" style="margin-bottom: 1.5rem;">
+        <label>카테고리 ID:
+            <input type="text" name="categoryId" th:value="${categoryId}">
+        </label>
+        <label>키워드:
+            <input type="text" name="keyWord" th:value="${keyWord}">
+        </label>
+        <label>정렬:
+            <select name="sortType">
+                <option value="id" th:selected="${sortType == 'id'}">기본</option>
+                <option value="title" th:selected="${sortType == 'title'}">제목순</option>
+                <option value="low-price" th:selected="${sortType == 'low-price'}">낮은가격순</option>
+                <option value="high-price" th:selected="${sortType == 'high-price'}">높은가격순</option>
+                <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
+                <option value="bookLike" th:selected="${sortType == 'bookLike'}">좋아요순</option>
+            </select>
+        </label>
+        <button type="submit">검색</button>
+    </form>
+
+    <!-- 도서 목록 테이블 -->
+    <table border="1" cellspacing="0" cellpadding="8" style="width: 100%; border-collapse: collapse;">
+        <thead style="background-color: #f3f3f3;">
+        <tr>
+            <th>ID</th>
+            <th>제목</th>
+            <th>설명</th>
+            <th>출판사</th>
+            <th>출판일</th>
+            <th>정가</th>
+            <th>판매가</th>
+            <th>재고</th>
+            <th>조회수</th>
+            <th>포장 가능</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${booksPage.content}">
+            <td th:text="${book.id}">1</td>
+            <td>
+                <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">도서 제목</a>
+            </td>
+            <td th:text="${book.explanation}">간단 설명</td>
+            <td th:text="${book.publisher}">출판사</td>
+            <td th:text="${book.publishDate}">2025-01-01</td>
+            <td th:text="${book.regularPrice}">15000</td>
+            <td th:text="${book.salePrice}">12000</td>
+            <td th:text="${book.stock}">10</td>
+            <td th:text="${book.viewCount}">200</td>
+            <td th:text="${book.packable ? '가능' : '불가능'}">가능</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(booksPage.content)}">
+            <td colspan="10" style="text-align:center;">조회된 도서가 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 페이지 네비게이션 -->
+    <div style="margin-top: 1.5rem; text-align: center;">
+        <span th:text="'현재 페이지: ' + (${booksPage.number + 1}) + ' / ' + ${booksPage.totalPages}"></span>
+
+        <div style="margin-top: 0.5rem;">
+            <a th:if="${!booksPage.first}"
+               th:href="@{/books(page=${booksPage.number - 1}, size=${booksPage.size}, categoryId=${categoryId}, keyWord=${keyWord}, sortType=${sortType})}">
+                이전
+            </a>
+            <span th:if="${!booksPage.first && !booksPage.last}"> | </span>
+            <a th:if="${!booksPage.last}"
+               th:href="@{/books(page=${booksPage.number + 1}, size=${booksPage.size}, categoryId=${categoryId}, keyWord=${keyWord}, sortType=${sortType})}">
+                다음
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

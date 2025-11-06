@@ -14,7 +14,6 @@
 
 
     <form id="memberCreateForm" th:action="@{/members}" method="post">
-        <input type="hidden" name="_method" value="put" />
         <div class="form-group">
             <label for="username">아이디 (4~20자):</label>
             <input type="text" id="username" name="username" required minlength="4" maxlength="20">

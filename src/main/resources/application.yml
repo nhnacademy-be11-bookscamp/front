@@ -24,8 +24,10 @@ spring:
         config:
           default:
             logger-level: FULL
-
-# feign 로그 출력용
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled=true:
 logging:
   level:
     feign.Logger: DEBUG

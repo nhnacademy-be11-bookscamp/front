@@ -15,4 +15,4 @@ gateway:
   base-url: http://localhost:10352
 
 auth:
-  base-url: http://localhost:8080
+  base-url: http://localhost:10354

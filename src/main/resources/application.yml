@@ -46,4 +46,3 @@ feign:
         connectTimeout: 3000
         readTimeout: 5000
         loggerLevel: BASIC
-

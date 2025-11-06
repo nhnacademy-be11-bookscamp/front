@@ -8,6 +8,7 @@ spring:
       host: s4.java21.net
       port: 6379
       password: ${REDIS_PASSWORD}
+      database: 331
 
 # front는 eureka 미사용, gateway로만 호출
 gateway:

@@ -10,7 +10,7 @@
             th:classappend="${category.children != null and !category.children.isEmpty()} ? 'has-children' : ''">
 
             <div class="category-content">
-                <a th:href="@{/books/category/{id}(id=${category.id})}"
+                <a th:href="@{/books(categoryId=${category.id})}"
                    class="category-link"
                    th:text="${category.name}">카테고리명</a>
 

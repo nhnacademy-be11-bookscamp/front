@@ -37,7 +37,7 @@
     <!-- 헤더 -->
     <th:block th:replace="~{fragment/header :: header}"></th:block>
 
-    <!-- Hero 섹션 (카테고리 사이드바 + 검색) -->
+    <!-- Hero 섹션 (카테고리 사이드바 + 검색 + 배너) -->
     <section class="hero" layout:fragment="hero">
         <div class="container">
             <div class="row">
@@ -56,15 +56,34 @@
                         </ul>
                     </div>
                 </div>
-                <!-- 검색 영역 -->
+                <!-- 검색 영역 + 배너 -->
                 <div class="col-lg-9">
+                    <!-- 검색창 -->
                     <div class="hero__search">
                         <div class="hero__search__form">
-                            <form th:action="@{/books/search}" method="get">
-                                <input type="text" name="keyword" placeholder="찾으시는 도서가 있나요?"
-                                       th:value="${keyword}">
+                            <form th:action="@{/books}" method="get">
+                                <input type="text" name="keyWord" placeholder="찾으시는 도서가 있나요?"
+                                       th:value="${keyWord}">
                                 <button type="submit" class="site-btn">검색</button>
                             </form>
+                        </div>
+                        <div class="hero__search__phone">
+                            <div class="hero__search__phone__icon">
+                                <i class="fa fa-phone"></i>
+                            </div>
+                            <div class="hero__search__phone__text">
+                                <h5>간단질문환영</h5>
+                                <span>이용택TA 24시간</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 배너 -->
+                    <div class="hero__item set-bg" data-setbg="/img/hero/banner.png">
+                        <div class="hero__text">
+                            <span>BOOKS FRESH</span>
+                            <h2>신간 도서<br />특별 할인</h2>
+                            <p>지금 바로 최신 도서를 만나보세요</p>
+                            <a href="/books" class="primary-btn">쇼핑하기</a>
                         </div>
                     </div>
                 </div>

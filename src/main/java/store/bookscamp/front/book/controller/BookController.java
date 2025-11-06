@@ -51,10 +51,8 @@ public class BookController {
     private final MinioService minioService;
     private final AladinFeignClient aladinFeignClient;
     private final BookFeignClient bookFeignClient;
-    private final CategoryFeignClient categoryFeignClient;
     private final TagFeignClient tagFeignClient;
     private final BookLikeFeginClient bookLikeFeginClient;
-    private final CategoryService categoryService;
 
     @GetMapping("/admin/books")
     public String adminBooksHome(
@@ -87,7 +85,6 @@ public class BookController {
     @GetMapping("/admin/books/new")
     public String showCreatePage(Model model) {
 
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         List<TagGetResponse> tags = tagFeignClient.getAll();
 
         model.addAttribute("tags", tags);
@@ -118,11 +115,9 @@ public class BookController {
     public String showAladinCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         List<TagGetResponse> tags = tagFeignClient.getAll();
 
         model.addAttribute("aladinBook", detail);
-        model.addAttribute("categories", categories);
         model.addAttribute("tags", tags);
 
         return "/aladin/create";
@@ -142,11 +137,9 @@ public class BookController {
     public String showUpdatePage(@PathVariable Long id, Model model) {
 
         BookInfoResponse book = bookFeignClient.getBookDetail(id);
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         List<TagGetResponse> tags = tagFeignClient.getAll();
 
         model.addAttribute("book", book);
-        model.addAttribute("categories", categories);
         model.addAttribute("tags", tags);
 
         return "book/update";

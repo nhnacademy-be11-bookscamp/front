@@ -56,10 +56,8 @@ public class BookController {
     @GetMapping("/admin/books/new")
     public String showCreatePage(Model model) {
 
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         List<TagGetResponse> tags = tagFeignClient.getAll();
 
-        model.addAttribute("categories", categories);
         model.addAttribute("tags", tags);
 
         return "book/create";
@@ -88,11 +86,9 @@ public class BookController {
     public String showAladinCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         List<TagGetResponse> tags = tagFeignClient.getAll();
 
         model.addAttribute("aladinBook", detail);
-        model.addAttribute("categories", categories);
         model.addAttribute("tags", tags);
 
         return "/aladin/create";
@@ -167,10 +163,6 @@ public class BookController {
 
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
-
-        List<CategoryListResponse> categories = categoryService.getAllCategories();
-        model.addAttribute("categories", categories);
-
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("keyWord", keyWord);
         model.addAttribute("sortType", sortType);

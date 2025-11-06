@@ -1,5 +1,6 @@
 package store.bookscamp.front.common.config;
 
+
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

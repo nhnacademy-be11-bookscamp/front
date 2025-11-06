@@ -1,7 +1,6 @@
 package store.bookscamp.front.book.controller;
 
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -182,7 +181,6 @@ public class BookController {
     @GetMapping({"/books/{id}","/admin/books/{id}"})
     public String bookDetail(
             @PathVariable("id") Long id,
-            HttpServletRequest request,
             Model model
     ){
 
@@ -201,13 +199,7 @@ public class BookController {
 
         model.addAttribute("apiPrefix", pathPrefix);
 
-        String uri = request.getRequestURI();
-
-        if (uri.startsWith("/admin")) {
-            return "admin/books";
-        } else {
-            return "book/detail";
-        }
+        return "book/detail";
     }
 }
 

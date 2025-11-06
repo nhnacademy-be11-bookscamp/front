@@ -12,4 +12,9 @@ public class AdminController {
     public String adminIndex() {
         return "admin/index";
     }
+
+    @GetMapping("/dashboard")
+    public String adminDashBoard() {
+        return "admin/dashboard";
+    }
 }

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- 재귀적 카테고리 옵션 Fragment (select용) -->
+    <th:block th:fragment="categoryOptions(categoryList, depth)">
+        <th:block th:if="${categoryList != null and !categoryList.isEmpty()}">
+            <th:block th:each="cat : ${categoryList}">
+                <option th:value="${cat.id}"
+                        th:text="${#strings.repeat('　', depth ?: 0) + cat.name}"
+                        th:selected="${categoryId != null and categoryId == cat.id}">
+                    카테고리명
+                </option>
+                <!-- 하위 카테고리가 있으면 재귀 호출 -->
+                <th:block th:if="${cat.children != null and !cat.children.isEmpty()}"
+                          th:insert="~{fragment/category-select :: categoryOptions(${cat.children}, ${(depth ?: 0) + 1})}">
+                </th:block>
+            </th:block>
+        </th:block>
+    </th:block>
+</body>
+</html>

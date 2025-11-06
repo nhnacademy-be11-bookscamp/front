@@ -1,33 +1,68 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-</head>
 <body>
-<!-- Footer Fragment -->
-<footer class="footer" th:fragment="footer">
-    <div class="footer-container">
-        <div class="footer-section">
-            <h4>회사 정보</h4>
-            <p>북스캠프 도서 쇼핑몰</p>
-            <p>주소: 대전광역시 유성구</p>
+    <!-- 푸터 영역 시작 -->
+    <footer th:fragment="footer" class="footer spad">
+        <div class="container">
+            <div class="row">
+                <!-- 팀 소개 -->
+                <div class="col-lg-12">
+                    <div class="footer__widget">
+                        <h6>Team 3 소개</h6>
+                        <p>안녕하세요, 북스캠프를 만든 Team 3입니다.</p>
+                        <div class="footer__team">
+                            <div class="row">
+                                <div class="col-lg-3 col-md-6">
+                                    <p><strong>팀원 1: 김가현</strong></p>
+                                    <p>담당: </p>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <p><strong>팀원 2: 김채리</strong></p>
+                                    <p>담당: </p>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <p><strong>팀원 3: 백성준</strong></p>
+                                    <p>담당: </p>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <p><strong>팀원 4:윤빈</strong></p>
+                                    <p>담당: </p>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 20px;">
+                                <div class="col-lg-3 col-md-6">
+                                    <p><strong>팀원 5: 이원중</strong></p>
+                                    <p>담당: </p>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <p><strong>팀원 6: 이한정</strong></p>
+                                    <p>담당: </p>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <p><strong>팀원 7: 정기주</strong></p>
+                                    <p>담당: </p>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <p><strong>팀원 8: 하영채</strong></p>
+                                    <p>담당: </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 저작권 정보 -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="footer__copyright">
+                        <div class="footer__copyright__text">
+                            <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script> 북스캠프 Team 3. All rights reserved | Template by <a href="https://colorlib.com" target="_blank">Colorlib</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="footer-section">
-            <h4>고객센터</h4>
-            <p>전화: 8282-0000</p>
-            <p>이메일: support@bookscamp.com</p>
-        </div>
-        <div class="footer-section">
-            <h4>바로가기</h4>
-            <ul>
-                <li><a href="#">이용약관</a></li>
-                <li><a href="#">개인정보처리방침</a></li>
-            </ul>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        <p>&copy; 2025 북스캠프. All rights reserved.</p>
-    </div>
-</footer>
+    </footer>
+    <!-- 푸터 영역 끝 -->
 </body>
 </html>

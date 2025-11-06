@@ -30,10 +30,10 @@ public class MemberController {
     @Value("${app.api.prefix}")
     private String apiPrefix;
 
-    @GetMapping("/sign-up")
+    @GetMapping("/signup")
     public String showPage(Model model){
         model.addAttribute("apiPrefix", apiPrefix);
-        return "member/signup-form";
+        return "member/signup";
     }
 
     @GetMapping("/login")
@@ -104,7 +104,7 @@ public class MemberController {
             model.addAttribute("memberCreateRequest", memberCreateRequest);
 
 
-            return "member/signup-form";
+            return "member/signup";
         }
     }
 

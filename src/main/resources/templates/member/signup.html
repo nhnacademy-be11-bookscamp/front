@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/no-sidebar}">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입 | 북스캠프</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- 회원가입 섹션 -->
+    <section class="checkout spad">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="checkout__form">
+                        <h4 style="margin-bottom: 30px;">회원 정보 입력</h4>
+
+                        <!-- 에러 메시지 표시 -->
+                        <div th:if="${errorMessage}"
+                             style="margin-bottom: 20px; padding: 15px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px;">
+                            <strong>오류!</strong>
+                            <p th:text="${errorMessage}" style="margin: 5px 0 0 0;"></p>
+                        </div>
+
+                        <form id="memberCreateForm" th:action="@{/members}" method="post">
+                            <input type="hidden" name="_method" value="put" />
+
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="checkout__input">
+                                        <p>아이디 (4~20자)<span>*</span></p>
+                                        <div style="display: flex; gap: 10px;">
+                                            <input type="text"
+                                                   id="username"
+                                                   name="username"
+                                                   placeholder="4-20자의 영문, 숫자 조합"
+                                                   required
+                                                   minlength="4"
+                                                   maxlength="20"
+                                                   style="flex: 1;">
+                                            <button type="button"
+                                                    id="checkIdButton"
+                                                    class="site-btn"
+                                                    style="width: 120px; padding: 13px 20px;">
+                                                중복확인
+                                            </button>
+                                        </div>
+                                        <p id="idCheckMessage"
+                                           style="margin-top: 8px; font-size: 14px; color: #dd2222;">
+                                            중복 확인이 필요합니다.
+                                        </p>
+                                    </div>
+
+                                    <div class="checkout__input">
+                                        <p>비밀번호 (8~20자)<span>*</span></p>
+                                        <input type="password"
+                                               id="password"
+                                               name="password"
+                                               placeholder="8-20자의 영문, 숫자 조합"
+                                               required
+                                               minlength="8"
+                                               maxlength="20">
+                                    </div>
+
+                                    <div class="checkout__input">
+                                        <p>이름<span>*</span></p>
+                                        <input type="text"
+                                               id="name"
+                                               name="name"
+                                               placeholder="이름을 입력하세요"
+                                               required>
+                                    </div>
+
+                                    <div class="checkout__input">
+                                        <p>이메일<span>*</span></p>
+                                        <input type="email"
+                                               id="email"
+                                               name="email"
+                                               placeholder="example@email.com"
+                                               required>
+                                    </div>
+
+                                    <div class="checkout__input">
+                                        <p>전화번호<span>*</span></p>
+                                        <input type="text"
+                                               id="phone"
+                                               name="phone"
+                                               placeholder="010-1234-5678"
+                                               required>
+                                    </div>
+
+                                    <div class="checkout__input">
+                                        <p>생년월일<span>*</span></p>
+                                        <input type="date"
+                                               id="birthDate"
+                                               name="birthDate"
+                                               required>
+                                    </div>
+
+                                    <div class="text-center mt-4">
+                                        <button type="submit"
+                                                id="submitButton"
+                                                class="site-btn"
+                                                style="width: 200px;"
+                                                disabled>
+                                            회원가입
+                                        </button>
+                                        <a th:href="@{/login}"
+                                           class="site-btn"
+                                           style="width: 200px; background: #6f6f6f; display: inline-block; text-align: center; margin-left: 10px; text-decoration: none;">
+                                            취소
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div layout:fragment="extra-js">
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            var pathPrefix = /*[[${apiPrefix}]]*/ '';
+
+            var isIdChecked = false;
+            var isIdDuplicated = true;
+
+            var idInput = document.getElementById('username');
+            var checkIdButton = document.getElementById('checkIdButton');
+            var idCheckMessage = document.getElementById('idCheckMessage');
+            var submitButton = document.getElementById('submitButton');
+            var memberCreateForm = document.getElementById('memberCreateForm');
+
+            // 아이디 입력 시 중복확인 초기화
+            idInput.addEventListener('input', function() {
+                submitButton.disabled = true;
+                idCheckMessage.textContent = '중복 확인이 필요합니다.';
+                idCheckMessage.style.color = '#dd2222';
+                isIdChecked = false;
+            });
+
+            // 중복 확인 버튼 클릭
+            checkIdButton.addEventListener('click', async function() {
+                var id = idInput.value;
+
+                if (id.length < 4 || id.length > 20) {
+                    idCheckMessage.textContent = "아이디는 4자 이상 20자 이하여야 합니다.";
+                    idCheckMessage.style.color = '#dd2222';
+                    isIdChecked = false;
+                    submitButton.disabled = true;
+                    return;
+                }
+
+                const url = pathPrefix + '/api-server/member/check-id?id=' + encodeURIComponent(id);
+
+                console.log('--- 아이디 중복 확인 요청 시작 ---');
+                console.log('Request URL:', url);
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'text/plain'
+                        }
+                    });
+
+                    console.log('Response Status:', response.status, response.statusText);
+
+                    if (!response.ok) {
+                        isIdDuplicated = true;
+                        submitButton.disabled = true;
+
+                        const errorMessage = await response.text();
+
+                        console.error('Error Response Body:', errorMessage);
+
+                        idCheckMessage.textContent = errorMessage || "서버 오류가 발생했습니다.";
+                        idCheckMessage.style.color = '#dd2222';
+
+                    } else {
+                        isIdChecked = true;
+                        isIdDuplicated = false;
+                        submitButton.disabled = false;
+
+                        const successMessage = await response.text();
+
+                        console.log('Success Response Body:', successMessage);
+
+                        idCheckMessage.textContent = successMessage;
+                        idCheckMessage.style.color = '#0064FF';
+                    }
+
+                    isIdChecked = true;
+
+                } catch (error) {
+                    console.error('Network Fetch Error:', error);
+                    idCheckMessage.textContent = "네트워크 오류가 발생했습니다.";
+                    idCheckMessage.style.color = '#dd2222';
+                    isIdChecked = false;
+                    isIdDuplicated = true;
+                    submitButton.disabled = true;
+                } finally {
+                    console.log('--- 아이디 중복 확인 요청 종료 ---');
+                }
+            });
+
+            // 폼 제출 전 검증
+            memberCreateForm.addEventListener('submit', function(e) {
+                if (!isIdChecked || isIdDuplicated) {
+                    e.preventDefault();
+                    alert("아이디 중복 검사를 완료하고, 사용 가능한 아이디를 선택해주세요.");
+                }
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

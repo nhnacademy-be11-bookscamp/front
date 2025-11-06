@@ -13,11 +13,6 @@ import store.bookscamp.front.book.feign.AladinFeignClient;
 public class AladinController {
     private final AladinFeignClient aladinFeignClient;
 
-    /*@GetMapping("/aladin/search")
-    public String testAladin(@RequestParam String q) {
-        return aladinApiClient.search(q, "Title", 1, 5, "Accuracy");
-    }*/
-
     @GetMapping("/admin/aladin/search")
     public String search(
             @RequestParam(value = "query", required = false) String query,

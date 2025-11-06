@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>카테고리 관리 | 북스캠프 관리자</title>
+
+    <th:block layout:fragment="extra-css">
+        <style>
+            /* 카테고리 관리 영역에만 적용 */
+            .col-lg-9 .category-list,
+            .col-lg-9 .category-children {
+                list-style: none;
+                padding-left: 0;
+            }
+
+            .col-lg-9 .category-children {
+                padding-left: 30px;
+                margin-top: 5px;
+            }
+
+            .col-lg-9 .category-item {
+                margin-bottom: 5px;
+            }
+
+            .category-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 15px;
+                background: #f8f8f8;
+                border-radius: 4px;
+                border: 1px solid #ebebeb;
+                transition: all 0.2s;
+            }
+
+            .category-row:hover {
+                background: #f0f0f0;
+                border-color: #d0d0d0;
+            }
+
+            .category-label {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+                flex: 1;
+                font-size: 14px;
+                color: #333;
+                font-weight: 500;
+            }
+
+            .col-lg-9 .category-children {
+                display: none;
+                margin-left: 20px;
+            }
+
+            .expanded > .category-children {
+                display: block;
+            }
+
+            .category-buttons {
+                display: flex;
+                gap: 8px;
+            }
+
+            .category-buttons a, .category-buttons button {
+                font-size: 13px;
+                padding: 5px 12px;
+                border-radius: 4px;
+                text-decoration: none;
+                border: none;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .btn-add-child {
+                background: #7fad39;
+                color: white;
+            }
+
+            .btn-add-child:hover {
+                background: #6d9631;
+            }
+
+            .btn-edit {
+                background: #6f6f6f;
+                color: white;
+            }
+
+            .btn-edit:hover {
+                background: #555;
+            }
+
+            .btn-delete {
+                background: #dc3545;
+                color: white;
+            }
+
+            .btn-delete:hover {
+                background: #c82333;
+            }
+
+            .edit-form input, .add-form input {
+                flex: 1;
+                padding: 8px 12px;
+                border: 1px solid #ebebeb;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+
+            .add-form-li {
+                margin-bottom: 10px;
+            }
+        </style>
+    </th:block>
+
+    <script>
+        function toggleCategory(element) {
+            const item = element.closest(".category-item");
+            if (item) {
+                item.classList.toggle("expanded");
+            }
+        }
+
+        function showEditForm(buttonElement, categoryId, currentName) {
+            const row = buttonElement.closest('.category-row');
+            if (!row) return;
+
+            const existingForm = row.parentElement.querySelector('.edit-form');
+            if (existingForm) {
+                cancelEdit(existingForm.querySelector('button'), row.id);
+            }
+
+            row.style.display = 'none';
+
+            const formHtml = `
+                <form class="category-row edit-form" onsubmit="submitEditForm(this, ${categoryId}); return false;">
+                    <input type="text" name="name" value="${currentName}" style="flex-grow: 1;" required>
+                    <span class="category-buttons">
+                        <button type="submit" class="btn-edit" style="border:none; cursor:pointer;">저장</button>
+                        <button type="button" class="btn-delete" style="border:none; cursor:pointer;"
+                                onclick="cancelEdit(this, '${row.id}');">취소</button>
+                    </span>
+                </form>
+            `;
+            row.insertAdjacentHTML('afterend', formHtml);
+            row.parentElement.querySelector('.edit-form input').focus();
+        }
+
+        function cancelEdit(cancelButton, originalRowId) {
+            const form = cancelButton.closest('.edit-form');
+            if (form) {
+                form.remove();
+            }
+            const originalRow = document.getElementById(originalRowId);
+            if (originalRow) {
+                originalRow.style.display = 'flex';
+            }
+        }
+
+        function showRootAddForm(buttonElement) {
+            const headerDiv = buttonElement.closest('div');
+            if (!headerDiv) return;
+
+            const rootList = headerDiv.nextElementSibling;
+
+            if (!rootList || !rootList.classList.contains('category-list')) {
+                console.error("메인 카테고리 리스트를 찾을 수 없습니다.");
+                return;
+            }
+
+            if (rootList.querySelector('.add-form-li')) {
+                rootList.querySelector('.add-form-li input[name="name"]').focus();
+                return;
+            }
+
+            const formHtml = `
+                <li class="category-item add-form-li" style="padding-left: 0;">
+                    <form class="category-row add-form" onsubmit="submitAddForm(this, null); return false;">
+                        <input type="text" name="name" placeholder="새 최상위 카테고리 이름" style="flex-grow: 1;" required>
+                        <span class="category-buttons">
+                            <button type="submit" class="btn-add-child" style="border:none; cursor:pointer;">등록</button>
+                            <button type="button" class="btn-delete" style="border:none; cursor:pointer;"
+                                    onclick="this.closest('.add-form-li').remove();">취소</button>
+                        </span>
+                    </form>
+                </li>
+            `;
+
+            rootList.insertAdjacentHTML('beforeend', formHtml);
+            rootList.querySelector('.add-form-li input[name="name"]').focus();
+        }
+
+        function showAddForm(buttonElement, parentId) {
+            const parentItem = buttonElement.closest('.category-item');
+            if (!parentItem) return;
+
+            const childrenList = parentItem.querySelector('.category-children');
+            if (!childrenList) return;
+
+            if (childrenList.querySelector('.add-form-li')) {
+                childrenList.querySelector('.add-form-li input[name="name"]').focus();
+                return;
+            }
+
+            const formHtml = `
+                <li class="category-item add-form-li">
+                    <form class="category-row add-form" onsubmit="submitAddForm(this, ${parentId}); return false;">
+                        <input type="text" name="name" placeholder="새 카테고리 이름" style="flex-grow: 1;" required>
+                        <span class="category-buttons">
+                            <button type="submit" class="btn-add-child" style="border:none; cursor:pointer;">등록</button>
+                            <button type="button" class="btn-delete" style="border:none; cursor:pointer;"
+                                    onclick="this.closest('.add-form-li').remove();">취소</button>
+                        </span>
+                    </form>
+                </li>
+            `;
+
+            childrenList.insertAdjacentHTML('afterbegin', formHtml);
+
+            parentItem.classList.add('expanded');
+            childrenList.style.display = 'block';
+
+            childrenList.querySelector('.add-form-li input[name="name"]').focus();
+        }
+    </script>
+
+    <script th:inline="javascript">
+        const pathPrefix = /*[[${apiPrefix}]]*/ '';
+        /*<![CDATA[*/
+
+        let csrfToken = null;
+        let csrfHeader = null;
+
+        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+
+        if (csrfTokenMeta && csrfHeaderMeta) {
+            csrfToken = csrfTokenMeta.content;
+            csrfHeader = csrfHeaderMeta.content;
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
+        async function submitEditForm(form, categoryId) {
+            const newName = form.querySelector('input[name="name"]').value;
+
+            const apiUrl = pathPrefix + '/api-server/admin/category/update';
+            console.log(apiUrl);
+
+            try {
+                const response = await fetch(`${apiUrl}/${categoryId}`, {
+                    method: 'PUT',
+                    headers: headers,
+                    body: JSON.stringify({ name: newName })
+                });
+
+                if (!response.ok) {
+                    throw new Error('카테고리 수정에 실패했습니다.');
+                }
+
+                location.reload();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+            }
+        }
+
+        async function submitAddForm(form, parentId) {
+
+            const newName = form.querySelector('input[name="name"]').value;
+
+            const apiUrl = pathPrefix + '/api-server/admin/category/create';
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ parentId: parentId, name: newName })
+                });
+
+                if (!response.ok) {
+                    throw new Error('카테고리 추가에 실패했습니다.');
+                }
+
+                location.reload();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+            }
+        }
+
+        async function submitDelete(buttonElement, categoryId) {
+            if (!confirm('정말 삭제할까요?')) {
+                return;
+            }
+
+            const apiUrl = pathPrefix + '/api-server/admin/category/delete';
+
+            try {
+                const response = await fetch(`${apiUrl}/${categoryId}`, {
+                    method: 'DELETE',
+                    headers: headers
+                });
+
+                if (!response.ok) {
+                    throw new Error('카테고리 삭제에 실패했습니다.');
+                }
+
+                location.reload();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+            }
+        }
+        /*]]>*/
+    </script>
+</head>
+
+<body>
+<!-- Hero 섹션 비우기 -->
+<section layout:fragment="hero" class="hero" style="display: none;">
+</section>
+
+<!-- 메인 콘텐츠 -->
+<div layout:fragment="content">
+    <section class="product spad">
+        <div class="container">
+            <div class="row">
+                <!-- 관리자 사이드바 -->
+                <div class="col-lg-3">
+                    <div class="hero__categories">
+                        <div class="hero__categories__all">
+                            <i class="fa fa-bars"></i>
+                            <span>관리자 메뉴</span>
+                        </div>
+                        <ul th:replace="~{fragment/admin-sidebar :: sidebar}">
+                            <li><a href="#">메뉴</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 카테고리 관리 영역 -->
+                <div class="col-lg-9">
+                    <div style="background: #ffffff; padding: 30px; border: 1px solid #ebebeb; border-radius: 4px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                            <h4 style="margin: 0; font-weight: 700;">
+                                <i class="fa fa-sitemap" style="margin-right: 10px; color: #0064FF;"></i>
+                                카테고리 관리
+                            </h4>
+
+                            <a href="#" class="btn-add-child" style="padding: 8px 16px; font-size: 14px;"
+                               onclick="showRootAddForm(this); return false;">
+                                <i class="fa fa-plus" style="margin-right: 5px;"></i>새 카테고리 추가
+                            </a>
+                        </div>
+
+                        <ul class="category-list">
+                            <th:block th:each="category : ${categories}">
+                                <th:block th:replace="~{this :: categoryItem(category=${category})}"></th:block>
+                            </th:block>
+                        </ul>
+
+                        <th:block th:fragment="categoryItem(category)">
+                            <li class="category-item"
+                                th:if="${category != null}"
+                                th:id="'category-item-' + ${category.id}">
+
+                                <div class="category-row"
+                                     th:id="'category-row-' + ${category.id}"
+                                     th:if="${category != null}">
+                                    <span class="category-label"
+                                          th:if="${category != null}"
+                                          onclick="toggleCategory(this)">
+                                        <span th:text="${(category.children != null and !category.children.isEmpty()) ? '📁' : '📄'}"></span>
+                                        <span class="category-name" th:text="${category.name}">카테고리</span>
+                                    </span>
+
+                                    <span class="category-buttons">
+                                        <a href="#" class="btn-add-child"
+                                           th:onclick="showAddForm(this, [[${category.id}]]); return false;">추가</a>
+                                        <a href="#" class="btn-edit"
+                                           th:onclick="showEditForm(this, [[${category.id}]], [[${category.name}]]); return false;">수정</a>
+                                        <a href="#" class="btn-delete"
+                                           th:onclick="submitDelete(this, [[${category.id}]]); return false;">삭제</a>
+                                    </span>
+                                </div>
+
+                                <ul th:if="${category.children != null and !category.children.isEmpty()}" class="category-children">
+                                    <th:block th:each="child : ${category.children}">
+                                        <th:block th:replace="~{this :: categoryItem(category=${child})}"></th:block>
+                                    </th:block>
+                                </ul>
+
+                                <ul th:unless="${category.children != null and !category.children.isEmpty()}" class="category-children" style="display: none;">
+                                </ul>
+
+                            </li>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- 추가 JavaScript -->
+<div layout:fragment="extra-js">
+    <script>
+        $(document).ready(function() {
+            // 관리자 사이드바 전용 토글
+            $('.admin-category-header').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                var menuId = $(this).data('admin-menu');
+                var $submenu = $('#admin-menu-' + menuId);
+                var $toggle = $(this).find('.admin-toggle');
+
+                $toggle.toggleClass('active');
+                $submenu.slideToggle(300);
+            });
+
+            $('.admin-toggle').attr('role', 'button');
+            $('.admin-toggle').attr('aria-expanded', 'false');
+            $('.admin-toggle').attr('tabindex', '0');
+        });
+    </script>
+</div>
+</body>
+</html>

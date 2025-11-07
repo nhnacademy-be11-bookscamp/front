@@ -80,7 +80,7 @@ public class MemberController {
     @GetMapping("/mypage")
     public ModelAndView getMember(){
         MemberGetResponse memberInfo = memberFeignClient.getMember();
-        ModelAndView modelAndView = new ModelAndView("/member/mypage");
+        ModelAndView modelAndView = new ModelAndView("member/mypage");
         modelAndView.addObject("memberInfo",memberInfo);
         return modelAndView;
     }

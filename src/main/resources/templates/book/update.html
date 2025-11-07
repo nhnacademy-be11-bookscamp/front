@@ -164,7 +164,7 @@
 
         function removeImage(url, el) {
             removedUrls.push(url);
-            document.getElementById('removedUrls').value = JSON.stringify(removedUrls);
+            document.getElementById('removedUrls').value = removedUrls.join(',');
             el.closest('.image-item').remove();
         }
 

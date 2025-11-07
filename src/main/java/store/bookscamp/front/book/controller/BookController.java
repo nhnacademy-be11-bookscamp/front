@@ -85,6 +85,10 @@ public class BookController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
 
+        if (files != null) {
+            files.removeIf(MultipartFile::isEmpty); // 빈 파일 제거
+        }
+
         List<String> imageUrls;
         if (files != null && !files.isEmpty()) {
             imageUrls = minioService.uploadFiles(files, "book");
@@ -107,7 +111,7 @@ public class BookController {
         model.addAttribute("aladinBook", detail);
         model.addAttribute("tags", tags);
 
-        return "/aladin/create";
+        return "aladin/create";
     }
 
     @PostMapping("/admin/aladin/books")
@@ -138,6 +142,10 @@ public class BookController {
             @ModelAttribute BookUpdateRequest req,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
+
+        if (files != null) {
+            files.removeIf(MultipartFile::isEmpty); // 빈 파일 제거
+        }
 
         if (files != null && !files.isEmpty()) {
             List<String> imageUrls = minioService.uploadFiles(files, "book");

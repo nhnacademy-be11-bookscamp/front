@@ -31,6 +31,9 @@ public class MinioService {
     @Value("${minio.bucket.review}")
     private String reviewBucket;
 
+    @Value("${minio.bucket.package}")
+    private String packageBucket;
+
     /**
      * @param files 업로드할 파일들
      * @param type "book" or "review"
@@ -49,6 +52,7 @@ public class MinioService {
             String bucketName = switch (type.toLowerCase()) {
                 case "book" -> bookBucket;
                 case "review" -> reviewBucket;
+                case "package" -> packageBucket;
                 default -> throw new RuntimeException();
             };
 
@@ -69,7 +73,7 @@ public class MinioService {
             }
 
             // 고유 파일명 생성
-            for( MultipartFile file : files) {
+            for (MultipartFile file : files) {
                 String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
                 // 미니오에 파일 업로드
@@ -97,6 +101,7 @@ public class MinioService {
             String bucketName = switch (type.toLowerCase()) {
                 case "book" -> bookBucket;
                 case "review" -> reviewBucket;
+                case "package" -> packageBucket;
                 default -> throw new RuntimeException();
             };
 

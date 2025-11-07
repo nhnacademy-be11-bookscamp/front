@@ -40,7 +40,7 @@ public class TagController {
             tagFeignClient.createTag(new TagCreateRequest(name));
         } catch (FeignException e) {
             model.addAttribute("error", "이미 존재하는 태그입니다.");
-            return "/tags/tag";
+            return "tags/tag";
         }
          return "redirect:/admin/tags";
     }

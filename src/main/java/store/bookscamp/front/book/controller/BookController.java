@@ -111,7 +111,7 @@ public class BookController {
         model.addAttribute("aladinBook", detail);
         model.addAttribute("tags", tags);
 
-        return "/aladin/create";
+        return "aladin/create";
     }
 
     @PostMapping("/admin/aladin/books")

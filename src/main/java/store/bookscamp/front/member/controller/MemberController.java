@@ -119,11 +119,8 @@ public class MemberController {
             } catch (Exception ex) {
             }
 
-            redirectAttributes.addAttribute("errorMessage", errorMessage);
-            redirectAttributes.addAttribute("apiPrefix", apiPrefix);
-            redirectAttributes.addAttribute("memberCreateRequest", memberCreateRequest);
-
-
+            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
+            redirectAttributes.addFlashAttribute("apiPrefix", apiPrefix);
             return "redirect:/signup";
         }
     }

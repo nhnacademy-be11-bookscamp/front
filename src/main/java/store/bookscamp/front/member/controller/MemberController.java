@@ -123,7 +123,7 @@ public class MemberController {
             model.addAttribute("memberCreateRequest", memberCreateRequest);
 
 
-            return "/member/signup";
+            return "member/signup";
         }
     }
 

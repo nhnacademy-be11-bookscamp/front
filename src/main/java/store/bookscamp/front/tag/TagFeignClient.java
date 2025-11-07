@@ -1,6 +1,5 @@
 package store.bookscamp.front.tag;
 
-import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import store.bookscamp.front.tag.controller.request.TagCreateRequest;
 import store.bookscamp.front.tag.controller.request.TagUpdateRequest;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
+
+import java.util.List;
 
 @FeignClient(name = "tagApiClient", url = "${gateway.base-url}")
 public interface TagFeignClient {

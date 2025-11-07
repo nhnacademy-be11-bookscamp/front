@@ -4,95 +4,145 @@
       layout:decorate="~{layout/default}">
 <head>
     <title th:text="${book.title} + ' | 북스캠프'">도서 상세</title>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-    <th:block layout:fragment="extra-css">
-        <style>
-            .book-detail-wrapper { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
-            .book-detail-container { display: flex; flex-wrap: wrap; gap: 2.5rem; margin-top: 2rem; }
-            .book-cover { flex: 1; min-width: 300px; max-width: 400px; }
-            .book-cover img { width: 100%; border: 1px solid #ddd; border-radius: 4px; }
-            .book-info { flex: 2; min-width: 300px; }
-            .book-info h1 { margin-top: 0; font-size: 2.2rem; border-bottom: 2px solid #333; padding-bottom: 1rem; }
-            .info-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 1rem; }
-            .info-table th, .info-table td { padding: 0.8rem 0.2rem; text-align: left; border-bottom: 1px solid #f0f0f0; }
-            .info-table th { width: 100px; color: #555; }
-            .price-info { background-color: #f9f9f9; padding: 1.5rem; border-radius: 4px; margin: 1.5rem 0; }
-            .regular-price { text-decoration: line-through; color: #888; font-size: 1rem; }
-            .sale-price { font-size: 2rem; font-weight: bold; color: #d9534f; }
-            .discount-rate { color: #d9534f; font-weight: bold; margin-left: 0.75rem; font-size: 1.8rem; }
-            .purchase-actions { display: flex; gap: 1rem; margin-top: 2rem; }
-            .purchase-actions .btn { padding: 1rem 1.5rem; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
-            .btn-like { background-color: #fff; color: #d9534f; border: 1px solid #d9534f; width: 130px; flex-shrink: 0; transition: all 0.2s ease-in-out; }
-            .btn-like .icon-liked { display: none; }
-            .btn-like .icon-unliked { display: inline-block; }
-            .btn-like.liked { background-color: #d9534f; color: white; }
-            .btn-like.liked .icon-liked { display: inline-block; }
-            .btn-like.liked .icon-unliked { display: none; }
-            .btn-like [class^="icon-"] + span { margin-left: 0.6rem; }
-            .btn-like .like-count {margin-left: 0.5rem; font-size: 1rem; font-weight: 500; vertical-align: middle;}
-            .btn-cart { background-color: #f0f0f0; color: #333; border: 1px solid #ccc; flex-grow: 1; }
-            .btn-buy { background-color: #007bff; color: white; flex-grow: 1; }
-            .book-explanation { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee; clear: both; }
-            .book-explanation h2 { font-size: 1.8rem; border-bottom: 2px solid #555; padding-bottom: 0.5rem; }
-            .book-explanation p { font-size: 1rem; line-height: 1.7; }
-        </style>
-    </th:block>
 </head>
+
 <body>
-<div layout:fragment="content" class="book-detail-wrapper">
-    <div class="book-detail-container">
-        <div class="book-info">
-            <h1 th:text="${book.title}"></h1>
+<!-- Hero Section 숨김 -->
+<section layout:fragment="hero" class="hero" style="display: none;">
+</section>
 
-            <table class="info-table">
-                <tbody>
-                <tr><th>출판사</th><td th:text="${book.publisher}"></td></tr>
-                <tr><th>출판일</th><td th:text="${#temporals.format(book.publishDate, 'yyyy-MM-dd')}"></td></tr>
-                </tbody>
-            </table>
+<div layout:fragment="content">
+    <!-- 도서 상세 섹션 -->
+    <section class="product-details spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-md-6">
+                    <div class="product__details__pic">
+                        <div class="product__details__pic__item">
+                            <div style="width: 100%; height: 500px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border: 1px solid #ebebeb; border-radius: 4px;">
+                                <i class="fa fa-book" style="font-size: 80px; color: #ccc;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="product__details__text">
+                        <h3 th:text="${book.title}" style="margin-bottom: 20px; font-weight: 700; color: #333;">도서 제목</h3>
 
-            <div class="price-info">
-                <div><span class="regular-price" th:text="${#numbers.formatInteger(book.regularPrice, 3, 'COMMA') + '원'}"></span></div>
-                <div>
-                    <span class="sale-price" th:text="${#numbers.formatInteger(book.salePrice, 3, 'COMMA') + '원'}"></span>
-                    <span class="discount-rate" th:if="${book.regularPrice > book.salePrice}" th:text="${#numbers.formatDecimal((book.regularPrice - book.salePrice) * 100.0 / book.regularPrice, 0, 'COMMA', 0, 'POINT') + '%'}"></span>
+                        <!-- 기본 정보 -->
+                        <div style="padding: 20px 0; border-top: 1px solid #ebebeb; border-bottom: 1px solid #ebebeb; margin-bottom: 20px;">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="padding: 8px 0; display: flex;">
+                                    <span style="width: 100px; color: #6f6f6f; font-weight: 600;">출판사</span>
+                                    <span th:text="${book.publisher}" style="color: #333;">출판사</span>
+                                </li>
+                                <li style="padding: 8px 0; display: flex;">
+                                    <span style="width: 100px; color: #6f6f6f; font-weight: 600;">출판일</span>
+                                    <span th:text="${#temporals.format(book.publishDate, 'yyyy-MM-dd')}" style="color: #333;">2025-01-01</span>
+                                </li>
+                                <li style="padding: 8px 0; display: flex;">
+                                    <span style="width: 100px; color: #6f6f6f; font-weight: 600;">재고</span>
+                                    <span style="color: #333;">
+                                        <span th:text="${book.stock + '권'}">10권</span>
+                                        <span th:if="${book.stock > 10}" style="margin-left: 10px; color: #7fad39; font-weight: 600;">재고 충분</span>
+                                        <span th:if="${book.stock > 0 and book.stock <= 10}" style="margin-left: 10px; color: #ff9800; font-weight: 600;">재고 부족</span>
+                                        <span th:if="${book.stock == 0}" style="margin-left: 10px; color: #dc3545; font-weight: 600;">품절</span>
+                                    </span>
+                                </li>
+                                <li style="padding: 8px 0; display: flex;">
+                                    <span style="width: 100px; color: #6f6f6f; font-weight: 600;">포장</span>
+                                    <span th:if="${book.packable}" style="color: #7fad39; font-weight: 600;">포장 가능</span>
+                                    <span th:unless="${book.packable}" style="color: #999;">포장 불가능</span>
+                                </li>
+                                <li style="padding: 8px 0; display: flex;">
+                                    <span style="width: 100px; color: #6f6f6f; font-weight: 600;">조회수</span>
+                                    <span th:text="${book.viewCount}" style="color: #333;">200</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 가격 정보 -->
+                        <div class="product__details__price" style="margin-bottom: 30px;">
+                            <div style="margin-bottom: 10px;">
+                                <span style="text-decoration: line-through; color: #999; font-size: 18px;"
+                                      th:text="${#numbers.formatInteger(book.regularPrice, 0, 'COMMA') + '원'}">15,000원</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline;">
+                                <span style="font-size: 32px; font-weight: 700; color: #7fad39;"
+                                      th:text="${#numbers.formatInteger(book.salePrice, 0, 'COMMA') + '원'}">12,000원</span>
+                                <span th:if="${book.regularPrice > book.salePrice}"
+                                      style="margin-left: 15px; font-size: 24px; font-weight: 700; color: #dc3545;"
+                                      th:text="${#numbers.formatDecimal((book.regularPrice - book.salePrice) * 100.0 / book.regularPrice, 0, 0) + '%'}">20%</span>
+                            </div>
+                        </div>
+
+                        <!-- 구매 액션 -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <button type="button"
+                                    class="site-btn"
+                                    id="likeButton"
+                                    style="width: 140px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: white; color: #dc3545; border: 2px solid #dc3545; transition: all 0.3s;">
+                                <span class="icon-unliked"><i class="fa-regular fa-heart"></i></span>
+                                <span class="icon-liked" style="display: none;"><i class="fa-solid fa-heart"></i></span>
+                                <span>좋아요</span>
+                                <span id="likeCount" th:text="${bookLike.likeCount}">0</span>
+                            </button>
+                            <button type="button" class="site-btn" style="flex: 1; padding: 14px; background: #6f6f6f;">
+                                <i class="fa fa-shopping-cart"></i> 장바구니
+                            </button>
+                        </div>
+                        <div>
+                            <button type="button" class="site-btn" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600;">
+                                <i class="fa fa-credit-card"></i> 바로 구매
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <table class="info-table">
-                <tbody>
-                <tr><th>재고</th><td th:text="${book.stock + '권'}"></td></tr>
-                <tr><th>포장</th><td th:text="${book.packable ? '포장 가능' : '포장 불가능'}"></td></tr>
-                <tr><th>조회수</th><td th:text="${book.viewCount}"></td></tr>
-                </tbody>
-            </table>
-
-            <div class="purchase-actions">
-                <button type="button" class="btn btn-like" id="likeButton">
-                    <span class="icon-unliked"><i class="fa-regular fa-heart"></i></span>
-                    <span class="icon-liked"><i class="fa-solid fa-heart"></i></span>
-                    <span>좋아요</span>
-                    <span id="likeCount" class="like-count" th:text="${bookLike.likeCount}">0</span>
-                </button>
-                <button type="button" class="btn btn-cart">장바구니</button>
-                <button type="button" class="btn btn-buy">바로 구매</button>
+            <!-- 도서 소개 -->
+            <div class="row" style="margin-top: 60px;">
+                <div class="col-lg-12">
+                    <div class="product__details__tab">
+                        <div style="background: white; padding: 40px; border: 1px solid #ebebeb; border-radius: 4px;">
+                            <h4 style="margin-bottom: 30px; font-weight: 700; padding-bottom: 15px; border-bottom: 2px solid #333;">
+                                <i class="fa fa-book-open" style="margin-right: 10px; color: #7fad39;"></i>
+                                도서 소개
+                            </h4>
+                            <div style="font-size: 15px; line-height: 1.8; color: #555;" th:text="${book.explanation}">
+                                도서 설명이 여기에 표시됩니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="book-explanation">
-        <h2>도서 소개</h2>
-        <p th:text="${book.explanation}" style="line-height: 1.7;"></p>
-    </div>
+    </section>
 </div>
+
+<th:block layout:fragment="extra-css">
+    <style>
+        #likeButton.liked {
+            background: #dc3545 !important;
+            color: white !important;
+            border-color: #dc3545 !important;
+        }
+        #likeButton.liked .icon-unliked {
+            display: none;
+        }
+        #likeButton.liked .icon-liked {
+            display: inline-block !important;
+        }
+        #likeButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</th:block>
 
 <th:block layout:fragment="extra-js">
     <script th:inline="javascript">
         const pathPrefix = /*[[${apiPrefix}]]*/ '';
-        /*<![CDATA[*/
-        console.log(pathPrefix);
 
         document.addEventListener("DOMContentLoaded", function() {
             const likeButton = document.getElementById('likeButton');
@@ -101,7 +151,6 @@
             const bookId = [[${book.id}]];
             const isAlreadyLiked = [[${isLikedByCurrentUser}]];
             const apiUrl = pathPrefix + '/api-server/books/like';
-            console.log(apiUrl);
 
             let currentLikeCount = parseInt(likeCountElement.innerText, 10);
 

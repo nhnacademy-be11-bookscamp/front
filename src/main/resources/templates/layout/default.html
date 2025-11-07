@@ -3,94 +3,166 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="UTF-8">
+    <meta name="description" content="북스캠프 도서 쇼핑몰">
+    <meta name="keywords" content="books, 도서, 쇼핑">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>북스캠프</title>
-    <link rel="stylesheet" th:href="@{/css/layout.css}">
-    <link rel="stylesheet" th:href="@{/css/category-sidebar.css}">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>북스캠프 | BooksCAMP</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- CSS 스타일 -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/elegant-icons.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/nice-select.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/jquery-ui.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/owl.carousel.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/slicknav.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css">
+
     <!-- 페이지별 추가 CSS -->
-    <style>
-        .category-list .category-list-child {
-            display: none;
-            padding-left: 20px;
-            list-style-type: none;
-        }
-
-        .category-list li > a.has-children {
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .category-list li > a .toggle-icon {
-            float: right;
-            margin-right: 5px;
-            font-family: monospace;
-            color: #888;
-
-            font-size: 1.1rem;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-    </style>
     <th:block layout:fragment="extra-css"></th:block>
 </head>
 <body>
-    <!-- Header -->
-    <th:block th:replace="~{fragment/header :: header}"></th:block>
-
-    <!-- Main Container with Sidebar -->
-    <div class="main-container">
-        <!-- Sidebar (child pages can override this fragment) -->
-        <aside class="sidebar" layout:fragment="sidebar">
-            <th:block th:replace="~{fragment/category-sidebar :: sidebar}"></th:block>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <div class="content-area">
-                <!-- 각 페이지의 콘텐츠가 이 영역에 삽입됩니다 -->
-                <div layout:fragment="content">
-                    <h2>콘텐츠 영역</h2>
-                    <p>이 영역에 페이지별 콘텐츠를 작성하세요.</p>
-                </div>
-            </div>
-        </main>
+    <!-- 페이지 로더 -->
+    <div id="preloder">
+        <div class="loader"></div>
     </div>
 
-    <!-- Footer -->
+    <!-- 모바일 햄버거 메뉴 -->
+    <th:block th:replace="~{fragment/header :: humberger}"></th:block>
+
+    <!-- 헤더 -->
+    <th:block th:replace="~{fragment/header :: header}"></th:block>
+
+    <!-- Hero 섹션 (카테고리 사이드바 + 검색 + 배너) -->
+    <section class="hero" layout:fragment="hero">
+        <div class="container">
+            <div class="row">
+                <!-- 카테고리 사이드바 (동적 데이터: categories, 재귀 구조 지원) -->
+                <div class="col-lg-3">
+                    <div class="hero__categories">
+                        <div class="hero__categories__all">
+                            <i class="fa fa-bars"></i>
+                            <span>전체 카테고리</span>
+                        </div>
+                        <ul th:if="${categories != null}" th:replace="~{fragment/category :: categoryList(${categories})}">
+                            <li><a href="#">카테고리명</a></li>
+                        </ul>
+                        <ul th:unless="${categories != null}">
+                            <li><a href="#">카테고리를 불러오는 중...</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- 검색 영역 + 배너 -->
+                <div class="col-lg-9">
+                    <!-- 검색창 -->
+                    <div class="hero__search">
+                        <div class="hero__search__form">
+                            <form th:action="@{/books}" method="get">
+                                <input type="text" name="keyWord" placeholder="찾으시는 도서가 있나요?"
+                                       th:value="${keyWord}">
+                                <button type="submit" class="site-btn">검색</button>
+                            </form>
+                        </div>
+                        <div class="hero__search__phone">
+                            <div class="hero__search__phone__icon">
+                                <i class="fa fa-phone"></i>
+                            </div>
+                            <div class="hero__search__phone__text">
+                                <h5>간단질문환영</h5>
+                                <span>이용택TA 24시간</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 배너 -->
+                    <div class="hero__item set-bg" data-setbg="/img/hero/banner.png">
+                        <div class="hero__text">
+                            <span>BOOKS FRESH</span>
+                            <h2>신간 도서<br />특별 할인</h2>
+                            <p>지금 바로 최신 도서를 만나보세요</p>
+                            <a href="/books" class="primary-btn">쇼핑하기</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Hero 섹션 끝 -->
+
+    <!-- 메인 콘텐츠 영역 -->
+    <div layout:fragment="content">
+        <h2>콘텐츠 영역</h2>
+        <p>이 영역에 페이지별 콘텐츠를 작성하세요.</p>
+    </div>
+
+    <!-- 푸터 -->
     <th:block th:replace="~{fragment/footer :: footer}"></th:block>
 
+    <!-- JavaScript 플러그인 -->
+    <script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/jquery.nice-select.min.js}"></script>
+    <script th:src="@{/js/jquery-ui.min.js}"></script>
+    <script th:src="@{/js/jquery.slicknav.js}"></script>
+    <script th:src="@{/js/mixitup.min.js}"></script>
+    <script th:src="@{/js/owl.carousel.min.js}"></script>
+    <script th:src="@{/js/main.js}"></script>
+
+    <!-- 카테고리 토글 스크립트 -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        $(document).ready(function() {
+            // 카테고리 토글 버튼 클릭 이벤트 (관리자 토글 제외)
+            $('.category-toggle:not(.admin-toggle)').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
 
-            const anchors = document.querySelectorAll('.category-list li > a');
+                var $toggle = $(this);
+                var categoryId = $toggle.data('category-id');
+                var $childrenContainer = $('#category-' + categoryId);
 
-            anchors.forEach(function(anchor) {
+                // 토글 버튼 active 클래스 추가/제거 (아이콘 회전)
+                $toggle.toggleClass('active');
 
-                const childList = anchor.nextElementSibling;
+                // 하위 카테고리 슬라이드 토글 (부드러운 애니메이션)
+                $childrenContainer.slideToggle(300, function() {
+                    // 애니메이션 완료 후 콜백
+                    if ($childrenContainer.is(':visible')) {
+                        $toggle.attr('aria-expanded', 'true');
+                    } else {
+                        $toggle.attr('aria-expanded', 'false');
+                    }
+                });
+            });
 
-                if (childList && childList.classList.contains('category-list-child')) {
+            // 카테고리 링크 hover 효과
+            $('.category-link').hover(
+                function() {
+                    $(this).parent('.category-content').addClass('hover');
+                },
+                function() {
+                    $(this).parent('.category-content').removeClass('hover');
+                }
+            );
 
-                    anchor.classList.add('has-children');
-                    const icon = document.createElement('span');
-                    icon.classList.add('toggle-icon');
-                    icon.textContent = ' +';
-                    anchor.appendChild(icon);
-
-                    icon.addEventListener('click', function(event) {
-
-                        event.preventDefault();
-
-                        event.stopPropagation();
-
-                        const isHidden = childList.style.display === 'none' || childList.style.display === '';
-                        childList.style.display = isHidden ? 'block' : 'none';
-                        icon.textContent = isHidden ? ' -' : ' +';
-                    });
-
+            // 접근성 향상: 키보드 네비게이션 지원
+            $('.category-toggle').on('keypress', function(e) {
+                if (e.which === 13 || e.which === 32) { // Enter 또는 Space
+                    e.preventDefault();
+                    $(this).click();
                 }
             });
+
+            // 초기화: aria 속성 설정
+            $('.category-toggle').attr('role', 'button');
+            $('.category-toggle').attr('aria-expanded', 'false');
+            $('.category-toggle').attr('tabindex', '0');
         });
     </script>
+
+    <!-- 페이지별 추가 JavaScript -->
     <th:block layout:fragment="extra-js"></th:block>
 </body>
 </html>

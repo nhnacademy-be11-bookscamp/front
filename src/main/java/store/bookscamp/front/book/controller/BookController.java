@@ -18,15 +18,12 @@ import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookDetailResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
-import store.bookscamp.front.category.controller.response.CategoryListResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
 import store.bookscamp.front.booklike.feign.BookLikeFeginClient;
-import store.bookscamp.front.category.service.CategoryService;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
-import store.bookscamp.front.category.feign.CategoryFeignClient;
 import store.bookscamp.front.common.service.MinioService;
 import store.bookscamp.front.tag.TagFeignClient;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
@@ -41,13 +38,32 @@ public class BookController {
     private final MinioService minioService;
     private final AladinFeignClient aladinFeignClient;
     private final BookFeignClient bookFeignClient;
-    private final CategoryFeignClient categoryFeignClient;
     private final TagFeignClient tagFeignClient;
     private final BookLikeFeginClient bookLikeFeginClient;
-    private final CategoryService categoryService;
 
     @GetMapping("/admin/books")
-    public String adminBooksHome() {
+    public String adminBooksHome(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String keyWord,
+            @RequestParam(defaultValue = "id") String sortType,
+            @PageableDefault(size = 20, page = 0) Pageable pageable,
+            Model model
+    ) {
+        ResponseEntity<RestPageImpl<BookSortResponse>> response = bookFeignClient.getBooks(
+                categoryId,
+                keyWord,
+                sortType,
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
+
+        RestPageImpl<BookSortResponse> booksPage = response.getBody();
+        model.addAttribute("booksPage", booksPage);
+
+        model.addAttribute("categoryId", categoryId);
+        model.addAttribute("keyWord", keyWord);
+        model.addAttribute("sortType", sortType);
+
         return "admin/books";
     }
 
@@ -56,10 +72,8 @@ public class BookController {
     @GetMapping("/admin/books/new")
     public String showCreatePage(Model model) {
 
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         List<TagGetResponse> tags = tagFeignClient.getAll();
 
-        model.addAttribute("categories", categories);
         model.addAttribute("tags", tags);
 
         return "book/create";
@@ -70,6 +84,10 @@ public class BookController {
             @ModelAttribute BookCreateRequest req,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
+
+        if (files != null) {
+            files.removeIf(MultipartFile::isEmpty); // 빈 파일 제거
+        }
 
         List<String> imageUrls;
         if (files != null && !files.isEmpty()) {
@@ -88,14 +106,12 @@ public class BookController {
     public String showAladinCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         List<TagGetResponse> tags = tagFeignClient.getAll();
 
         model.addAttribute("aladinBook", detail);
-        model.addAttribute("categories", categories);
         model.addAttribute("tags", tags);
 
-        return "/aladin/create";
+        return "aladin/create";
     }
 
     @PostMapping("/admin/aladin/books")
@@ -112,11 +128,9 @@ public class BookController {
     public String showUpdatePage(@PathVariable Long id, Model model) {
 
         BookInfoResponse book = bookFeignClient.getBookDetail(id);
-        List<CategoryListResponse> categories = categoryFeignClient.getAllCategories();
         List<TagGetResponse> tags = tagFeignClient.getAll();
 
         model.addAttribute("book", book);
-        model.addAttribute("categories", categories);
         model.addAttribute("tags", tags);
 
         return "book/update";
@@ -128,6 +142,10 @@ public class BookController {
             @ModelAttribute BookUpdateRequest req,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
+
+        if (files != null) {
+            files.removeIf(MultipartFile::isEmpty); // 빈 파일 제거
+        }
 
         if (files != null && !files.isEmpty()) {
             List<String> imageUrls = minioService.uploadFiles(files, "book");
@@ -167,10 +185,6 @@ public class BookController {
 
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
-
-        List<CategoryListResponse> categories = categoryService.getAllCategories();
-        model.addAttribute("categories", categories);
-
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("keyWord", keyWord);
         model.addAttribute("sortType", sortType);

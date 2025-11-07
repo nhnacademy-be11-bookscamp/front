@@ -19,7 +19,6 @@ import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.common.config.FeignConfig;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @FeignClient(
         name = "api-through-gateway-book",
@@ -28,20 +27,20 @@ import java.util.List;
 )
 public interface BookFeignClient {
 
-    @PutMapping(value = "/api-server/admin/books/{id}/update", consumes = {"multipart/form-data"})
+    @PutMapping(value = "/api-server/admin/books/{id}/update", produces = "application/json")
     void updateBook(
             @PathVariable Long id,
-            @RequestPart("request") BookUpdateRequest request
-            );
-
-    @PostMapping(value ="/api-server/admin/books/create",consumes = {"multipart/form-data"})
-    void createBook(
-            @RequestPart("request") BookCreateRequest request,
-            @RequestParam LocalDate publishDate,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files
+            @RequestBody BookUpdateRequest request,
+            @RequestParam LocalDate publishDate
     );
 
-    @PostMapping(value ="/api-server/admin/aladin/books",consumes = "application/json")
+    @PostMapping(value ="/api-server/admin/books/create", produces = "application/json")
+    void createBook(
+            @RequestBody BookCreateRequest request,
+            @RequestParam LocalDate publishDate
+    );
+
+    @PostMapping(value ="/api-server/admin/aladin/books", produces = "application/json")
     void createAladinBook(@RequestBody AladinCreateRequest request);
 
     @GetMapping("/api-server/books")
@@ -55,5 +54,4 @@ public interface BookFeignClient {
 
     @GetMapping("/api-server/bookDetail/{id}")
     BookInfoResponse getBookDetail(@PathVariable Long id);
-    // BookGetResponse
 }

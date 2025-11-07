@@ -20,7 +20,7 @@ import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
-import store.bookscamp.front.booklike.feign.BookLikeFeginClient;
+import store.bookscamp.front.booklike.feign.BookLikeFeignClient;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
@@ -39,7 +39,7 @@ public class BookController {
     private final AladinFeignClient aladinFeignClient;
     private final BookFeignClient bookFeignClient;
     private final TagFeignClient tagFeignClient;
-    private final BookLikeFeginClient bookLikeFeginClient;
+    private final BookLikeFeignClient bookLikeFeignClient;
 
     @GetMapping("/admin/books")
     public String adminBooksHome(
@@ -193,11 +193,11 @@ public class BookController {
         BookInfoResponse bookDetail = bookFeignClient.getBookDetail(id);
         model.addAttribute("book", bookDetail);
 
-        ResponseEntity<BookLikeCountResponse> count = bookLikeFeginClient.getLikeCount(id);
+        ResponseEntity<BookLikeCountResponse> count = bookLikeFeignClient.getLikeCount(id);
         BookLikeCountResponse countResponse = count.getBody();
         model.addAttribute("bookLike", countResponse);
 
-        ResponseEntity<BookLikeStatusResponse> likeStatus = bookLikeFeginClient.getLikeStatus(id);
+        ResponseEntity<BookLikeStatusResponse> likeStatus = bookLikeFeignClient.getLikeStatus(id);
         boolean likedByCurrentUser = Optional.ofNullable(likeStatus.getBody())
                 .map(BookLikeStatusResponse::liked)
                 .orElse(false);

@@ -13,7 +13,7 @@ import store.bookscamp.front.common.config.FeignConfig;
         url = "${gateway.base-url}",
         configuration = FeignConfig.class
 )
-public interface BookLikeFeginClient {
+public interface BookLikeFeignClient {
 
     @GetMapping("/api-server/books/{bookId}/like/count")
     ResponseEntity<BookLikeCountResponse> getLikeCount(@PathVariable Long bookId);

@@ -38,6 +38,7 @@ minio:
   bucket:
     book: bookscamp-book-image
     review: bookscamp-review-image
+    package: bookscamp-package-image
 
 feign:
   client:

@@ -6,22 +6,22 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class CustomMemberDetails implements UserDetails, TokenDetails {
+public class CustomAdminDetails implements UserDetails, TokenDetails {
 
-    private final Long memberId;
+    private final Long adminId;
     private final String username;
     private final String role;
     private final String rawJwtToken;
 
-    public CustomMemberDetails(Long memberId, String username, String role, String rawJwtToken) {
-        this.memberId = memberId;
+    public CustomAdminDetails(Long adminId, String username, String role, String rawJwtToken) {
+        this.adminId = adminId;
         this.username = username;
         this.role = role;
         this.rawJwtToken = rawJwtToken;
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getAdminId() {
+        return adminId;
     }
 
     @Override

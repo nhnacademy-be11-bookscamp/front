@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import store.bookscamp.front.member.controller.request.MemberCreateRequest;
 import store.bookscamp.front.member.controller.request.MemberLoginRequest;
 import store.bookscamp.front.member.controller.request.MemberPasswordUpdateRequest;
@@ -64,7 +65,7 @@ public class MemberController {
     @GetMapping("/mypage/edit-info")
     public ModelAndView editInfo() {
         MemberGetResponse memberInfo = memberFeignClient.getMember();
-        ModelAndView mav = new ModelAndView("/member/edit-info");
+        ModelAndView mav = new ModelAndView("member/edit-info");
         mav.addObject("memberInfo",memberInfo);
         return mav;
     }
@@ -72,7 +73,7 @@ public class MemberController {
     @GetMapping("/mypage/change-password")
     public ModelAndView changePassword(){
         MemberGetResponse memberInfo = memberFeignClient.getMember();
-        ModelAndView mav = new ModelAndView("/member/change-password");
+        ModelAndView mav = new ModelAndView("member/change-password");
         mav.addObject("memberInfo",memberInfo);
         return mav;
     }
@@ -92,7 +93,7 @@ public class MemberController {
     }
 
     @PostMapping("/members")
-    public String createMember(MemberCreateRequest memberCreateRequest, Model model){
+    public String createMember(MemberCreateRequest memberCreateRequest, RedirectAttributes redirectAttributes){
         try{
             String rawPassword = memberCreateRequest.password();
 
@@ -118,12 +119,12 @@ public class MemberController {
             } catch (Exception ex) {
             }
 
-            model.addAttribute("errorMessage", errorMessage);
-            model.addAttribute("apiPrefix", apiPrefix);
-            model.addAttribute("memberCreateRequest", memberCreateRequest);
+            redirectAttributes.addAttribute("errorMessage", errorMessage);
+            redirectAttributes.addAttribute("apiPrefix", apiPrefix);
+            redirectAttributes.addAttribute("memberCreateRequest", memberCreateRequest);
 
 
-            return "/member/signup";
+            return "redirect:/signup";
         }
     }
 

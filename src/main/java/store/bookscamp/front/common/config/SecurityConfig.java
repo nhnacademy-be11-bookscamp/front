@@ -32,10 +32,7 @@ public class SecurityConfig {
         return new AdminAuthenticationProvider(adminLoginFeignClient);
     }
 
-    @Bean
-    public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
-        return new CustomAuthenticationSuccessHandler();
-    }
+
 
     @Bean
     @Order(1)
@@ -55,11 +52,11 @@ public class SecurityConfig {
         http.formLogin(form -> form
                         .loginPage("/admin/login")
                         .loginProcessingUrl("/admin/login")
-                        .defaultSuccessUrl("/admin/dashboard")
+                        .defaultSuccessUrl("/admin")
                         .failureUrl("/admin/login?error")
                         .usernameParameter("username")
                         .passwordParameter("password")
-                        .successHandler(customAuthenticationSuccessHandler())
+                        .successHandler(new CustomAuthenticationSuccessHandler("/admin/dashboard"))
         );
 
         http.httpBasic(AbstractHttpConfigurer::disable);
@@ -88,7 +85,13 @@ public class SecurityConfig {
             .failureUrl("/login?error")
             .usernameParameter("username")
             .passwordParameter("password")
-                .successHandler(customAuthenticationSuccessHandler())
+                .successHandler(new CustomAuthenticationSuccessHandler("/"))
+        );
+        http.logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/")
+                .deleteCookies("Authorization")
+                .invalidateHttpSession(true)
         );
 
         http.httpBasic(AbstractHttpConfigurer::disable);

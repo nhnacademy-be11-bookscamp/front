@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import store.bookscamp.front.auth.user.CustomMemberDetails; // CustomMemberDetails import 필요
+import store.bookscamp.front.auth.user.TokenDetails;
 
 @Component
 public class FeignClientRequestInterceptor implements RequestInterceptor {
@@ -21,19 +22,13 @@ public class FeignClientRequestInterceptor implements RequestInterceptor {
         }
         Object principal = authentication.getPrincipal();
 
-        if (principal instanceof CustomMemberDetails customMemberDetails) {
+        if (principal instanceof TokenDetails tokenDetails) {
 
-            String rawJwtToken = customMemberDetails.getRawJwtToken();
+            String rawJwtToken = tokenDetails.getRawJwtToken();
 
             if (rawJwtToken != null && !rawJwtToken.isEmpty()) {
 
-                String finalToken;
-
-                if (rawJwtToken.startsWith("Bearer ")) {
-                    finalToken = rawJwtToken;
-                } else {
-                    finalToken = "Bearer " + rawJwtToken;
-                }
+                String finalToken = rawJwtToken;
 
                 template.header(AUTHORIZATION_HEADER, finalToken);
             }

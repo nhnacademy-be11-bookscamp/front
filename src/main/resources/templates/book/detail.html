@@ -172,7 +172,9 @@
                 fetch(`${apiUrl}/${bookId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ liked: isLiked })
+                    body: JSON.stringify({ liked: isLiked }),
+
+                    credentials: 'include'
                 })
                     .then(res => {
                         if (!res.ok) {

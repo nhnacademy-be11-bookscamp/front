@@ -1,5 +1,6 @@
 package store.bookscamp.front.auth.provider;
 
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import feign.FeignException;
@@ -9,14 +10,17 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import store.bookscamp.front.admin.controller.request.AdminLoginRequest;
+import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
+import store.bookscamp.front.auth.user.CustomAdminDetails;
 import store.bookscamp.front.auth.user.CustomMemberDetails;
 import store.bookscamp.front.member.controller.MemberLoginFeignClient;
 import store.bookscamp.front.member.controller.request.MemberLoginRequest;
 
 @RequiredArgsConstructor
-public class CustomAuthenticationProvider implements AuthenticationProvider {
+public class AdminAuthenticationProvider implements AuthenticationProvider {
 
-    private final MemberLoginFeignClient memberLoginFeignClient;
+    private final AdminLoginFeignClient adminLoginFeignClient;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -24,8 +28,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
 
         try {
-            MemberLoginRequest request = new MemberLoginRequest(username, password);
-            var authResponse = memberLoginFeignClient.doLogin(request);
+            AdminLoginRequest request = new AdminLoginRequest(username, password);
+            var authResponse = adminLoginFeignClient.doLogin(request);
 
             String rawJwtToken = authResponse.getHeaders().getFirst("Authorization");
 
@@ -39,10 +43,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             Long id = decodedJWT.getClaim("id").asLong();
             String role = decodedJWT.getClaim("role").asString();
 
-            CustomMemberDetails customUserDetails = new CustomMemberDetails(id, username, role,rawJwtToken);
+            CustomAdminDetails customAdminDetails = new CustomAdminDetails(id, username, role,rawJwtToken);
 
             UsernamePasswordAuthenticationToken result =
-                    new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+                    new UsernamePasswordAuthenticationToken(customAdminDetails, null, customAdminDetails.getAuthorities());
 
             result.setDetails(rawJwtToken);
             return result;

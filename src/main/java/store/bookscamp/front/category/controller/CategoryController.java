@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin/categories")
 public class CategoryController {
 
-    @Value("${gateway.base-url}")
-    private String pathPrefix;
+    @Value("${app.api.prefix}")
+    private String apiPrefix;
 
     @GetMapping
     public String category(Model model){
-        model.addAttribute("apiPrefix", pathPrefix);
+        model.addAttribute("apiPrefix", apiPrefix);
         return "admin/category";
     }
 }

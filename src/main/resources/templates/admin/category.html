@@ -262,7 +262,9 @@
                 const response = await fetch(`${apiUrl}/${categoryId}`, {
                     method: 'PUT',
                     headers: headers,
-                    body: JSON.stringify({ name: newName })
+                    body: JSON.stringify({ name: newName }),
+
+                    credentials: 'include'
                 });
 
                 if (!response.ok) {
@@ -287,7 +289,9 @@
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: headers,
-                    body: JSON.stringify({ parentId: parentId, name: newName })
+                    body: JSON.stringify({ parentId: parentId, name: newName }),
+
+                    credentials: 'include'
                 });
 
                 if (!response.ok) {
@@ -312,7 +316,9 @@
             try {
                 const response = await fetch(`${apiUrl}/${categoryId}`, {
                     method: 'DELETE',
-                    headers: headers
+                    headers: headers,
+
+                    credentials: 'include'
                 });
 
                 if (!response.ok) {

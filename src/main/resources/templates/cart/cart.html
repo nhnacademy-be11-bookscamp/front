@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <meta charset="UTF-8">
+    <title>장바구니</title>
+    <th:block layout:fragment="extra-css"></th:block>
+    <style>
+        .cart-table { width: 100%; border-collapse: collapse; }
+        .cart-table th, .cart-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        .cart-summary { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .cart-actions { display: flex; gap: 10px; }
+        .btn { padding: 10px 14px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: #4A90E2; color: #fff; }
+        .btn-secondary { background: #6c757d; color: #fff; }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <h1>장바구니</h1>
+
+    <table class="cart-table">
+        <thead>
+        <tr>
+            <th>도서</th>
+            <th>수량</th>
+            <th>가격</th>
+            <th>합계</th>
+            <th>작업</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>샘플 도서 제목</td>
+            <td>1</td>
+            <td>12,000원</td>
+            <td>12,000원</td>
+            <td><button class="btn btn-secondary" type="button">삭제</button></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(items)}">
+            <td colspan="5" style="text-align:center; color:#888;">장바구니가 비어 있습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="cart-summary">
+        <div>
+            <strong>총 상품금액</strong>: <span th:text="${total} ?: '0원'">0원</span>
+        </div>
+        <div class="cart-actions">
+            <a class="btn btn-secondary" th:href="@{/books}">쇼핑 계속하기</a>
+            <button class="btn btn-primary" type="button">주문하기</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+

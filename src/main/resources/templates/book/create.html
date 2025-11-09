@@ -3,124 +3,256 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default}">
 <head>
-    <title>도서 등록</title>
-
-    <!-- 페이지 전용 스타일 -->
-    <th:block layout:fragment="extra-css">
-        <link rel="stylesheet" th:href="@{/css/book.css}">
-        <style>
-            .register-form {
-                display: grid;
-                grid-template-columns: 1fr 2fr;
-                gap: 10px 20px;
-                max-width: 700px;
-                background: #fff;
-                padding: 30px;
-                border-radius: 12px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            }
-            label {
-                text-align: right;
-                padding-top: 6px;
-                font-weight: 600;
-                color: #333;
-            }
-            input, textarea {
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                font-family: inherit;
-            }
-            button {
-                grid-column: span 2;
-                padding: 10px;
-                border: none;
-                border-radius: 6px;
-                background: #4A90E2;
-                color: white;
-                cursor: pointer;
-                font-size: 1rem;
-                font-weight: 600;
-                transition: background 0.2s;
-            }
-            button:hover {
-                background: #357ABD;
-            }
-            h1 {
-                margin-bottom: 20px;
-                color: #333;
-                font-size: 1.5rem;
-                text-align: center;
-            }
-        </style>
-    </th:block>
+    <title>도서 등록 | 북스캠프 관리자</title>
 </head>
 
 <body>
+<!-- Hero 섹션 숨김 -->
+<section layout:fragment="hero" class="hero" style="display: none;">
+</section>
+
+<!-- 메인 콘텐츠 -->
 <div layout:fragment="content">
-    <h1>📖 도서 등록</h1>
+    <section class="product spad">
+        <div class="container">
+            <div class="row">
+                <!-- 관리자 사이드바 -->
+                <div class="col-lg-3">
+                    <div class="hero__categories">
+                        <div class="hero__categories__all">
+                            <i class="fa fa-bars"></i>
+                            <span>관리자 메뉴</span>
+                        </div>
+                        <ul th:replace="~{fragment/admin-sidebar :: sidebar}">
+                            <li><a href="#">메뉴</a></li>
+                        </ul>
+                    </div>
+                </div>
 
-    <form th:action="@{/admin/books/create}" method="post" class="register-form">
-        <label>제목</label>
-        <input type="text" name="title" th:value="${book.title ?: ''}" required>
+                <!-- 도서 등록 폼 -->
+                <div class="col-lg-9">
+                    <div style="background: #ffffff; padding: 30px; border: 1px solid #ebebeb; border-radius: 4px;">
+                        <h4 style="margin-bottom: 30px; font-weight: 700;">
+                            <i class="fa fa-plus-circle" style="margin-right: 10px; color: #7fad39;"></i>
+                            도서 등록
+                        </h4>
 
-        <label>저자</label>
-        <input type="text" name="contributors" th:value="${book.author ?: ''}" required>
+                        <form th:action="@{/admin/books}" method="post" enctype="multipart/form-data">
+                                <div class="row">
+                                    <!-- 제목 -->
+                                    <div class="col-lg-12">
+                                        <div class="checkout__input">
+                                            <p>제목<span>*</span></p>
+                                            <input type="text"
+                                                   name="title"
+                                                   placeholder="도서 제목을 입력하세요"
+                                                   required>
+                                        </div>
+                                    </div>
 
-        <label>출판사</label>
-        <input type="text" name="publisher" th:value="${book.publisher ?: ''}" required>
+                                    <!-- 기여자 -->
+                                    <div class="col-lg-6">
+                                        <div class="checkout__input">
+                                            <p>기여자<span>*</span></p>
+                                            <input type="text"
+                                                   name="contributors"
+                                                   placeholder="저자, 역자 등을 입력하세요"
+                                                   required>
+                                        </div>
+                                    </div>
 
-        <label>출판일</label>
-        <input type="text" name="publishDate" th:value="${book.publishDate ?: ''}">
+                                    <!-- 출판사 -->
+                                    <div class="col-lg-6">
+                                        <div class="checkout__input">
+                                            <p>출판사<span>*</span></p>
+                                            <input type="text"
+                                                   name="publisher"
+                                                   placeholder="출판사명을 입력하세요"
+                                                   required>
+                                        </div>
+                                    </div>
 
-        <label>ISBN</label>
-        <input type="text" name="isbn" th:value="${book.isbn13 ?: ''}">
+                                    <!-- 출판일 -->
+                                    <div class="col-lg-4">
+                                        <div class="checkout__input">
+                                            <p>출판일</p>
+                                            <input type="date" name="publishDate">
+                                        </div>
+                                    </div>
 
-        <label>정가</label>
-        <input type="number" name="regularPrice" th:value="${book.regularPrice ?: ''}">
+                                    <!-- ISBN -->
+                                    <div class="col-lg-4">
+                                        <div class="checkout__input">
+                                            <p>ISBN</p>
+                                            <input type="text"
+                                                   name="isbn"
+                                                   placeholder="ISBN을 입력하세요">
+                                        </div>
+                                    </div>
 
-        <label>판매가</label>
-        <input type="number" name="salePrice" th:value="${book.salePrice ?: ''}">
+                                    <!-- 재고 -->
+                                    <div class="col-lg-4">
+                                        <div class="checkout__input">
+                                            <p>재고</p>
+                                            <input type="number"
+                                                   name="stock"
+                                                   placeholder="재고 수량"
+                                                   min="0"
+                                                   value="0">
+                                        </div>
+                                    </div>
 
-        <label>목차</label>
-        <textarea name="content" rows="3" th:text="${book.content ?: ''}"></textarea>
+                                    <!-- 정가 -->
+                                    <div class="col-lg-4">
+                                        <div class="checkout__input">
+                                            <p>정가</p>
+                                            <input type="number"
+                                                   name="regularPrice"
+                                                   placeholder="정가를 입력하세요"
+                                                   min="0">
+                                        </div>
+                                    </div>
 
-        <label>설명</label>
-        <textarea name="explanation" rows="3" th:text="${book.explanation ?: ''}"></textarea>
+                                    <!-- 판매가 -->
+                                    <div class="col-lg-4">
+                                        <div class="checkout__input">
+                                            <p>판매가</p>
+                                            <input type="number"
+                                                   name="salePrice"
+                                                   placeholder="판매가를 입력하세요"
+                                                   min="0">
+                                        </div>
+                                    </div>
 
-       <!-- <label>이미지 URL</label>
-        <input type="text" name="imageUrls" th:value="${book.cover ?: ''}" placeholder="쉼표로 구분 가능">
+                                    <!-- 포장 가능 여부 -->
+                                    <div class="col-lg-4">
+                                        <div class="checkout__input">
+                                            <p>포장 가능 여부</p>
+                                            <div class="checkout__input__checkbox" style="margin-top: 10px;">
+                                                <label for="packable">
+                                                    포장 가능
+                                                    <input type="checkbox" id="packable" name="packable" value="true">
+                                                    <span class="checkmark"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
 
-        <label>카테고리</label>
-        <input type="text" name="categoryIds" placeholder="1,2,3">
+                                    <!-- 카테고리 -->
+                                    <div class="col-lg-6">
+                                        <div class="checkout__input">
+                                            <p>카테고리<span>*</span></p>
+                                            <select name="categoryId" required>
+                                                <option value="" disabled selected>카테고리를 선택하세요</option>
+                                                <th:block th:each="parent : ${categories}">
+                                                    <optgroup th:label="${parent.name}">
+                                                        <option th:each="child : ${parent.children}"
+                                                                th:value="${child.id}"
+                                                                th:text="${child.name}"></option>
+                                                    </optgroup>
+                                                </th:block>
+                                            </select>
+                                        </div>
+                                    </div>
 
-        <label>태그</label>
-        <input type="text" name="tagNames" placeholder="태그1,태그2">
--->
-        <button type="submit">등록</button>
-    </form>
-</div>
+                                    <!-- 태그 -->
+                                    <div class="col-lg-6">
+                                        <div class="checkout__input">
+                                            <p>태그</p>
+                                            <select name="tagIds" multiple size="5">
+                                                <option th:each="tag : ${tags}"
+                                                        th:value="${tag.id}"
+                                                        th:text="${tag.name}"></option>
+                                            </select>
+                                            <small style="color: #6f6f6f; font-size: 13px; display: block; margin-top: 5px;">
+                                                Ctrl(또는 Cmd) 키를 누른 채로 여러 개 선택 가능
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <!-- 이미지 업로드 -->
+                                    <div class="col-lg-12">
+                                        <div class="checkout__input">
+                                            <p>이미지 업로드</p>
+                                            <input type="file"
+                                                   name="files"
+                                                   multiple
+                                                   accept="image/*"
+                                                   style="padding: 10px; border: 1px solid #ebebeb; border-radius: 4px; width: 100%;">
+                                            <small style="color: #6f6f6f; font-size: 13px; display: block; margin-top: 5px;">
+                                                여러 이미지를 선택할 수 있습니다
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <!-- 목차 -->
+                                    <div class="col-lg-12">
+                                        <div class="checkout__input">
+                                            <p>목차</p>
+                                            <textarea name="content"
+                                                      rows="5"
+                                                      placeholder="목차를 입력하세요"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- 설명 -->
+                                    <div class="col-lg-12">
+                                        <div class="checkout__input">
+                                            <p>설명</p>
+                                            <textarea name="explanation"
+                                                      rows="5"
+                                                      placeholder="도서 설명을 입력하세요"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- 버튼 -->
+                                    <div class="col-lg-12 text-center" style="margin-top: 20px;">
+                                        <button type="submit"
+                                                class="site-btn"
+                                                style="width: 200px; margin-right: 10px;">
+                                            등록
+                                        </button>
+                                        <a th:href="@{/admin/books}"
+                                           class="site-btn"
+                                           style="width: 200px; background: #6f6f6f; display: inline-block; text-align: center; text-decoration: none;">
+                                            취소
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 추가 JavaScript -->
+    <div layout:fragment="extra-js">
+        <script>
+            $(document).ready(function() {
+                // 관리자 사이드바 전용 토글
+                $('.admin-category-header').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var menuId = $(this).data('admin-menu');
+                    var $submenu = $('#admin-menu-' + menuId);
+                    var $toggle = $(this).find('.admin-toggle');
+
+                    // 토글 버튼 active 클래스 추가/제거 (아이콘 회전)
+                    $toggle.toggleClass('active');
+
+                    // 하위 메뉴 슬라이드 토글
+                    $submenu.slideToggle(300);
+                });
+
+                // 초기화: aria 속성 설정
+                $('.admin-toggle').attr('role', 'button');
+                $('.admin-toggle').attr('aria-expanded', 'false');
+                $('.admin-toggle').attr('tabindex', '0');
+            });
+        </script>
+    </div>
 </body>
-<script>
-    function submitBook() {
-        const form = document.getElementById('registerForm');
-        const data = Object.fromEntries(new FormData(form).entries());
-
-        data.imageUrls = data.imageUrls ? data.imageUrls.split(',').map(s => s.trim()) : [];
-        data.categoryIds = data.categoryIds ? data.categoryIds.split(',').map(s => Number(s.trim())) : [];
-        data.tagNames = data.tagNames ? data.tagNames.split(',').map(s => s.trim()) : [];
-
-        fetch('/admin/books/create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-            .then(resp => {
-                if (!resp.ok) throw new Error('등록 실패');
-                alert('도서 등록 완료!');
-                window.location.href = '/book/list';
-            })
-            .catch(err => alert(err.message));
-    }
-</script>
 </html>

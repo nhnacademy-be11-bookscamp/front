@@ -1,29 +1,95 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-</head>
 <body>
-<!-- Header Fragment -->
-<header class="header" th:fragment="header">
-    <div class="header-container">
-        <div class="logo">
-            <a th:href="@{/}">
-                <h1>북스캠프 📚</h1>
-            </a>
-        </div>
-        <nav class="main-nav">
-            <ul>
-                <li><a th:href="@{/}">홈</a></li>
-                <li><a th:href="@{/books}">도서 목록</a></li>
-                <li><a th:href="@{/cart}">장바구니</a></li>
-                <li><a th:href="@{/mypage}">마이페이지</a></li>
-            </ul>
-        </nav>
-        <div class="header-actions">
-            <a th:href="@{/login}" class="btn-login">로그인</a>
+    <!-- 모바일 햄버거 메뉴 Fragment -->
+    <div th:fragment="humberger">
+        <div class="humberger__menu__overlay"></div>
+        <div class="humberger__menu__wrapper">
+            <!-- 로고 -->
+            <div class="humberger__menu__logo">
+                <a th:href="@{/}"><img th:src="@{/img/logo.png}" alt="북스캠프" style="max-height: 50px; width: auto;"></a>
+            </div>
+            <!-- 장바구니 및 로그인 영역 -->
+            <div class="humberger__menu__cart__wrapper">
+                <div class="humberger__menu__cart">
+                    <ul>
+                        <!-- 위시리스트 -->
+                        <li><a href="#"><i class="fa fa-heart"></i> <span th:text="${likedCount ?: 0}">0</span></a></li>
+                        <!-- 장바구니 -->
+                        <li><a th:href="@{/cart}"><i class="fa fa-shopping-bag"></i> <span th:text="${cartItemCount ?: 0}">0</span></a></li>
+                    </ul>
+                    <!-- 장바구니 총액 (동적 데이터: cartTotalAmount) -->
+                    <div class="header__cart__price">총: <span th:text="${cartTotalAmount != null ? #numbers.formatInteger(cartTotalAmount, 0, 'COMMA') + '원' : '0원'}">0원</span></div>
+                </div>
+                <div class="humberger__menu__widget">
+                    <div class="header__top__right__auth">
+                        <!-- 로그인 버튼 -->
+                        <a th:href="@{/members/login}"><i class="fa fa-user"></i> 로그인</a>
+                    </div>
+                </div>
+            </div>
+            <!-- 네비게이션 메뉴 -->
+            <nav class="humberger__menu__nav mobile-menu">
+                <ul>
+                    <li class="active"><a th:href="@{/}">홈</a></li>
+                    <li><a th:href="@{/books/best}">베스트</a></li>
+                    <li><a th:href="@{/books/new}">신상품</a></li>
+                    <li><a href="#">Team3</a></li>
+                </ul>
+            </nav>
+            <div id="mobile-menu-wrap"></div>
         </div>
     </div>
-</header>
+    <!-- 모바일 햄버거 메뉴 끝 -->
+
+    <!-- 헤더 영역 시작 (Sticky Header - 스크롤 시 상단 고정) -->
+    <header th:fragment="header" class="header">
+        <div class="container">
+            <div class="row">
+                <!-- 로고 영역 (좌측) -->
+                <div class="col-lg-3">
+                    <div class="header__logo">
+                        <a th:href="@{/}"><img th:src="@{/img/logo.png}" alt="북스캠프" style="max-height: 50px; width: auto;"></a>
+                    </div>
+                </div>
+                <!-- 네비게이션 메뉴 (중앙) -->
+                <div class="col-lg-6">
+                    <nav class="header__menu">
+                        <ul>
+                            <li class="active"><a th:href="@{/}">홈</a></li>
+                            <li><a th:href="@{/books/best}">베스트</a></li>
+                            <li><a th:href="@{/books/new}">신상품</a></li>
+                            <li><a href="#">Team3</a></li>
+                            <li><a href="#">살려줘</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <!-- 우측 영역 (장바구니 및 로그인) -->
+                <div class="col-lg-3">
+                    <div class="header__right">
+                        <div class="header__cart">
+                            <ul>
+                                <!-- 위시리스트 (동적 데이터: likedCount) -->
+                                <li><a href="#"><i class="fa fa-heart"></i> <span th:text="${likedCount ?: 0}">0</span></a></li>
+                                <!-- 장바구니 (동적 데이터: cartItemCount) -->
+                                <li><a th:href="@{/cart}"><i class="fa fa-shopping-bag"></i> <span th:text="${cartItemCount ?: 0}">0</span></a></li>
+                            </ul>
+                            <!-- 장바구니 총액 (동적 데이터: cartTotalAmount, 천단위 쉼표 포맷) -->
+                            <div class="header__cart__price">총: <span th:text="${cartTotalAmount != null ? #numbers.formatInteger(cartTotalAmount, 0, 'COMMA') + '원' : '0원'}">0원</span></div>
+                        </div>
+                        <!-- 로그인 버튼 -->
+                        <a th:href="@{/login}" class="header__login" style="margin-left: 20px;">
+                            <i class="fa fa-user"></i> 로그인
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- 모바일 햄버거 메뉴 열기 버튼 -->
+            <div class="humberger__open">
+                <i class="fa fa-bars"></i>
+            </div>
+        </div>
+    </header>
+    <!-- 헤더 영역 끝 -->
 </body>
 </html>

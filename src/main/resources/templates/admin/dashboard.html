@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>관리자 대시보드 | 북스캠프</title>
+</head>
+
+<body>
+    <!-- Hero 섹션 비우기 -->
+    <section layout:fragment="hero" class="hero" style="display: none;">
+    </section>
+
+    <!-- 메인 콘텐츠 -->
+    <div layout:fragment="content">
+        <section class="product spad">
+            <div class="container">
+                <div class="row">
+                    <!-- 관리자 사이드바 -->
+                    <div class="col-lg-3">
+                        <div class="hero__categories">
+                            <div class="hero__categories__all">
+                                <i class="fa fa-bars"></i>
+                                <span>관리자 메뉴</span>
+                            </div>
+                            <ul th:replace="~{fragment/admin-sidebar :: sidebar}">
+                                <li><a href="#">메뉴</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 대시보드 영역 -->
+                    <div class="col-lg-9">
+                        <div style="background: #ffffff; padding: 30px; border: 1px solid #ebebeb; border-radius: 4px;">
+                            <h4 style="margin-bottom: 20px; font-weight: 700;">
+                                <i class="fa fa-tachometer" style="margin-right: 10px; color: #0064FF;"></i>
+                                관리자 대시보드
+                            </h4>
+                            <p style="color: #6f6f6f; margin-bottom: 0;">
+                                좌측 메뉴에서 관리 기능을 선택하세요.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 추가 JavaScript -->
+    <div layout:fragment="extra-js">
+        <script>
+            $(document).ready(function() {
+                // 관리자 사이드바 전용 토글
+                $('.admin-category-header').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var menuId = $(this).data('admin-menu');
+                    var $submenu = $('#admin-menu-' + menuId);
+                    var $toggle = $(this).find('.admin-toggle');
+
+                    // 토글 버튼 active 클래스 추가/제거 (아이콘 회전)
+                    $toggle.toggleClass('active');
+
+                    // 하위 메뉴 슬라이드 토글
+                    $submenu.slideToggle(300);
+                });
+
+                // 초기화: aria 속성 설정
+                $('.admin-toggle').attr('role', 'button');
+                $('.admin-toggle').attr('aria-expanded', 'false');
+                $('.admin-toggle').attr('tabindex', '0');
+            });
+        </script>
+    </div>
+</body>
+</html>

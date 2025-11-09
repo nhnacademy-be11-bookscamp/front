@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>도서 조회 | 북스캠프 관리자</title>
+</head>
+
+<body>
+<section layout:fragment="hero" class="hero" style="display: none;">
+</section>
+
+<div layout:fragment="content">
+    <section class="product spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="hero__categories">
+                        <div class="hero__categories__all">
+                            <i class="fa fa-bars"></i>
+                            <span>관리자 메뉴</span>
+                        </div>
+                        <ul th:replace="~{fragment/admin-sidebar :: sidebar}">
+                            <li><a href="#">메뉴</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div style="background: #ffffff; padding: 30px; border: 1px solid #ebebeb; border-radius: 4px;">
+                        <h4 style="margin-bottom: 20px; font-weight: 700;">
+                            <i class="fa fa-book" style="margin-right: 10px; color: #0064FF;"></i>
+                            도서 목록
+                        </h4>
+
+                        <form th:action="@{/admin/books}" method="get" style="margin-bottom: 25px;">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div style="margin-bottom: 15px;">
+                                        <label style="font-size: 14px; font-weight: 600; margin-bottom: 5px; display: block;">카테고리 ID</label>
+                                        <input type="text"
+                                               name="categoryId"
+                                               th:value="${categoryId}"
+                                               placeholder="카테고리 ID"
+                                               style="width: 100%; padding: 10px; border: 1px solid #ebebeb; border-radius: 4px;">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div style="margin-bottom: 15px;">
+                                        <label style="font-size: 14px; font-weight: 600; margin-bottom: 5px; display: block;">검색어</label>
+                                        <input type="text"
+                                               name="keyWord"
+                                               th:value="${keyWord}"
+                                               placeholder="도서 제목"
+                                               style="width: 100%; padding: 10px; border: 1px solid #ebebeb; border-radius: 4px;">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div style="margin-bottom: 15px;">
+                                        <label style="font-size: 14px; font-weight: 600; margin-bottom: 5px; display: block;">정렬</label>
+                                        <select name="sortType"
+                                                style="width: 100%; padding: 10px; border: 1px solid #ebebeb; border-radius: 4px;">
+                                            <option value="id" th:selected="${sortType == 'id'}">기본</option>
+                                            <option value="title" th:selected="${sortType == 'title'}">제목순</option>
+                                            <option value="low-price" th:selected="${sortType == 'low-price'}">낮은가격순</option>
+                                            <option value="high-price" th:selected="${sortType == 'high-price'}">높은가격순</option>
+                                            <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
+                                            <option value="bookLike" th:selected="${sortType == 'bookLike'}">좋아요순</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="site-btn" style="width: 150px; padding: 10px;">
+                                    <i class="fa fa-search" style="margin-right: 5px;"></i>검색
+                                </button>
+                            </div>
+                        </form>
+
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <thead style="background-color: #f8f8f8; border-bottom: 2px solid #ebebeb;">
+                                <tr>
+                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">ID</th>
+                                    <th style="padding: 12px 8px; text-align: left; font-weight: 600; color: #333;">제목</th>
+                                    <th style="padding: 12px 8px; text-align: left; font-weight: 600; color: #333;">설명</th>
+                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">출판사</th>
+                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">출판일</th>
+                                    <th style="padding: 12px 8px; text-align: right; font-weight: 600; color: #333;">정가</th>
+                                    <th style="padding: 12px 8px; text-align: right; font-weight: 600; color: #333;">판매가</th>
+                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">재고</th>
+                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">조회수</th>
+                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">포장</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="book : ${booksPage != null ? booksPage.content : T(java.util.Collections).emptyList()}"
+                                    style="border-bottom: 1px solid #ebebeb; transition: background 0.2s;"
+                                    onmouseover="this.style.backgroundColor='#f8f8f8'"
+                                    onmouseout="this.style.backgroundColor='#fff'">
+                                    <td style="padding: 12px 8px; text-align: center;" th:text="${book.id}">1</td>
+                                    <td style="padding: 12px 8px;">
+                                        <a th:href="@{/books/{id}(id=${book.id})}"
+                                           th:text="${book.title}"
+                                           style="color: #0064FF; text-decoration: none; font-weight: 500;">도서 제목</a>
+                                    </td>
+                                    <td style="padding: 12px 8px; color: #6f6f6f; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                        th:text="${book.explanation}">간단 설명</td>
+                                    <td style="padding: 12px 8px; text-align: center;" th:text="${book.publisher}">출판사</td>
+                                    <td style="padding: 12px 8px; text-align: center;" th:text="${book.publishDate}">2025-01-01</td>
+                                    <td style="padding: 12px 8px; text-align: right; text-decoration: line-through; color: #999;"
+                                        th:text="${book.regularPrice != null ? #numbers.formatInteger(book.regularPrice, 0, 'COMMA') + '원' : '-'}">15,000원</td>
+                                    <td style="padding: 12px 8px; text-align: right; font-weight: 600; color: #0064FF;"
+                                        th:text="${book.salePrice != null ? #numbers.formatInteger(book.salePrice, 0, 'COMMA') + '원' : '-'}">12,000원</td>
+                                    <td style="padding: 12px 8px; text-align: center;" th:text="${book.stock}">10</td>
+                                    <td style="padding: 12px 8px; text-align: center; color: #6f6f6f;" th:text="${book.viewCount}">200</td>
+                                    <td style="padding: 12px 8px; text-align: center;">
+                                        <span th:if="${book.packable}"
+                                              style="color: #7fad39; font-weight: 600;">가능</span>
+                                        <span th:unless="${book.packable}"
+                                              style="color: #999;">불가능</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${booksPage == null or #lists.isEmpty(booksPage.content)}">
+                                    <td colspan="10" style="text-align: center; padding: 60px; color: #6f6f6f;">
+                                        <i class="fa fa-inbox" style="font-size: 48px; color: #ebebeb; margin-bottom: 10px; display: block;"></i>
+                                        조회된 도서가 없습니다.
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div th:if="${booksPage != null and booksPage.totalPages > 1}"
+                             style="margin-top: 30px; text-align: center;">
+                            <div style="margin-bottom: 15px;">
+                                <span style="font-size: 14px; color: #333; font-weight: 500;"
+                                      th:text="'현재 페이지: ' + (${booksPage.number + 1}) + ' / ' + ${booksPage.totalPages}"></span>
+                            </div>
+
+                            <div style="display: inline-flex; gap: 10px;">
+                                <a th:if="${!booksPage.first}"
+                                   th:href="@{/admin/books(page=${booksPage.number - 1}, size=${booksPage.size}, categoryId=${categoryId}, keyWord=${keyWord}, sortType=${sortType})}"
+                                   class="site-btn"
+                                   style="padding: 8px 20px; text-decoration: none; background: #6f6f6f;">
+                                    이전
+                                </a>
+                                <a th:if="${!booksPage.last}"
+                                   th:href="@{/admin/books(page=${booksPage.number + 1}, size=${booksPage.size}, categoryId=${categoryId}, keyWord=${keyWord}, sortType=${sortType})}"
+                                   class="site-btn"
+                                   style="padding: 8px 20px; text-decoration: none;">
+                                    다음
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div layout:fragment="extra-js">
+    <script>
+        $(document).ready(function() {
+            $('.admin-category-header').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                var menuId = $(this).data('admin-menu');
+                var $submenu = $('#admin-menu-' + menuId);
+                var $toggle = $(this).find('.admin-toggle');
+
+                $toggle.toggleClass('active');
+                $submenu.slideToggle(300);
+            });
+
+            $('.admin-toggle').attr('role', 'button');
+            $('.admin-toggle').attr('aria-expanded', 'false');
+            $('.admin-toggle').attr('tabindex', '0');
+        });
+    </script>
+</div>
+</body>
+</html>

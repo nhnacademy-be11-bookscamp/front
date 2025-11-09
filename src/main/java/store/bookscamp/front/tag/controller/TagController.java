@@ -1,6 +1,6 @@
 package store.bookscamp.front.tag.controller;
 
-import java.util.List;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +14,8 @@ import store.bookscamp.front.tag.TagFeignClient;
 import store.bookscamp.front.tag.controller.request.TagCreateRequest;
 import store.bookscamp.front.tag.controller.request.TagUpdateRequest;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
-import feign.FeignException;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class TagController {
             tagFeignClient.createTag(new TagCreateRequest(name));
         } catch (FeignException e) {
             model.addAttribute("error", "이미 존재하는 태그입니다.");
-            return "/tags/tag";
+            return "tags/tag";
         }
          return "redirect:/admin/tags";
     }

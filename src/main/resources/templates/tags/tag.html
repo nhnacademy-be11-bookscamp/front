@@ -1,82 +1,175 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>태그 관리</title>
-    <link rel="stylesheet" th:href="@{/css/layout.css}">
-    <!-- 페이지별 추가 CSS -->
-    <th:block layout:fragment="extra-css"></th:block>
+    <title>태그 관리 | 북스캠프 관리자</title>
 </head>
+
 <body>
-<!-- Header -->
-<th:block th:replace="~{fragment/header :: header}"></th:block>
+    <!-- Hero 섹션 비우기 -->
+    <section layout:fragment="hero" class="hero" style="display: none;">
+    </section>
 
-<!-- Main Container with Sidebar -->
-<div class="main-container">
-    <!-- Sidebar -->
-    <th:block th:replace="~{fragment/categorySidebar :: sidebar}"></th:block>
+    <!-- 메인 콘텐츠 -->
+    <div layout:fragment="content">
+        <section class="product spad">
+            <div class="container">
+                <div class="row">
+                    <!-- 관리자 사이드바 -->
+                    <div class="col-lg-3">
+                        <div class="hero__categories">
+                            <div class="hero__categories__all">
+                                <i class="fa fa-bars"></i>
+                                <span>관리자 메뉴</span>
+                            </div>
+                            <ul th:replace="~{fragment/admin-sidebar :: sidebar}">
+                                <li><a href="#">메뉴</a></li>
+                            </ul>
+                        </div>
+                    </div>
 
-    <!-- Main Content Area -->
-    <main class="main-content">
-        <div class="content-area">
-            <!-- 페이지별 콘텐츠 삽입 영역 -->
-            <div layout:fragment="content">
-                <h2>태그 관리</h2>
+                    <!-- 태그 관리 영역 -->
+                    <div class="col-lg-9">
+                        <div style="background: #ffffff; padding: 30px; border: 1px solid #ebebeb; border-radius: 4px;">
+                            <h4 style="margin-bottom: 20px; font-weight: 700;">
+                                <i class="fa fa-tags" style="margin-right: 10px; color: #0064FF;"></i>
+                                태그 관리
+                            </h4>
 
-                <!-- 에러 메시지 표시 -->
-                <div th:if="${error != null}" style="color: red;">
-                    <p th:text="${error}"></p>
+                            <!-- 에러 메시지 표시 -->
+                            <div th:if="${error != null}"
+                                 style="background: #ffebee; color: #c62828; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #c62828;">
+                                <i class="fa fa-exclamation-circle" style="margin-right: 8px;"></i>
+                                <span th:text="${error}"></span>
+                            </div>
+
+                            <!-- 태그 추가 폼 -->
+                            <form method="post" th:action="@{/admin/tags}" style="margin-bottom: 30px;">
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="text"
+                                           name="name"
+                                           placeholder="새 태그 이름을 입력하세요"
+                                           required
+                                           style="flex: 1; padding: 12px; border: 1px solid #ebebeb; border-radius: 4px; font-size: 14px;">
+                                    <button type="submit"
+                                            class="site-btn"
+                                            style="width: 150px; padding: 12px;">
+                                        <i class="fa fa-plus" style="margin-right: 5px;"></i>추가
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- 태그 목록 테이블 -->
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                    <thead style="background-color: #f8f8f8; border-bottom: 2px solid #ebebeb;">
+                                        <tr>
+                                            <th style="padding: 12px 15px; text-align: center; font-weight: 600; color: #333; width: 15%;">ID</th>
+                                            <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; width: 35%;">태그 이름</th>
+                                            <th style="padding: 12px 15px; text-align: center; font-weight: 600; color: #333; width: 25%;">수정</th>
+                                            <th style="padding: 12px 15px; text-align: center; font-weight: 600; color: #333; width: 25%;">삭제</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="tag : ${tags}"
+                                            style="border-bottom: 1px solid #ebebeb; transition: background 0.2s;"
+                                            onmouseover="this.style.backgroundColor='#f8f8f8'"
+                                            onmouseout="this.style.backgroundColor='#fff'">
+                                            <td style="padding: 15px; text-align: center; color: #6f6f6f;"
+                                                th:text="${tag.id}">1</td>
+                                            <td style="padding: 15px;">
+                                                <span style="display: inline-block; background: #7fad39; color: white; padding: 5px 12px; border-radius: 15px; font-size: 13px; font-weight: 500;"
+                                                      th:text="${tag.name}">태그 이름</span>
+                                            </td>
+
+                                            <!-- 수정 폼 -->
+                                            <td style="padding: 15px; text-align: center;">
+                                                <form method="post"
+                                                      th:action="@{'/admin/tags/' + ${tag.id}}"
+                                                      style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                                    <input type="text"
+                                                           name="name"
+                                                           th:value="${tag.name}"
+                                                           required
+                                                           style="padding: 8px 12px; border: 1px solid #ebebeb; border-radius: 4px; font-size: 13px; max-width: 200px;">
+                                                    <button type="submit"
+                                                            style="background: #6f6f6f; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; transition: all 0.2s;"
+                                                            onmouseover="this.style.backgroundColor='#555'"
+                                                            onmouseout="this.style.backgroundColor='#6f6f6f'">
+                                                        <i class="fa fa-pencil" style="margin-right: 5px;"></i>수정
+                                                    </button>
+                                                </form>
+                                            </td>
+
+                                            <!-- 삭제 버튼 -->
+                                            <td style="padding: 15px; text-align: center;">
+                                                <form method="post"
+                                                      th:action="@{'/admin/tags/' + ${tag.id} + '/delete'}"
+                                                      onsubmit="return confirm('정말 이 태그를 삭제하시겠습니까?');">
+                                                    <button type="submit"
+                                                            style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; transition: all 0.2s;"
+                                                            onmouseover="this.style.backgroundColor='#c82333'"
+                                                            onmouseout="this.style.backgroundColor='#dc3545'">
+                                                        <i class="fa fa-trash" style="margin-right: 5px;"></i>삭제
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${tags == null or tags.isEmpty()}">
+                                            <td colspan="4" style="text-align: center; padding: 60px; color: #6f6f6f;">
+                                                <i class="fa fa-inbox" style="font-size: 48px; color: #ebebeb; margin-bottom: 10px; display: block;"></i>
+                                                등록된 태그가 없습니다.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- 태그 사용 안내 -->
+                            <div style="margin-top: 30px; padding: 20px; background: #f8f8f8; border-radius: 4px; border-left: 4px solid #0064FF;">
+                                <h5 style="margin: 0 0 10px 0; color: #333; font-size: 15px; font-weight: 600;">
+                                    <i class="fa fa-info-circle" style="margin-right: 8px; color: #0064FF;"></i>태그 사용 안내
+                                </h5>
+                                <ul style="margin: 0; padding-left: 20px; color: #6f6f6f; font-size: 13px; line-height: 1.8;">
+                                    <li>태그는 도서를 분류하고 검색하는데 도움을 줍니다.</li>
+                                    <li>태그 이름은 중복될 수 없습니다.</li>
+                                    <li>사용 중인 태그를 삭제하면 관련 도서에서 해당 태그가 제거됩니다.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- 태그 추가 폼 -->
-                <form method="post" th:action="@{/admin/tags}">
-                    <input type="text" name="name" placeholder="새 태그 이름" required>
-                    <button type="submit">추가</button>
-                </form>
-
-                <!-- 태그 목록 테이블 -->
-                <table border="1" style="margin-top: 1rem; width: 100%; text-align: center;">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>이름</th>
-                        <th>수정</th>
-                        <th>삭제</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="tag : ${tags}">
-                        <td th:text="${tag.id}">1</td>
-                        <td th:text="${tag.name}">태그 이름</td>
-
-                        <!-- 수정 버튼 -->
-                        <td>
-                            <form method="post" th:action="@{'/admin/tags/' + ${tag.id}}">
-                                <input type="text" name="name" th:value="${tag.name}" required>
-                                <button type="submit" class="button button-update">수정</button>
-                            </form>
-                        </td>
-
-                        <!-- 삭제 버튼 -->
-                        <td>
-                            <form method="post" th:action="@{'/admin/tags/' + ${tag.id} + '/delete'}">
-                                <button type="submit" class="button button-delete">삭제</button>
-                            </form>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
             </div>
-        </div>
-    </main>
-</div>
+        </section>
+    </div>
 
-<!-- Footer -->
-<th:block th:replace="~{fragment/footer :: footer}"></th:block>
+    <!-- 추가 JavaScript -->
+    <div layout:fragment="extra-js">
+        <script>
+            $(document).ready(function() {
+                // 관리자 사이드바 전용 토글
+                $('.admin-category-header').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
 
-<!-- 페이지별 추가 JavaScript -->
-<th:block layout:fragment="extra-js"></th:block>
+                    var menuId = $(this).data('admin-menu');
+                    var $submenu = $('#admin-menu-' + menuId);
+                    var $toggle = $(this).find('.admin-toggle');
+
+                    // 토글 버튼 active 클래스 추가/제거 (아이콘 회전)
+                    $toggle.toggleClass('active');
+
+                    // 하위 메뉴 슬라이드 토글
+                    $submenu.slideToggle(300);
+                });
+
+                // 초기화: aria 속성 설정
+                $('.admin-toggle').attr('role', 'button');
+                $('.admin-toggle').attr('aria-expanded', 'false');
+                $('.admin-toggle').attr('tabindex', '0');
+            });
+        </script>
+    </div>
 </body>
 </html>

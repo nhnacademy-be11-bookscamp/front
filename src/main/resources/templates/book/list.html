@@ -21,10 +21,12 @@
         <label>정렬:
             <select name="sortType">
                 <option value="id" th:selected="${sortType == 'id'}">기본</option>
-                <option value="title" th:selected="${sortType == 'title'}">제목순</option>
-                <option value="low-price" th:s  elected="${sortType == 'low-price'}">낮은가격순</option>
-                <option value="high-price" th:selected="${sortType == 'high-price'}">높은가격순</option>
+                <option value="bookLike" th:selected="${sortType == 'bookLike'}">인기도순</option>
                 <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
+                <option value="low-price" th:selected="${sortType == 'low-price'}">낮은가격순</option>
+                <option value="high-price" th:selected="${sortType == 'high-price'}">높은가격순</option>
+                <option value="rating" th:selected="${sortType == 'rating'}">평점높은순</option>
+                <option value="review" th:selected="${sortType == 'review'}">리뷰많은순</option>
             </select>
         </label>
         <button type="submit">검색</button>

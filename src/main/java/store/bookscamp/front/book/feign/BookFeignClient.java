@@ -1,6 +1,8 @@
 package store.bookscamp.front.book.feign;
 
+import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import store.bookscamp.front.book.controller.request.AladinCreateRequest;
 import store.bookscamp.front.book.controller.request.BookCreateRequest;
 import store.bookscamp.front.book.controller.request.BookUpdateRequest;
+import store.bookscamp.front.book.controller.response.BookIndexResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
 import store.bookscamp.front.common.pagination.RestPageImpl;
@@ -46,7 +49,6 @@ public interface BookFeignClient {
     @GetMapping("/api-server/books")
     ResponseEntity<RestPageImpl<BookSortResponse>> getBooks(
             @RequestParam(value = "categoryId", required = false) Long categoryId,
-            @RequestParam(value = "keyWord", required = false) String keyWord,
             @RequestParam(value = "sortType", required = false) String sortType,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "size", required = false) Integer size
@@ -54,4 +56,7 @@ public interface BookFeignClient {
 
     @GetMapping("/api-server/bookDetail/{id}")
     BookInfoResponse getBookDetail(@PathVariable Long id);
+
+    @GetMapping("/api-server/allBooks")
+    ResponseEntity<List<BookIndexResponse>> getAllBooks();
 }

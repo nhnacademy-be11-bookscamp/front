@@ -13,9 +13,6 @@ import org.springframework.security.core.AuthenticationException;
 import store.bookscamp.front.admin.controller.request.AdminLoginRequest;
 import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
 import store.bookscamp.front.auth.user.CustomAdminDetails;
-import store.bookscamp.front.auth.user.CustomMemberDetails;
-import store.bookscamp.front.member.controller.MemberLoginFeignClient;
-import store.bookscamp.front.member.controller.request.MemberLoginRequest;
 
 @RequiredArgsConstructor
 public class AdminAuthenticationProvider implements AuthenticationProvider {

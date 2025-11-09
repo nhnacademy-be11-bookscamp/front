@@ -8,11 +8,11 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
 import store.bookscamp.front.auth.handler.CustomAuthenticationSuccessHandler;
 import store.bookscamp.front.auth.provider.AdminAuthenticationProvider;
 import store.bookscamp.front.auth.provider.CustomAuthenticationProvider;
+import store.bookscamp.front.common.exception.CustomAccessDeniedHandler;
 import store.bookscamp.front.member.controller.MemberLoginFeignClient;
 
 @Configuration
@@ -21,6 +21,7 @@ public class SecurityConfig {
 
     private final MemberLoginFeignClient memberLoginFeignClient;
     private final AdminLoginFeignClient adminLoginFeignClient;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public CustomAuthenticationProvider customAuthenticationProvider() {
@@ -61,6 +62,10 @@ public class SecurityConfig {
 
         http.httpBasic(AbstractHttpConfigurer::disable);
 
+        http.exceptionHandling(exception -> exception
+                .accessDeniedHandler(customAccessDeniedHandler)
+        );
+
         return http.build();
     }
 
@@ -95,6 +100,10 @@ public class SecurityConfig {
         );
 
         http.httpBasic(AbstractHttpConfigurer::disable);
+
+        http.exceptionHandling(exception -> exception
+                .accessDeniedHandler(customAccessDeniedHandler)
+        );
 
         return http.build();
     }

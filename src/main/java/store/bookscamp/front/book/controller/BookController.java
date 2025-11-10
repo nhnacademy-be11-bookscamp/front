@@ -20,7 +20,7 @@ import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
-import store.bookscamp.front.booklike.feign.BookLikeFeginClient;
+import store.bookscamp.front.booklike.feign.BookLikeFeignClient;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
@@ -32,14 +32,14 @@ import store.bookscamp.front.tag.controller.response.TagGetResponse;
 @RequiredArgsConstructor
 public class BookController {
 
-    @Value("${gateway.base-url}")
-    private String pathPrefix;
+    @Value("${app.api.prefix}")
+    private String apiPrefix;
 
     private final MinioService minioService;
     private final AladinFeignClient aladinFeignClient;
     private final BookFeignClient bookFeignClient;
     private final TagFeignClient tagFeignClient;
-    private final BookLikeFeginClient bookLikeFeginClient;
+    private final BookLikeFeignClient bookLikeFeignClient;
 
     @GetMapping("/admin/books")
     public String adminBooksHome(
@@ -85,6 +85,10 @@ public class BookController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
 
+        if (files != null) {
+            files.removeIf(MultipartFile::isEmpty); // 빈 파일 제거
+        }
+
         List<String> imageUrls;
         if (files != null && !files.isEmpty()) {
             imageUrls = minioService.uploadFiles(files, "book");
@@ -107,7 +111,7 @@ public class BookController {
         model.addAttribute("aladinBook", detail);
         model.addAttribute("tags", tags);
 
-        return "/aladin/create";
+        return "aladin/create";
     }
 
     @PostMapping("/admin/aladin/books")
@@ -138,6 +142,10 @@ public class BookController {
             @ModelAttribute BookUpdateRequest req,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
+
+        if (files != null) {
+            files.removeIf(MultipartFile::isEmpty); // 빈 파일 제거
+        }
 
         if (files != null && !files.isEmpty()) {
             List<String> imageUrls = minioService.uploadFiles(files, "book");
@@ -193,17 +201,17 @@ public class BookController {
         BookInfoResponse bookDetail = bookFeignClient.getBookDetail(id);
         model.addAttribute("book", bookDetail);
 
-        ResponseEntity<BookLikeCountResponse> count = bookLikeFeginClient.getLikeCount(id);
+        ResponseEntity<BookLikeCountResponse> count = bookLikeFeignClient.getLikeCount(id);
         BookLikeCountResponse countResponse = count.getBody();
         model.addAttribute("bookLike", countResponse);
 
-        ResponseEntity<BookLikeStatusResponse> likeStatus = bookLikeFeginClient.getLikeStatus(id);
+        ResponseEntity<BookLikeStatusResponse> likeStatus = bookLikeFeignClient.getLikeStatus(id);
         boolean likedByCurrentUser = Optional.ofNullable(likeStatus.getBody())
                 .map(BookLikeStatusResponse::liked)
                 .orElse(false);
         model.addAttribute("isLikedByCurrentUser", likedByCurrentUser);
 
-        model.addAttribute("apiPrefix", pathPrefix);
+        model.addAttribute("apiPrefix", apiPrefix);
 
         return "book/detail";
     }

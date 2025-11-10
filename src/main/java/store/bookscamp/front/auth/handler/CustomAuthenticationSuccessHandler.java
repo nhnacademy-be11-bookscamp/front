@@ -11,6 +11,13 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
 
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
+    private final SavedRequestAwareAuthenticationSuccessHandler delegate =
+            new SavedRequestAwareAuthenticationSuccessHandler();
+
+    public CustomAuthenticationSuccessHandler(String defaultTargetUrl) {
+        this.delegate.setDefaultTargetUrl(defaultTargetUrl);
+    }
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
@@ -27,6 +34,5 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             response.addCookie(cookie);
         }
 
-        new SavedRequestAwareAuthenticationSuccessHandler().onAuthenticationSuccess(request, response, authentication);
-    }
+        this.delegate.onAuthenticationSuccess(request, response, authentication);    }
 }

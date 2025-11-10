@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 import store.bookscamp.front.book.controller.request.AladinCreateRequest;
 import store.bookscamp.front.book.controller.request.BookCreateRequest;
 import store.bookscamp.front.book.controller.request.BookUpdateRequest;
@@ -49,6 +47,7 @@ public interface BookFeignClient {
     @GetMapping("/api-server/books")
     ResponseEntity<RestPageImpl<BookSortResponse>> getBooks(
             @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(required = false) String keyWord,
             @RequestParam(value = "sortType", required = false) String sortType,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "size", required = false) Integer size

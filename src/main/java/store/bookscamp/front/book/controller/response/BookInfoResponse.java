@@ -4,6 +4,8 @@ import store.bookscamp.front.book.BookStatus;
 
 import java.time.LocalDate;
 import java.util.List;
+import store.bookscamp.front.category.service.dto.CategoryDto;
+import store.bookscamp.front.tag.service.dto.TagDto;
 
 public record BookInfoResponse(
         Long id,
@@ -20,7 +22,7 @@ public record BookInfoResponse(
         Integer salePrice,
         Integer stock,
         long viewCount,
-        Long categoryId,
-        List<Long> tagIds,
-        List<String> imageUrls
+        List<CategoryDto> categoryList,
+        List<TagDto> tagList,
+        List<String> imageUrlList
 ) {}

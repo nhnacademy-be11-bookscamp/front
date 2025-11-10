@@ -55,6 +55,7 @@ public class BookController {
         ResponseEntity<RestPageImpl<BookSortResponse>> response = bookFeignClient.getBooks(
                 categoryId,
                 keyWord,
+                sortType,
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
@@ -180,6 +181,7 @@ public class BookController {
         ResponseEntity<RestPageImpl<BookSortResponse>> response = bookFeignClient.getBooks(
                 categoryId,
                 keyWord,
+                sortType,
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );

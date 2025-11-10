@@ -7,36 +7,47 @@
 </head>
 
 <body>
-<!-- Hero Section 숨김 -->
 <section layout:fragment="hero" class="hero" style="display: none;">
 </section>
 
 <div layout:fragment="content">
-    <!-- 도서 상세 섹션 -->
     <section class="product-details spad">
         <div class="container">
             <div class="row">
                 <div class="col-lg-6 col-md-6">
                     <div class="product__details__pic">
-                        <div class="product__details__pic__item">
+
+                        <div th:if="${imageUrls != null and !imageUrls.isEmpty()}"
+                             class="swiper product-swiper-container">
+                            <div class="swiper-wrapper">
+                                <div th:each="url : ${imageUrls}" class="swiper-slide">
+                                    <img th:src="${url}" alt="Book Cover">
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-prev"></div>
+                            <div class="swiper-button-next"></div>
+                        </div>
+
+                        <div th:if="${imageUrls == null or imageUrls.isEmpty()}" class="product__details__pic__item">
                             <div style="width: 100%; height: 500px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border: 1px solid #ebebeb; border-radius: 4px;">
                                 <i class="fa fa-book" style="font-size: 80px; color: #ccc;"></i>
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="col-lg-6 col-md-6">
                     <div class="product__details__text">
                         <h3 th:text="${book.title}" style="margin-bottom: 20px; font-weight: 700; color: #333;">도서 제목</h3>
 
-                        <!-- 기본 정보 -->
                         <div style="padding: 20px 0; border-top: 1px solid #ebebeb; border-bottom: 1px solid #ebebeb; margin-bottom: 20px;">
                             <ul style="list-style: none; padding: 0; margin: 0;">
                                 <li style="padding: 8px 0; display: flex;">
                                     <span style="width: 100px; color: #6f6f6f; font-weight: 600;">출판사</span>
                                     <span th:text="${book.publisher}" style="color: #333;">출판사</span>
                                 </li>
-                                <li style="padding: 8px 0; display: flex;">
+                                <li style:="padding: 8px 0; display: flex;">
                                     <span style="width: 100px; color: #6f6f6f; font-weight: 600;">출판일</span>
                                     <span th:text="${#temporals.format(book.publishDate, 'yyyy-MM-dd')}" style="color: #333;">2025-01-01</span>
                                 </li>
@@ -58,10 +69,34 @@
                                     <span style="width: 100px; color: #6f6f6f; font-weight: 600;">조회수</span>
                                     <span th:text="${book.viewCount}" style="color: #333;">200</span>
                                 </li>
+
+                                <li style="padding: 8px 0; display: flex; align-items: flex-start;">
+                                    <span style="width: 100px; color: #6f6f6f; font-weight: 600;">카테고리</span>
+                                    <div style="flex: 1; display: flex; flex-wrap: wrap; gap: 6px;">
+                                        <span th:each="category : ${categories}"
+                                              th:text="${category.name}"
+                                              style="background: #f2f2f2; color: #6f6f6f; padding: 3px 10px; border-radius: 12px; font-size: 13px;">
+                                            카테고리명
+                                        </span>
+                                        <span th:if="${categories == null or categories.isEmpty()}" style="color: #999;">
+                                            등록된 카테고리 없음
+                                        </span>
+                                    </div>
+                                </li>
                             </ul>
                         </div>
 
-                        <!-- 가격 정보 -->
+                        <div class="product__details__tags" style="margin-bottom: 20px;">
+                            <div th:if="${tags != null and !tags.isEmpty()}" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                <i class="fa fa-tags" style="color: #6f6f6f; margin-right: 5px;"></i>
+                                <a th:each="tag : ${tags}"
+                                   th:href="@{/search(query=${tag.name})}"
+                                   th:text="'#' + ${tag.name}"
+                                   style="color: #7fad39; font-size: 14px; font-weight: 600; text-decoration: none; background: #eef7e4; padding: 4px 10px; border-radius: 4px;">
+                                    #태그명
+                                </a>
+                            </div>
+                        </div>
                         <div class="product__details__price" style="margin-bottom: 30px;">
                             <div style="margin-bottom: 10px;">
                                 <span style="text-decoration: line-through; color: #999; font-size: 18px;"
@@ -76,7 +111,6 @@
                             </div>
                         </div>
 
-                        <!-- 구매 액션 -->
                         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                             <button type="button"
                                     class="site-btn"
@@ -100,7 +134,6 @@
                 </div>
             </div>
 
-            <!-- 도서 소개 -->
             <div class="row" style="margin-top: 60px;">
                 <div class="col-lg-12">
                     <div class="product__details__tab">
@@ -116,12 +149,16 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </section>
 </div>
 
 <th:block layout:fragment="extra-css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.4.5/swiper-bundle.min.css" />
+
     <style>
+        /* (기존 좋아요 버튼 스타일) */
         #likeButton.liked {
             background: #dc3545 !important;
             color: white !important;
@@ -137,71 +174,124 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+
+        /* (추가) Swiper 캐러셀 스타일 */
+        .product-swiper-container {
+            width: 100%;
+            height: 500px; /* 원본 아이콘 박스 높이와 맞춤 */
+            border: 1px solid #ebebeb;
+            border-radius: 4px;
+            background: #f8f8f8;
+        }
+        .product-swiper-container .swiper-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .product-swiper-container .swiper-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 이미지가 잘리지 않게 'contain' 사용 */
+        }
+        .product-swiper-container .swiper-pagination-bullet-active {
+            background-color: #7fad39; /* 활성 페이징 점 색상 */
+        }
+        .product-swiper-container .swiper-button-next,
+        .product-swiper-container .swiper-button-prev {
+            color: #7fad39; /* 화살표 색상 */
+            transform: scale(0.8);
+        }
     </style>
 </th:block>
-
 <th:block layout:fragment="extra-js">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.4.5/swiper-bundle.min.js"></script>
+
     <script th:inline="javascript">
         const pathPrefix = /*[[${apiPrefix}]]*/ '';
 
         document.addEventListener("DOMContentLoaded", function() {
+
+            // --- 1. (기존) 좋아요 버튼 로직 ---
             const likeButton = document.getElementById('likeButton');
-            const likeCountElement = document.getElementById('likeCount');
 
-            const bookId = [[${book.id}]];
-            const isAlreadyLiked = [[${isLikedByCurrentUser}]];
-            const apiUrl = pathPrefix + '/api-server/books/like';
+            // (null 체크 추가: 요소가 없을 때 스크립트 오류 방지)
+            if (likeButton) {
+                const likeCountElement = document.getElementById('likeCount');
+                const bookId = /*[[${book.id}]]*/ null;
+                const isAlreadyLiked = /*[[${isLikedByCurrentUser}]]*/ false;
+                const apiUrl = pathPrefix + '/api-server/books/like';
 
-            let currentLikeCount = parseInt(likeCountElement.innerText, 10);
+                let currentLikeCount = parseInt(likeCountElement.innerText, 10);
 
-            if (isAlreadyLiked) {
-                likeButton.classList.add('liked');
-            }
-
-            likeButton.addEventListener('click', function() {
-                const isLiked = likeButton.classList.toggle('liked');
-
-                if (isLiked) {
-                    currentLikeCount++;
-                } else {
-                    currentLikeCount--;
+                if (isAlreadyLiked) {
+                    likeButton.classList.add('liked');
                 }
 
-                likeCountElement.innerText = currentLikeCount;
+                likeButton.addEventListener('click', function() {
+                    const isLiked = likeButton.classList.toggle('liked');
 
-                fetch(`${apiUrl}/${bookId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ liked: isLiked }),
+                    if (isLiked) {
+                        currentLikeCount++;
+                    } else {
+                        currentLikeCount--;
+                    }
 
-                    credentials: 'include'
-                })
-                    .then(res => {
-                        if (!res.ok) {
-                            throw new Error('Server response was not ok');
-                        }
-                        return res.text();
+                    likeCountElement.innerText = currentLikeCount;
+
+                    fetch(`${apiUrl}/${bookId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ liked: isLiked }),
+                        credentials: 'include'
                     })
-                    .then(text => {
-                        if (text) {
-                            console.log('서버 응답:', JSON.parse(text));
-                        } else {
-                            console.log('서버 응답 성공 (본문 없음)');
-                        }
-                    })
-                    .catch(e => {
-                        console.error('에러:', e);
-                        alert('좋아요 처리에 실패했습니다.');
-                        likeButton.classList.toggle('liked');
+                        .then(res => {
+                            if (!res.ok) {
+                                throw new Error('Server response was not ok');
+                            }
+                            return res.text();
+                        })
+                        .then(text => {
+                            if (text) {
+                                console.log('서버 응답:', JSON.parse(text));
+                            } else {
+                                console.log('서버 응답 성공 (본문 없음)');
+                            }
+                        })
+                        .catch(e => {
+                            console.error('에러:', e);
+                            alert('좋아요 처리에 실패했습니다.');
+                            likeButton.classList.toggle('liked');
 
-                        if (isLiked) {
-                            currentLikeCount--;
-                        } else {
-                            currentLikeCount++;
-                        }
-                        likeCountElement.innerText = currentLikeCount;
-                    });
+                            if (isLiked) {
+                                currentLikeCount--;
+                            } else {
+                                currentLikeCount++;
+                            }
+                            likeCountElement.innerText = currentLikeCount;
+                        });
+                });
+            } // --- 좋아요 버튼 로직 종료 ---
+
+
+            // --- 2. (추가) Swiper 캐러셀 초기화 ---
+            const swiper = new Swiper('.product-swiper-container', {
+                loop: true, // 무한 반복
+                autoplay: {
+                    delay: 5000, // 5초마다 자동 넘김
+                    disableOnInteraction: false, // 사용자가 조작한 후에도 자동 재생 유지
+                },
+                pagination: { // 하단 점 버튼
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: { // 좌우 화살표
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
             });
+            // --- Swiper 초기화 종료 ---
+
         });
     </script>
 </th:block>

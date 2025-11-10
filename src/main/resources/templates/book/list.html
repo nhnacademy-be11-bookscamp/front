@@ -64,6 +64,24 @@
             </div>
         </div>
 
+        <div class="col-lg-3 col-md-6" style="margin-bottom: 15px;">
+            <div class="checkout__input">
+                <p>키워드</p>
+                <input type="text"
+                       name="keyWord"
+                       th:value="${keyWord}"
+                       placeholder="도서 제목 검색">
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6" style="margin-bottom: 15px; display: flex; align-items: flex-end;">
+            <button type="submit"
+                    class="site-btn"
+                    style="width: 100%; padding: 14px;">
+                <i class="fa fa-search"></i> 검색
+            </button>
+        </div>
+
         <form th:action="@{/books}" method="get" style="margin-bottom: 1.5rem;">
             <label>정렬:
                 <select name="sortType">

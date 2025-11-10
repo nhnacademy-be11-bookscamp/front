@@ -1,6 +1,7 @@
 package store.bookscamp.front.book.controller;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -192,6 +193,7 @@ public class BookController {
 
     @GetMapping({"/books/{id}","/admin/books/{id}"})
     public String bookDetail(
+            HttpServletRequest request,
             @PathVariable("id") Long id,
             Model model
     ){
@@ -203,11 +205,15 @@ public class BookController {
         BookLikeCountResponse countResponse = count.getBody();
         model.addAttribute("bookLike", countResponse);
 
-        ResponseEntity<BookLikeStatusResponse> likeStatus = bookLikeFeignClient.getLikeStatus(id);
-        boolean likedByCurrentUser = Optional.ofNullable(likeStatus.getBody())
-                .map(BookLikeStatusResponse::liked)
-                .orElse(false);
-        model.addAttribute("isLikedByCurrentUser", likedByCurrentUser);
+        boolean likeStatus = false;
+
+        if(request.getHeader("X-User-ID") != null) {
+            ResponseEntity<BookLikeStatusResponse> status = bookLikeFeignClient.getLikeStatus(id);
+            likeStatus = status.getBody().liked();
+        }
+
+
+        model.addAttribute("isLikedByCurrentUser", likeStatus);
 
         model.addAttribute("apiPrefix", apiPrefix);
 

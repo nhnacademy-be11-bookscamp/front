@@ -32,8 +32,8 @@ import store.bookscamp.front.tag.controller.response.TagGetResponse;
 @RequiredArgsConstructor
 public class BookController {
 
-    @Value("${gateway.base-url}")
-    private String pathPrefix;
+    @Value("${app.api.prefix}")
+    private String apiPrefix;
 
     private final MinioService minioService;
     private final AladinFeignClient aladinFeignClient;
@@ -211,7 +211,7 @@ public class BookController {
                 .orElse(false);
         model.addAttribute("isLikedByCurrentUser", likedByCurrentUser);
 
-        model.addAttribute("apiPrefix", pathPrefix);
+        model.addAttribute("apiPrefix", apiPrefix);
 
         return "book/detail";
     }

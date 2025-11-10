@@ -57,7 +57,7 @@
                     <!-- 검색창 -->
                     <div class="hero__search">
                         <div class="hero__search__form">
-                            <form th:action="@{/books}" method="get">
+                            <form th:action="@{'/books'}" method="get">
                                 <input type="text" name="keyWord" placeholder="찾으시는 도서가 있나요?"
                                        th:value="${keyWord}">
                                 <button type="submit" class="site-btn">검색</button>

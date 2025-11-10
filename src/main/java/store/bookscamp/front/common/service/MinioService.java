@@ -101,8 +101,8 @@ public class MinioService {
             String bucketName = switch (type.toLowerCase()) {
                 case "book" -> bookBucket;
                 case "review" -> reviewBucket;
-                case "package" -> packageBucket;
-                default -> throw new RuntimeException();
+                case "package", "packaging" -> packageBucket;
+                default -> throw new RuntimeException("Unsupported type: " + type);
             };
 
             String objectName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);

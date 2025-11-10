@@ -1,0 +1,134 @@
+<!-- templates/admin/packagings/detail.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+
+<head>
+    <title th:text="'포장지 상세 | ' + ${packaging.name}">포장지 상세</title>
+
+    <th:block layout:fragment="extra-css">
+        <style>
+            .detail-card { max-width: 960px; margin: 0 auto; }
+            .img-wrap {
+                width: 320px; height: 320px; border: 1px solid #e9ecef; border-radius: 12px;
+                overflow: hidden; background: #f8f9fa; display: flex; align-items: center; justify-content: center;
+            }
+            .img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+            .kv { margin-bottom: .75rem; }
+            .kv .k { width: 90px; color: #6c757d; }
+            .price { font-size: 1.25rem; font-weight: 700; }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<section class="hero" layout:fragment="hero">
+    <div class="container py-3">
+        <div class="d-flex align-items-center justify-content-between">
+            <h3 class="mb-0">포장지 상세</h3>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-secondary" th:href="@{/admin/packagings}">
+                    <i class="fa fa-list"></i>&nbsp; 목록으로
+                </a>
+                <a class="btn btn-primary"
+                   th:href="@{|/admin/packagings/${packaging.id}/update|}">
+                    <i class="fa fa-pencil"></i>&nbsp; 수정
+                </a>
+                <button class="btn btn-outline-danger" id="deleteBtn"
+                        th:attr="data-id=${packaging.id}">
+                    <i class="fa fa-trash"></i>&nbsp; 삭제
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="card shadow-sm detail-card">
+            <div class="card-body">
+                <div class="row g-4">
+                    <!-- 이미지 -->
+                    <div class="col-md-5">
+                        <div class="img-wrap">
+                            <img th:src="${packaging.imageUrl}" alt="packaging image">
+                        </div>
+                    </div>
+
+                    <!-- 정보 -->
+                    <div class="col-md-7">
+                        <div class="kv d-flex">
+                            <div class="k">이름</div>
+                            <div class="v fw-semibold" th:text="${packaging.name}">리본 포장지</div>
+                        </div>
+                        <div class="kv d-flex">
+                            <div class="k">가격</div>
+                            <div class="v price" th:text="${#numbers.formatInteger(packaging.price, 0, 'COMMA')} + '원'">1,500원</div>
+                        </div>
+                        <div class="kv d-flex">
+                            <div class="k">ID</div>
+                            <div class="v text-muted" th:text="${packaging.id}">1</div>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-2">
+                            <a class="btn btn-primary"
+                               th:href="@{|/admin/packagings/${packaging.id}/update|}">
+                                <i class="fa fa-pencil"></i>&nbsp; 수정
+                            </a>
+                            <button class="btn btn-outline-danger" id="deleteBtn2"
+                                    th:attr="data-id=${packaging.id}">
+                                <i class="fa fa-trash"></i>&nbsp; 삭제
+                            </button>
+                            <a class="btn btn-outline-secondary" th:href="@{/admin/packagings}">
+                                목록으로
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 썸네일 크게 보기 (선택) -->
+                <div class="mt-4">
+                    <a class="text-decoration-none" th:href="${packaging.imageUrl}" target="_blank">
+                        원본 이미지 열기 <i class="fa fa-external-link"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script>
+        // 삭제: 자격 증명 포함 (JWT 쿠키 전송)
+        function attachDeleteHandler(btnId) {
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+            btn.addEventListener('click', async () => {
+                if (!confirm('정말 삭제하시겠습니까?')) return;
+                const id = btn.getAttribute('data-id');
+                try {
+                    const res = await fetch(`/admin/packagings/${id}/delete`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include' // ✅ 쿠키 포함
+                    });
+                    if (!res.ok) {
+                        const t = await res.text();
+                        alert('삭제 실패\n' + t);
+                        return;
+                    }
+                    location.href = '/admin/packagings';
+                } catch (e) {
+                    console.error(e);
+                    alert('삭제 요청 중 오류가 발생했습니다.');
+                }
+            });
+        }
+        attachDeleteHandler('deleteBtn');
+        attachDeleteHandler('deleteBtn2');
+    </script>
+</th:block>
+
+</body>
+</html>

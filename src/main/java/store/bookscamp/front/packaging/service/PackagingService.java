@@ -22,7 +22,7 @@ public class PackagingService {
         files.removeIf(MultipartFile::isEmpty);
         if (files.isEmpty()) {return null;}
 
-        List<String> urls = minioService.uploadFiles(files, "packaging");
+        List<String> urls = minioService.uploadFiles(files, "package");
         // 리스트로 받지만 실사용은 1장만 하게 됨
         // 넘어온 값이 여러 개면 1장만 사용하도록 함
         return (urls.size() > 1) ? urls.subList(0, 1) : urls;

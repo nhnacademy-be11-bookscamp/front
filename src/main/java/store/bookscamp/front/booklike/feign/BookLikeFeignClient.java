@@ -18,6 +18,6 @@ public interface BookLikeFeignClient {
     @GetMapping("/api-server/books/{bookId}/like/count")
     ResponseEntity<BookLikeCountResponse> getLikeCount(@PathVariable Long bookId);
 
-    @GetMapping("/api-server/books/{bookId}/like/status")
+    @GetMapping("/api-server/like/status/{bookId}")
     ResponseEntity<BookLikeStatusResponse> getLikeStatus(@PathVariable Long bookId);
 }

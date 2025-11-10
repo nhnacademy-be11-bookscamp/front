@@ -7,8 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
+import store.bookscamp.front.auth.filter.JwtAuthenticationFilter;
 import store.bookscamp.front.auth.handler.CustomAuthenticationSuccessHandler;
 import store.bookscamp.front.auth.provider.AdminAuthenticationProvider;
 import store.bookscamp.front.auth.provider.CustomAuthenticationProvider;
@@ -33,6 +36,11 @@ public class SecurityConfig {
         return new AdminAuthenticationProvider(adminLoginFeignClient);
     }
 
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter();
+    }
+
 
 
     @Bean
@@ -41,6 +49,12 @@ public class SecurityConfig {
         http.securityMatcher("/admin/**");
 
         http.csrf(AbstractHttpConfigurer::disable);
+
+        http.sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
+
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         http.authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
@@ -74,6 +88,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable);
+
+        http.sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
+
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
 
         http.authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests

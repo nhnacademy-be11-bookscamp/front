@@ -8,21 +8,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class CustomMemberDetails implements UserDetails, TokenDetails {
 
-    private final Long memberId;
-    private final String username;
     private final String role;
     private final String rawJwtToken;
 
-    public CustomMemberDetails(Long memberId, String username, String role, String rawJwtToken) {
-        this.memberId = memberId;
-        this.username = username;
+    public CustomMemberDetails(String role, String rawJwtToken) {
         this.role = role;
         this.rawJwtToken = rawJwtToken;
     }
 
-    public Long getMemberId() {
-        return memberId;
-    }
 
     @Override
     public String getRawJwtToken() {
@@ -41,7 +34,7 @@ public class CustomMemberDetails implements UserDetails, TokenDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return null;
     }
 
     @Override

@@ -33,17 +33,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 throw new BadCredentialsException("토큰을 찾을 수 없거나 형식이 잘못되었습니다.");
             }
 
-            String jwtToken = rawJwtToken.substring(7);
-            var decodedJWT = JWT.decode(jwtToken);
-
-            Long id = decodedJWT.getClaim("id").asLong();
-            String role = decodedJWT.getClaim("role").asString();
-
-            CustomMemberDetails customUserDetails = new CustomMemberDetails(id, username, role,rawJwtToken);
-
+            CustomMemberDetails tempDetails = new CustomMemberDetails("ROLE_USER", rawJwtToken);
             UsernamePasswordAuthenticationToken result =
-                    new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-
+                    new UsernamePasswordAuthenticationToken(tempDetails, null, tempDetails.getAuthorities());
             result.setDetails(rawJwtToken);
             return result;
 

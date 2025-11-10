@@ -55,8 +55,7 @@
                                     <span style="width: 100px; color: #6f6f6f; font-weight: 600;">재고</span>
                                     <span style="color: #333;">
                                         <span th:text="${book.stock + '권'}">10권</span>
-                                        <span th:if="${book.stock > 10}" style="margin-left: 10px; color: #7fad39; font-weight: 600;">재고 충분</span>
-                                        <span th:if="${book.stock > 0 and book.stock <= 10}" style="margin-left: 10px; color: #ff9800; font-weight: 600;">재고 부족</span>
+                                        <span th:if="${book.stock > 0 and book.stock <= 10}" style="margin-left: 10px; color: #ff9800; font-weight: 600;">품절임박</span>
                                         <span th:if="${book.stock == 0}" style="margin-left: 10px; color: #dc3545; font-weight: 600;">품절</span>
                                     </span>
                                 </li>

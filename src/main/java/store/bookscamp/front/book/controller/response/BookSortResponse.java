@@ -13,6 +13,7 @@ public record BookSortResponse(
         Integer regularPrice,
         Integer salePrice,
         Integer stock,
-        String thumbnailUrl
+        String thumbnailUrl,
+        long viewCount
 ) {
 }

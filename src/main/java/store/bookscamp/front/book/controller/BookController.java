@@ -120,7 +120,7 @@ public class BookController {
     @PostMapping("/admin/aladin/books")
     public String aladinCreateBook(@ModelAttribute AladinCreateRequest req) {
 
-        bookFeignClient.createAladinBook(req);
+        bookFeignClient.createAladinBook(req, req.getImgUrls());
 
         return "redirect:/admin/books";
     }

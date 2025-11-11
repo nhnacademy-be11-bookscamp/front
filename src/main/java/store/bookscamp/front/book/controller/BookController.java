@@ -1,6 +1,7 @@
 package store.bookscamp.front.book.controller;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -194,6 +197,7 @@ public class BookController {
 
     @GetMapping({"/books/{id}","/admin/books/{id}"})
     public String bookDetail(
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable("id") Long id,
             Model model
     ){
@@ -205,16 +209,17 @@ public class BookController {
         BookLikeCountResponse countResponse = count.getBody();
         model.addAttribute("bookLike", countResponse);
 
-        ResponseEntity<BookLikeStatusResponse> likeStatus = bookLikeFeignClient.getLikeStatus(id);
-        boolean likedByCurrentUser = Optional.ofNullable(likeStatus.getBody())
-                .map(BookLikeStatusResponse::liked)
-                .orElse(false);
-        model.addAttribute("isLikedByCurrentUser", likedByCurrentUser);
+        boolean likeStatus = false;
+
+        if(userDetails != null) {
+            ResponseEntity<BookLikeStatusResponse> status = bookLikeFeignClient.getLikeStatus(id);
+            likeStatus = status.getBody().liked();
+        }
+
+        model.addAttribute("isLikedByCurrentUser", likeStatus);
 
         model.addAttribute("apiPrefix", apiPrefix);
 
         return "book/detail";
     }
 }
-
-

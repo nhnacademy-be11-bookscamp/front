@@ -4,282 +4,307 @@
       layout:decorate="~{layout/default}">
 <head>
     <title>도서 수정 | 북스캠프 관리자</title>
+
+    <style>
+        body {
+            background: #f9fafb;
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+        }
+        .book-edit-container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .book-edit-container h4 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .book-edit-container h4 i {
+            color: #7fad39;
+            margin-right: 10px;
+        }
+        .checkout__input {
+            margin-bottom: 25px;
+        }
+        .checkout__input p {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .checkout__input input[type=text],
+        .checkout__input input[type=number],
+        .checkout__input input[type=date],
+        .checkout__input select,
+        .checkout__input textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            transition: 0.2s ease;
+            font-size: 15px;
+        }
+        .checkout__input input:focus,
+        .checkout__input textarea:focus,
+        .checkout__input select:focus {
+            outline: none;
+            border-color: #7fad39;
+            box-shadow: 0 0 0 2px rgba(127,173,57,0.15);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+        .tag-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .tag-item {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .tag-item:hover {
+            background: #7fad39;
+            border-color: #7fad39;
+            color: #fff;
+        }
+        .tag-item input {
+            display: none;
+        }
+
+        /* ✅ 추가됨: 선택된 태그(active) 시 스타일 */
+        .tag-item.active {
+            background: #7fad39;
+            border-color: #7fad39;
+            color: #fff;
+        }
+
+        .img-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .img-item {
+            position: relative;
+        }
+        .img-item img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .img-item button {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(220,53,69,0.85);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-section {
+            text-align: center;
+            margin-top: 35px;
+        }
+        .site-btn {
+            background: #7fad39;
+            border: none;
+            padding: 12px 30px;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: 0.2s ease;
+        }
+        .site-btn:hover {
+            background: #6d9732;
+        }
+        .cancel-btn {
+            background: #6f6f6f;
+            margin-left: 10px;
+        }
+    </style>
 </head>
 
 <body>
-<!-- Hero 섹션 숨김 -->
-<section layout:fragment="hero" class="hero" style="display: none;">
-</section>
+<section layout:fragment="hero" class="hero" style="display:none;"></section>
 
-<!-- 메인 콘텐츠 -->
 <div layout:fragment="content">
     <section class="product spad">
         <div class="container">
             <div class="row">
-                <!-- 관리자 사이드바 -->
                 <div class="col-lg-3">
                     <div class="hero__categories">
                         <div class="hero__categories__all">
                             <i class="fa fa-bars"></i>
                             <span>관리자 메뉴</span>
                         </div>
-                        <ul th:replace="~{fragment/admin-sidebar :: sidebar}">
-                            <li><a href="#">메뉴</a></li>
-                        </ul>
+                        <ul th:replace="~{fragment/admin-sidebar :: sidebar}"></ul>
                     </div>
                 </div>
 
-                <!-- 도서 수정 폼 -->
                 <div class="col-lg-9">
-                    <div style="background: #ffffff; padding: 30px; border: 1px solid #ebebeb; border-radius: 4px;">
-                        <h4 style="margin-bottom: 30px; font-weight: 700;">
-                            <i class="fa fa-edit" style="margin-right: 10px; color: #7fad39;"></i>
-                            도서 수정
-                        </h4>
+                    <div class="book-edit-container">
+                        <h4><i class="fa fa-edit"></i> 도서 수정</h4>
 
                         <form th:action="@{'/admin/books/' + ${book.id} + '/update'}"
-                              method="post"
-                              enctype="multipart/form-data">
+                              method="post" enctype="multipart/form-data">
 
-                            <!-- Spring PUT 처리용 hidden field -->
                             <input type="hidden" name="_method" value="put">
-
-                            <!-- ✅ removedUrls hidden input -->
                             <input type="hidden" id="removedUrls" name="removedUrls">
 
-                            <div class="row">
-                                <!-- 제목 -->
-                                <div class="col-lg-12">
-                                    <div class="checkout__input">
-                                        <p>제목<span>*</span></p>
-                                        <input type="text"
-                                               name="title"
-                                               th:value="${book.title}"
-                                               placeholder="도서 제목을 입력하세요"
-                                               required>
-                                    </div>
-                                </div>
+                            <!-- 제목 -->
+                            <div class="checkout__input">
+                                <p>제목<span>*</span></p>
+                                <input type="text" name="title" th:value="${book.title}" required>
+                            </div>
 
-                                <!-- 기여자 -->
+                            <!-- 기여자 / 출판사 -->
+                            <div class="row">
                                 <div class="col-lg-6">
                                     <div class="checkout__input">
                                         <p>기여자<span>*</span></p>
-                                        <input type="text"
-                                               name="contributors"
-                                               th:value="${book.contributors}"
-                                               placeholder="저자, 역자 등을 입력하세요"
-                                               required>
+                                        <input type="text" name="contributors" th:value="${book.contributors}" required>
                                     </div>
                                 </div>
-
-                                <!-- 출판사 -->
                                 <div class="col-lg-6">
                                     <div class="checkout__input">
                                         <p>출판사<span>*</span></p>
-                                        <input type="text"
-                                               name="publisher"
-                                               th:value="${book.publisher}"
-                                               placeholder="출판사명을 입력하세요"
-                                               required>
+                                        <input type="text" name="publisher" th:value="${book.publisher}" required>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- 출판일 -->
+                            <!-- 출판일 / ISBN / 재고 -->
+                            <div class="row">
                                 <div class="col-lg-4">
                                     <div class="checkout__input">
                                         <p>출판일</p>
-                                        <input type="date"
-                                               name="publishDate"
-                                               th:value="${book.publishDate}">
+                                        <input type="date" name="publishDate" th:value="${#temporals.format(book.publishDate, 'yyyy-MM-dd')}">
                                     </div>
                                 </div>
-
-                                <!-- ISBN -->
                                 <div class="col-lg-4">
                                     <div class="checkout__input">
                                         <p>ISBN</p>
-                                        <input type="text"
-                                               name="isbn"
-                                               th:value="${book.isbn}"
-                                               placeholder="ISBN을 입력하세요">
+                                        <input type="text" name="isbn" th:value="${book.isbn}">
                                     </div>
                                 </div>
-
-                                <!-- 재고 -->
                                 <div class="col-lg-4">
                                     <div class="checkout__input">
                                         <p>재고</p>
-                                        <input type="number"
-                                               name="stock"
-                                               th:value="${book.stock}"
-                                               placeholder="재고 수량"
-                                               min="0">
+                                        <input type="number" name="stock" th:value="${book.stock}" min="0">
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- 정가 -->
+                            <!-- 가격 -->
+                            <div class="row">
                                 <div class="col-lg-4">
                                     <div class="checkout__input">
                                         <p>정가</p>
-                                        <input type="number"
-                                               name="regularPrice"
-                                               th:value="${book.regularPrice}"
-                                               placeholder="정가를 입력하세요"
-                                               min="0">
+                                        <input type="number" name="regularPrice" th:value="${book.regularPrice}" min="0">
                                     </div>
                                 </div>
-
-                                <!-- 판매가 -->
                                 <div class="col-lg-4">
                                     <div class="checkout__input">
                                         <p>판매가</p>
-                                        <input type="number"
-                                               name="salePrice"
-                                               th:value="${book.salePrice}"
-                                               placeholder="판매가를 입력하세요"
-                                               min="0">
+                                        <input type="number" name="salePrice" th:value="${book.salePrice}" min="0">
                                     </div>
                                 </div>
-
-                                <!-- 포장 가능 여부 -->
                                 <div class="col-lg-4">
                                     <div class="checkout__input">
                                         <p>포장 가능 여부</p>
-                                        <div class="checkout__input__checkbox" style="margin-top: 10px;">
-                                            <label for="packable">
-                                                포장 가능
-                                                <input type="checkbox"
-                                                       id="packable"
-                                                       name="packable"
-                                                       th:checked="${book.packable}"
-                                                       value="true">
-                                                <span class="checkmark"></span>
-                                            </label>
-                                        </div>
+                                        <label><input type="checkbox" name="packable" value="true" th:checked="${book.packable}"> 포장 가능</label>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- 판매 상태 -->
-                                <div class="col-lg-6">
-                                    <div class="checkout__input">
-                                        <p>판매 상태<span>*</span></p>
-                                        <select name="status" required>
-                                            <option th:value="AVAILABLE" th:selected="${book.status == 'AVAILABLE'}">판매 가능</option>
-                                            <option th:value="SOLD_OUT" th:selected="${book.status == 'SOLD_OUT'}">품절</option>
-                                            <option th:value="DISCONTINUED" th:selected="${book.status == 'DISCONTINUED'}">판매 중지</option>
-                                        </select>
+                            <!-- 상태 -->
+                            <div class="checkout__input">
+                                <p>판매 상태</p>
+                                <select name="status">
+                                    <option value="AVAILABLE" th:selected="${book.status.name() == 'AVAILABLE'}">판매 가능</option>
+                                    <option value="SOLD_OUT" th:selected="${book.status.name() == 'SOLD_OUT'}">품절</option>
+                                    <option value="DISCONTINUED" th:selected="${book.status.name() == 'DISCONTINUED'}">판매 중지</option>
+                                </select>
+                            </div>
+
+                            <!-- 카테고리 -->
+                            <div class="checkout__input">
+                                <p>카테고리</p>
+                                <select name="categoryId">
+                                    <option value="">카테고리를 선택하세요</option>
+                                    <option th:each="category : ${book.categoryList}"
+                                            th:value="${category.id}"
+                                            th:text="${category.name}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- 태그 -->
+                            <div class="checkout__input">
+                                <p>태그</p>
+                                <div class="tag-box">
+                                    <label class="tag-item" th:each="tag : ${tags}">
+                                        <input type="checkbox" name="tagIds" th:value="${tag.id}">
+                                        <span th:text="${tag.name}">태그명</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 기존 이미지 -->
+                            <div class="checkout__input">
+                                <p>기존 이미지</p>
+                                <div class="img-box">
+                                    <div class="img-item" th:each="url : ${book.imageUrlList}">
+                                        <img th:src="${url}" alt="도서 이미지">
+                                        <button type="button" class="btn-remove-image" th:data-url="${url}">×</button>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- 카테고리 -->
-                                <div class="col-lg-6">
-                                    <div class="checkout__input">
-                                        <p>카테고리<span>*</span></p>
-                                        <label>
-                                            <select name="categoryId" required>
-                                                <option value="" disabled>카테고리를 선택하세요</option>
-                                                <th:block th:each="parent : ${categories}">
-                                                    <optgroup th:label="${parent.name}">
-                                                        <option th:each="child : ${parent.children}"
-                                                                th:value="${child.id}"
-                                                                th:text="${child.name}"
-                                                                th:selected="${book.categoryId == child.id}"></option>
-                                                    </optgroup>
-                                                </th:block>
-                                            </select>
-                                        </label>
-                                    </div>
-                                </div>
+                            <!-- 새 이미지 업로드 -->
+                            <div class="checkout__input">
+                                <p>새 이미지 업로드</p>
+                                <input type="file" id="newImageUpload" name="files" multiple accept="image/*">
+                                <div id="newPreview" class="img-box"></div>
+                            </div>
 
-                                <!-- 태그 -->
-                                <div class="col-lg-12">
-                                    <div class="checkout__input">
-                                        <p>태그</p>
-                                        <select name="tagIds" multiple size="5">
-                                            <option th:each="tag : ${tags}"
-                                                    th:value="${tag.id}"
-                                                    th:text="${tag.name}"
-                                                    th:selected="${book.tagIds.contains(tag.id)}"></option>
-                                        </select>
-                                        <small style="color: #6f6f6f; font-size: 13px; display: block; margin-top: 5px;">
-                                            Ctrl(또는 Cmd) 키를 누른 채로 여러 개 선택 가능
-                                        </small>
-                                    </div>
-                                </div>
+                            <!-- 목차 -->
+                            <div class="checkout__input">
+                                <p>목차</p>
+                                <textarea name="content" rows="7" th:text="${book.content}" placeholder="목차를 입력하세요"></textarea>
+                            </div>
 
-                                <!-- 기존 이미지 -->
-                                <div class="col-lg-12">
-                                    <div class="checkout__input">
-                                        <p>기존 이미지</p>
-                                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                            <div th:each="url : ${book.imageUrls}"
-                                                 style="position: relative; display: inline-block;">
-                                                <img th:src="${url}"
-                                                     alt="도서 이미지"
-                                                     style="width: 100px; height: 100px; object-fit: cover; border: 1px solid #ebebeb; border-radius: 4px;">
-                                                <button type="button"
-                                                        class="btn-remove-image"
-                                                        th:data-url="${url}"
-                                                        style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; cursor: pointer; line-height: 1;">
-                                                    ×
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <!-- 설명 -->
+                            <div class="checkout__input">
+                                <p>설명</p>
+                                <textarea name="explanation" rows="8" th:text="${book.explanation}" placeholder="도서 설명을 입력하세요"></textarea>
+                            </div>
 
-                                <!-- 새 이미지 업로드 -->
-                                <div class="col-lg-12">
-                                    <div class="checkout__input">
-                                        <p>새 이미지 업로드</p>
-                                        <input type="file"
-                                               id="newImageUpload"
-                                               name="files"
-                                               multiple
-                                               accept="image/*"
-                                               style="padding: 10px; border: 1px solid #ebebeb; border-radius: 4px; width: 100%;">
-                                        <small style="color: #6f6f6f; font-size: 13px; display: block; margin-top: 5px;">
-                                            여러 이미지를 선택할 수 있습니다
-                                        </small>
-                                        <div id="newPreview" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;"></div>
-                                    </div>
-                                </div>
-
-                                <!-- 목차 -->
-                                <div class="col-lg-12">
-                                    <div class="checkout__input">
-                                        <p>목차</p>
-                                        <textarea name="content"
-                                                  rows="5"
-                                                  placeholder="목차를 입력하세요"
-                                                  th:text="${book.content}"></textarea>
-                                    </div>
-                                </div>
-
-                                <!-- 설명 -->
-                                <div class="col-lg-12">
-                                    <div class="checkout__input">
-                                        <p>설명</p>
-                                        <textarea name="explanation"
-                                                  rows="5"
-                                                  placeholder="도서 설명을 입력하세요"
-                                                  th:text="${book.explanation}"></textarea>
-                                    </div>
-                                </div>
-
-                                <!-- 버튼 -->
-                                <div class="col-lg-12 text-center" style="margin-top: 20px;">
-                                    <button type="submit"
-                                            class="site-btn"
-                                            style="width: 200px; margin-right: 10px;">
-                                        수정 완료
-                                    </button>
-                                    <a th:href="@{/admin/books}"
-                                       class="site-btn"
-                                       style="width: 200px; background: #6f6f6f; display: inline-block; text-align: center; text-decoration: none;">
-                                        취소
-                                    </a>
-                                </div>
+                            <!-- 버튼 -->
+                            <div class="btn-section">
+                                <button type="submit" class="site-btn">수정 완료</button>
+                                <a th:href="@{/admin/books}" class="site-btn cancel-btn">취소</a>
                             </div>
                         </form>
                     </div>
@@ -289,65 +314,51 @@
     </section>
 </div>
 
-<!-- 추가 JavaScript -->
+<!-- JS -->
 <div layout:fragment="extra-js">
     <script>
-        (function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const removedUrls = [];
 
-            // DOM이 로드된 후 실행
-            document.addEventListener('DOMContentLoaded', function() {
-                // 이미지 삭제 버튼 이벤트 위임
-                document.addEventListener('click', function(e) {
-                    if (e.target.closest('.btn-remove-image')) {
-                        const button = e.target.closest('.btn-remove-image');
-                        const url = button.dataset.url;
-                        removedUrls.push(url);
-                        document.getElementById('removedUrls').value = removedUrls.join(',');
-                        button.closest('div').remove();
-                    }
-                });
-
-                // 파일 업로드 이벤트
-                const fileInput = document.getElementById('newImageUpload');
-                if (fileInput) {
-                    fileInput.addEventListener('change', function(e) {
-                        const preview = document.getElementById('newPreview');
-                        preview.innerHTML = '';
-                        Array.from(e.target.files).forEach(file => {
-                            const reader = new FileReader();
-                            reader.onload = function(ev) {
-                                const img = document.createElement('img');
-                                img.src = ev.target.result;
-                                img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border: 1px solid #ebebeb; border-radius: 4px;';
-                                preview.appendChild(img);
-                            };
-                            reader.readAsDataURL(file);
-                        });
-                    });
+            // 기존 이미지 삭제
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.btn-remove-image');
+                if (btn) {
+                    removedUrls.push(btn.dataset.url);
+                    document.getElementById('removedUrls').value = removedUrls.join(',');
+                    btn.closest('.img-item').remove();
                 }
+            });
 
-                // 관리자 사이드바 전용 토글
-                $('.admin-category-header').on('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    const menuId = $(this).data('admin-menu');
-                    const $submenu = $('#admin-menu-' + menuId);
-                    const $toggle = $(this).find('.admin-toggle');
-
-                    $toggle.toggleClass('active');
-                    $submenu.slideToggle(300);
+            // 새 이미지 미리보기
+            const fileInput = document.getElementById('newImageUpload');
+            const preview = document.getElementById('newPreview');
+            if (fileInput) {
+                fileInput.addEventListener('change', function (e) {
+                    preview.innerHTML = '';
+                    Array.from(e.target.files).forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                            const img = document.createElement('img');
+                            img.src = ev.target.result;
+                            preview.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    });
                 });
+            }
 
-                // 초기화: aria 속성 설정
-                $('.admin-toggle').attr({
-                    'role': 'button',
-                    'aria-expanded': 'false',
-                    'tabindex': '0'
+            // ✅ 추가됨: 태그 클릭 시 active 토글
+            const tagItems = document.querySelectorAll('.tag-item');
+            tagItems.forEach(item => {
+                item.addEventListener('click', function (e) {
+                    e.preventDefault(); // label 기본 동작 방지
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked; // 체크 상태 반전
+                    this.classList.toggle('active', checkbox.checked); // 색상 반영
                 });
             });
-        })();
+        });
     </script>
 </div>
 </body>

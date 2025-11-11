@@ -41,7 +41,23 @@
                 font-weight: 500;
                 padding: 10px 15px;
             }
-            /* 부트스트랩 기본 버튼 스타일을 사용해도 좋습니다. */
+
+            /* ##### [추가] 필터 탭 활성화 스타일 ##### */
+            .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+                color: #fff;
+                background-color: #0b5ed7; /* 사이트 메인 컬러와 통일 */
+            }
+            .nav-pills .nav-link {
+                color: #0b5ed7;
+                border: 1px solid #0b5ed7;
+                margin-right: 10px;
+                font-weight: 500;
+            }
+            .nav-pills .nav-item {
+                margin-bottom: 10px; /* 모바일에서 줄바꿈 시 간격 */
+            }
+            /* ##### /필터 탭 활성화 스타일 ##### */
+
         </style>
     </th:block>
 </head>
@@ -65,41 +81,74 @@
             </div>
         </div>
     </section>
-    <section class="checkout spad"> <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="section-title">
-                    <h2>내 쿠폰함</h2>
-                </div>
 
-                <div th:if="${issueSuccess}" class="alert alert-success" role="alert" th:text="${issueSuccess}"></div>
-                <div th:if="${issueError}" class="alert alert-danger" role="alert" th:text="${issueError}"></div>
-                <div th:if="${deleteError}" class="alert alert-warning" role="alert" th:text="${deleteError}"></div>
+    <section class="checkout spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title">
+                        <h2>내 쿠폰함</h2>
+                    </div>
 
+                    <div th:if="${issueSuccess}" class="alert alert-success" role="alert" th:text="${issueSuccess}"></div>
+                    <div th:if="${issueError}" class="alert alert-danger" role="alert" th:text="${issueError}"></div>
+                    <div th:if="${deleteError}" class="alert alert-warning" role="alert" th:text="${deleteError}"></div>
 
-                <div th:if="${coupons == null || coupons.isEmpty()}" class="text-center" style="padding: 60px 0;">
-                    <h4>보유한 쿠폰이 없습니다.</h4>
-                    <p class="text-secondary">다양한 이벤트에 참여하고 쿠폰을 받아보세요!</p>
-                </div>
+                    <ul class="nav nav-pills mb-4" id="coupon-filter-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               th:classappend="${param.status == null || param.status == 'all'} ? 'active'"
+                               th:href="@{/my-coupons(status='all')}">전체</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               th:classappend="${param.status == 'AVAILABLE'} ? 'active'"
+                               th:href="@{/my-coupons(status='AVAILABLE')}">사용 가능</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               th:classappend="${param.status == 'USED'} ? 'active'"
+                               th:href="@{/my-coupons(status='USED')}">사용 완료</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               th:classappend="${param.status == 'EXPIRED'} ? 'active'"
+                               th:href="@{/my-coupons(status='EXPIRED')}">기한 만료</a>
+                        </li>
+                    </ul>
+                    <div th:if="${coupons == null || coupons.isEmpty()}" class="text-center" style="padding: 60px 0;">
+                        <h4>보유한 쿠폰이 없습니다.</h4>
+                        <p class="text-secondary">다양한 이벤트에 참여하고 쿠폰을 받아보세요!</p>
+                    </div>
 
-                <div th:unless="${coupons == null || coupons.isEmpty()}">
-                    <div th:each="coupon : ${coupons}" class="coupon-card">
+                    <div th:unless="${coupons == null || coupons.isEmpty()}">
 
-                        <div class="coupon-details">
-                            <h4 th:text="${coupon.couponName}">[웰컴 쿠폰] 15% 할인</h4>
-                            <p class="discount-info" th:text="${coupon.discountInfo}">전 상품 15% (최대 10,000원)</p>
-                            <p class="expiry">
-                                유효기간: <span th:text="${#temporals.format(coupon.expiredAt, 'yyyy-MM-dd')}"></span> 까지
-                            </p>
+                        <div th:each="coupon : ${coupons}" class="coupon-card">
+
+                            <div class="coupon-details">
+                                <h4 th:text="${coupon.name}">[웰컴 쿠폰] 15% 할인</h4>
+                                <p class="discount-info" th:text="${coupon.discountValue()}">전 상품 15% (최대 10,000원)</p>
+                                <p class="expiry">
+                                    유효기간: <span th:text="${#temporals.format(coupon.expiredAt, 'yyyy-MM-dd')}"></span> 까지
+                                </p>
+                            </div>
+
+                            <div class="coupon-action">
+                                <form th:action="@{/my-coupons/delete}" method="post" onsubmit="return confirm('이 쿠폰을 목록에서 삭제하시겠습니까?');">
+
+                                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                                    <button type="submit" class="btn delete-btn">삭제</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
-    </div>
     </section>
 </div>
+
 <th:block layout:fragment="extra-js">
     <script>
         // console.log("내 쿠폰 페이지 전용 스크립트");

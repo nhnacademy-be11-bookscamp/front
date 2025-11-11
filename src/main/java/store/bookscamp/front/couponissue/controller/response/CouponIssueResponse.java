@@ -11,7 +11,8 @@ public record CouponIssueResponse(
         Integer minOrderAmount,
         Integer maxDiscountAmount,
         LocalDateTime expiredAt,
-        boolean isUsed,
-        LocalDateTime usedAt
+        CouponIssueResponse status,
+        LocalDateTime usedAt,
+        String name
 ) {
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import store.bookscamp.front.common.config.FeignConfig;
 import store.bookscamp.front.couponissue.controller.request.CouponIssueRequest;
+import store.bookscamp.front.couponissue.controller.response.CouponIssueDownloadResponse;
 import store.bookscamp.front.couponissue.controller.response.CouponIssueResponse;
 
 @FeignClient(
@@ -19,9 +20,6 @@ import store.bookscamp.front.couponissue.controller.response.CouponIssueResponse
         configuration = FeignConfig.class
 )
 public interface CouponIssueFeignClient {
-
-    @PostMapping("/api-server/coupon-issue/issue")
-    ResponseEntity<Long> issueCoupon(@Valid @RequestBody CouponIssueRequest couponIssueRequest);
 
     @GetMapping("/api-server/coupon-issue/my")
     ResponseEntity<List<CouponIssueResponse>> getMyCoupons();

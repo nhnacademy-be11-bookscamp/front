@@ -42,7 +42,7 @@ public interface BookFeignClient {
     );
 
     @PostMapping(value ="/api-server/admin/aladin/books", produces = "application/json")
-    void createAladinBook(@RequestBody AladinCreateRequest request);
+    void createAladinBook(@RequestBody AladinCreateRequest request, @RequestParam List<String> imgUrls);
 
     @GetMapping("/api-server/books")
     ResponseEntity<RestPageImpl<BookSortResponse>> getBooks(

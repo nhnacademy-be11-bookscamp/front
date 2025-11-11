@@ -8,21 +8,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class CustomAdminDetails implements UserDetails, TokenDetails {
 
-    private final Long adminId;
-    private final String username;
     private final String role;
     private final String rawJwtToken;
 
-    public CustomAdminDetails(Long adminId, String username, String role, String rawJwtToken) {
-        this.adminId = adminId;
-        this.username = username;
+    public CustomAdminDetails(String role, String rawJwtToken) {
         this.role = role;
         this.rawJwtToken = rawJwtToken;
     }
 
-    public Long getAdminId() {
-        return adminId;
-    }
+
 
     @Override
     public String getRawJwtToken() {
@@ -41,7 +35,7 @@ public class CustomAdminDetails implements UserDetails, TokenDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return null;
     }
 
     @Override

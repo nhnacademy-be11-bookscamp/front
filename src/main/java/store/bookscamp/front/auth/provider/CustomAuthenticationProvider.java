@@ -1,6 +1,5 @@
 package store.bookscamp.front.auth.provider;
 
-import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;

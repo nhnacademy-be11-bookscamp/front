@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>북스캠프 | 내 쿠폰함</title>
+
+    <th:block layout:fragment="extra-css">
+        <style>
+            .coupon-card {
+                border: 2px dashed #0b5ed7; /* 점선 테두리 */
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 25px;
+                margin-bottom: 20px;
+                display: flex;
+                justify-content: space-between; /* 양쪽 정렬 */
+                align-items: center;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            }
+            .coupon-details h4 {
+                font-weight: 700;
+                color: #222;
+                margin-bottom: 10px;
+            }
+            .coupon-details .discount-info {
+                font-size: 1.1rem;
+                color: #0b5ed7;
+                font-weight: 500;
+                margin-bottom: 15px;
+            }
+            .coupon-details .expiry {
+                font-size: 0.9rem;
+                color: #e74c3c; /* 유효기간은 강조 */
+                font-weight: 500;
+            }
+            .coupon-action .delete-btn {
+                background-color: #dc3545;
+                border-color: #dc3545;
+                color: white;
+                font-weight: 500;
+                padding: 10px 15px;
+            }
+            /* 부트스트랩 기본 버튼 스타일을 사용해도 좋습니다. */
+        </style>
+    </th:block>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+    <section class="breadcrumb-section set-bg" th:data-setbg="@{/img/breadcrumb.jpg}">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb__text">
+                        <h2>마이페이지</h2>
+                        <div class="breadcrumb__option">
+                            <a th:href="@{/}">Home</a>
+                            <span>내 쿠폰함</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="checkout spad"> <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-title">
+                    <h2>내 쿠폰함</h2>
+                </div>
+
+                <div th:if="${issueSuccess}" class="alert alert-success" role="alert" th:text="${issueSuccess}"></div>
+                <div th:if="${issueError}" class="alert alert-danger" role="alert" th:text="${issueError}"></div>
+                <div th:if="${deleteError}" class="alert alert-warning" role="alert" th:text="${deleteError}"></div>
+
+
+                <div th:if="${coupons == null || coupons.isEmpty()}" class="text-center" style="padding: 60px 0;">
+                    <h4>보유한 쿠폰이 없습니다.</h4>
+                    <p class="text-secondary">다양한 이벤트에 참여하고 쿠폰을 받아보세요!</p>
+                </div>
+
+                <div th:unless="${coupons == null || coupons.isEmpty()}">
+                    <div th:each="coupon : ${coupons}" class="coupon-card">
+
+                        <div class="coupon-details">
+                            <h4 th:text="${coupon.couponName}">[웰컴 쿠폰] 15% 할인</h4>
+                            <p class="discount-info" th:text="${coupon.discountInfo}">전 상품 15% (최대 10,000원)</p>
+                            <p class="expiry">
+                                유효기간: <span th:text="${#temporals.format(coupon.expiredAt, 'yyyy-MM-dd')}"></span> 까지
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    </section>
+</div>
+<th:block layout:fragment="extra-js">
+    <script>
+        // console.log("내 쿠폰 페이지 전용 스크립트");
+    </script>
+</th:block>
+
+</body>
+</html>

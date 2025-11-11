@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <body>
     <!-- 모바일 햄버거 메뉴 Fragment -->
     <div th:fragment="humberger">
@@ -24,7 +25,12 @@
                 <div class="humberger__menu__widget">
                     <div class="header__top__right__auth">
                         <!-- 로그인 버튼 -->
-                        <a th:href="@{/members/login}"><i class="fa fa-user"></i> 로그인</a>
+                        <a sec:authorize="isAnonymous()" th:href="@{/members/login}">
+                            <i class="fa fa-user"></i> 로그인
+                        </a>
+                        <!-- 로그아웃 버튼-->
+                        <a sec:authorize="isAuthenticated()" th:href="@{/logout}"> <i class="fa fa-sign-out"></i> 로그아웃
+                        </a>
                     </div>
                 </div>
             </div>
@@ -78,9 +84,16 @@
                             <div class="header__cart__price">총: <span th:text="${cartTotalAmount != null ? #numbers.formatInteger(cartTotalAmount, 0, 'COMMA') + '원' : '0원'}">0원</span></div>
                         </div>
                         <!-- 로그인 버튼 -->
-                        <a th:href="@{/login}" class="header__login" style="margin-left: 20px;">
+                        <a sec:authorize="isAnonymous()" th:href="@{/login}" class="header__login" style="margin-left: 20px;">
                             <i class="fa fa-user"></i> 로그인
                         </a>
+
+                        <div sec:authorize="isAuthenticated()" class="header__login" style="margin-left: 20px; display: flex; align-items: center; font-size: 14px;">
+
+                            <a th:href="@{/logout}" style="color: #333;">
+                                <i class="fa fa-sign-out"></i> 로그아웃
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

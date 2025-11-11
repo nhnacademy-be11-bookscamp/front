@@ -1,0 +1,137 @@
+<!-- templates/admin/packagings/packagings.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+
+<head>
+    <title>관리자 | 포장지 목록</title>
+
+    <!-- 페이지별 추가 CSS -->
+    <th:block layout:fragment="extra-css">
+        <style>
+            .pkg-thumb {
+                width: 80px; height: 80px; object-fit: cover; border-radius: 8px;
+                border: 1px solid #e9ecef;
+            }
+            .pkg-row:hover { background: #fafafa; }
+            .pkg-name { font-weight: 600; }
+            .table thead th { white-space: nowrap; }
+            .action-btns .btn { margin-right: .25rem; }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<!-- Hero 섹션(관리자 페이지에선 간단 배너로 대체 가능) -->
+<section class="hero" layout:fragment="hero">
+    <div class="container py-3">
+        <div class="d-flex align-items-center justify-content-between">
+            <h3 class="mb-0">포장지 관리</h3>
+            <a class="btn btn-primary" th:href="@{/admin/packagings/create}">
+                <i class="fa fa-plus"></i>&nbsp; 새 포장지 등록
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- 메인 콘텐츠 -->
+<div layout:fragment="content">
+    <div class="container py-4">
+
+        <!-- 목록 테이블 -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                        <tr>
+                            <th>포장지 사진</th>
+                            <th>포장지 이름</th>
+                            <th>가격</th>
+                            <th class="text-end">작업</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- 데이터가 있을 때 -->
+                        <tr th:each="p : ${packagings}" class="pkg-row">
+                            <td>
+                                <a th:href="@{|/admin/packagings/${p.id}|}">
+                                    <img th:src="${p.imageUrl}" alt="packaging"
+                                         class="pkg-thumb">
+                                </a>
+                            </td>
+                            <td>
+                                <a class="pkg-name text-decoration-none"
+                                   th:text="${p.name}"
+                                   th:href="@{|/admin/packagings/${p.id}|}">포장지 이름</a>
+                            </td>
+                            <td th:text="${#numbers.formatInteger(p.price, 0, 'COMMA')} + '원'">1,500원</td>
+                            <td class="text-end action-btns">
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:href="@{|/admin/packagings/${p.id}/update|}">
+                                    <i class="fa fa-pencil"></i> 수정
+                                </a>
+                                <button type="button"
+                                        class="btn btn-outline-danger btn-sm js-delete"
+                                        th:attr="data-id=${p.id}">
+                                    <i class="fa fa-trash"></i> 삭제
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- 데이터가 없을 때 -->
+                        <tr th:if="${packagings == null or #lists.isEmpty(packagings)}">
+                            <td colspan="4" class="text-center text-muted py-5">
+                                등록된 포장지가 없습니다. <a th:href="@{/admin/packagings/create}">첫 포장지를 등록</a>해보세요.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- 페이지별 JS -->
+<th:block layout:fragment="extra-js">
+    <script>
+        // 삭제 버튼 핸들러 (credentials: 'include' 필수)
+        document.addEventListener('click', async function (e) {
+            const btn = e.target.closest('.js-delete');
+            if (!btn) return;
+
+            const id = btn.getAttribute('data-id');
+            if (!id) return;
+
+            if (!confirm('정말 삭제하시겠습니까?')) return;
+
+            try {
+                const res = await fetch(`/admin/packagings/${id}/delete`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include' // ✅ 쿠키(JWT) 포함 전송
+                });
+
+                if (!res.ok) {
+                    const text = await res.text();
+                    alert('삭제에 실패했습니다.\n' + text);
+                    return;
+                }
+
+                // 성공 시 목록 새로고침
+                location.reload();
+
+            } catch (err) {
+                console.error(err);
+                alert('삭제 요청 중 오류가 발생했습니다.');
+            }
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

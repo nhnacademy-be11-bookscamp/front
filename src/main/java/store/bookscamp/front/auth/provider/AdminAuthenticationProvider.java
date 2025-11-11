@@ -1,7 +1,5 @@
 package store.bookscamp.front.auth.provider;
 
-
-import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -34,17 +32,10 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
                 throw new BadCredentialsException("토큰을 찾을 수 없거나 형식이 잘못되었습니다.");
             }
 
-            String jwtToken = rawJwtToken.substring(7);
-            var decodedJWT = JWT.decode(jwtToken);
-
-            Long id = decodedJWT.getClaim("id").asLong();
-            String role = decodedJWT.getClaim("role").asString();
-
-            CustomAdminDetails customAdminDetails = new CustomAdminDetails(id, username, role,rawJwtToken);
+            CustomAdminDetails tempDetails = new CustomAdminDetails("ROLE_ADMIN", rawJwtToken);
 
             UsernamePasswordAuthenticationToken result =
-                    new UsernamePasswordAuthenticationToken(customAdminDetails, null, customAdminDetails.getAuthorities());
-
+                    new UsernamePasswordAuthenticationToken(tempDetails, null, tempDetails.getAuthorities());
             result.setDetails(rawJwtToken);
             return result;
 

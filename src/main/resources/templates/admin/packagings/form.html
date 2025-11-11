@@ -1,0 +1,167 @@
+<!-- templates/admin/packagings/form.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+
+<head>
+    <title th:text="${packaging != null} ? '포장지 수정' : '포장지 등록'">포장지 등록</title>
+
+    <th:block layout:fragment="extra-css">
+        <style>
+            .form-card { max-width: 880px; margin: 0 auto; }
+            .thumb-box {
+                width: 160px; height: 160px; border: 1px solid #e9ecef; border-radius: 10px;
+                display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f8f9fa;
+            }
+            .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+            .help { color:#6c757d; font-size: .9rem; }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<section class="hero" layout:fragment="hero">
+    <div class="container py-3">
+        <div class="d-flex align-items-center justify-content-between">
+            <h3 class="mb-0" th:text="${packaging != null} ? '포장지 수정' : '포장지 등록'">포장지 등록</h3>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/packagings}">
+                <i class="fa fa-list"></i>&nbsp; 목록으로
+            </a>
+        </div>
+    </div>
+</section>
+
+<div layout:fragment="content">
+    <div class="container py-4">
+        <div class="card shadow-sm form-card">
+            <div class="card-body">
+                <!-- 생성/수정 공통 폼 -->
+                <form th:action="${packaging != null} ? @{/admin/packagings/{id}/update(id=${packaging.id})} : @{/admin/packagings}"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    <!-- PUT 메서드 오버라이드 (수정일 때만) -->
+                    <input type="hidden" name="_method" value="put" th:if="${packaging != null}"/>
+
+                    <div class="row g-4">
+                        <!-- 미리보기 -->
+                        <div class="col-md-4">
+                            <label class="form-label">포장지 이미지</label>
+                            <div class="thumb-box mb-2">
+                                <img id="preview"
+                                     th:if="${packaging != null and packaging.imageUrl != null}"
+                                     th:src="${packaging.imageUrl}"
+                                     alt="preview">
+                                <img id="preview" th:if="${packaging == null}" src="/img/placeholder/placeholder-1x1.png" alt="preview">
+                            </div>
+
+                            <div class="d-grid">
+                                <input class="form-control" type="file" name="files"
+                                       id="fileInput" accept="image/*" />
+                                <small class="help mt-2">
+                                    한 장만 업로드하세요. 새 이미지를 선택하면 기존 이미지를 교체합니다.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- 기본 정보 -->
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">포장지 이름</label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                       th:value="${packaging != null} ? ${packaging.name} : ''"
+                                       placeholder="예) 리본 포장지" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="price" class="form-label">가격(원)</label>
+                                <input type="number" class="form-control" id="price" name="price"
+                                       min="0" step="1"
+                                       th:value="${packaging != null} ? ${packaging.price} : 0"
+                                       required>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-check"></i>&nbsp;
+                                    <span th:text="${packaging != null} ? '저장' : '등록'">등록</span>
+                                </button>
+                                <a class="btn btn-outline-secondary" th:href="${packaging != null} ? @{/admin/packagings/{id}(id=${packaging.id})} : @{/admin/packagings}">
+                                    취소
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- 삭제 버튼 (수정 모드에서만 노출, 별도 확인) -->
+                <div class="border-top pt-3 mt-4" th:if="${packaging != null}">
+                    <button type="button" class="btn btn-outline-danger" id="deleteBtn"
+                            th:attr="data-id=${packaging.id}">
+                        <i class="fa fa-trash"></i>&nbsp; 삭제
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script>
+        // 이미지 미리보기 & 한 장만 유지
+        const fileInput = document.getElementById('fileInput');
+        const preview   = document.getElementById('preview');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function (e) {
+                const files = Array.from(e.target.files || []);
+                if (!files.length) return;
+
+                // 여러 장 선택했을 경우 첫 장만 사용
+                if (files.length > 1) {
+                    const dt = new DataTransfer();
+                    dt.items.add(files[0]);
+                    fileInput.files = dt.files;
+                }
+
+                const file = fileInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        if (preview) preview.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // 삭제 (수정 화면 전용) - JWT 쿠키 포함
+        const delBtn = document.getElementById('deleteBtn');
+        if (delBtn) {
+            delBtn.addEventListener('click', async () => {
+                if (!confirm('정말 삭제하시겠습니까?')) return;
+                const id = delBtn.getAttribute('data-id');
+                try {
+                    const res = await fetch(`/admin/packagings/${id}/delete`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include' // ✅ 쿠키(JWT) 포함
+                    });
+                    if (!res.ok) {
+                        const t = await res.text();
+                        alert('삭제 실패\n' + t);
+                        return;
+                    }
+                    location.href = '/admin/packagings';
+                } catch (e) {
+                    console.error(e);
+                    alert('삭제 요청 중 오류가 발생했습니다.');
+                }
+            });
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

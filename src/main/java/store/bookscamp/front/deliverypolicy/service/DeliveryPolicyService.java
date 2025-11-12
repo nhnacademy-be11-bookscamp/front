@@ -44,4 +44,8 @@ public class DeliveryPolicyService {
     public DeliveryPolicyResponse updateDeliveryPolicy(Long id, DeliveryPolicyUpdateRequest updateRequest) {
         return deliveryPolicyFeignClient.updateDeliveryPolicy(id, updateRequest);
     }
+
+    public void delete(Long id) {
+        deliveryPolicyFeignClient.delete(id);
+    }
 }

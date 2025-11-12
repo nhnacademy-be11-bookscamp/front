@@ -2,6 +2,7 @@ package store.bookscamp.front.deliverypolicy.feign;
 
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,26 +19,29 @@ import store.bookscamp.front.deliverypolicy.controller.response.DeliveryPolicyRe
 public interface DeliveryPolicyFeignClient {
 
     // 관리자 전용 API
-    @PostMapping("/admin/delivery-policies")
+    @PostMapping("/api-server/admin/delivery-policies")
     DeliveryPolicyResponse createDeliveryPolicy(@RequestBody DeliveryPolicyCreateRequest createRequest);
 
-    @GetMapping
+    @GetMapping("/api-server/admin/delivery-policies")
     List<DeliveryPolicyResponse> getAllDeliveryPolicies();
 
-    @PutMapping("/admin/delivery-policies/{id}")
+    @PutMapping("/api-server/admin/delivery-policies/{id}")
     DeliveryPolicyResponse updateDeliveryPolicy(
             @PathVariable("id") Long id,
             @RequestBody DeliveryPolicyUpdateRequest updateRequest);
 
+    @DeleteMapping("/api-server/admin/delivery-policies/{id}")
+    void delete(@PathVariable("id") Long id);
+
 
     // 사용자 전용 API
-    @GetMapping("/delivery-policies/current")
+    @GetMapping("/api-server/delivery-policies/current")
     DeliveryPolicyResponse getCurrentDeliveryPolicy();
 
-    @GetMapping("/delivery-policies/is-free")
+    @GetMapping("/api-server/delivery-policies/is-free")
     boolean isFreeByTotal(@RequestParam("orderTotal") int orderTotal);
 
     // 총액 기준 배송비 계산
-    @GetMapping("/delivery-policies/fee")
+    @GetMapping("/api-server/delivery-policies/fee")
     DeliveryFeeResponse calculateFee(@RequestParam("orderTotal") int orderTotal);
 }

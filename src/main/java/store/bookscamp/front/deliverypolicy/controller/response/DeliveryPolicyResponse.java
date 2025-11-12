@@ -9,6 +9,6 @@ import lombok.Getter;
 public class DeliveryPolicyResponse {
 
     private Long id;
-    private int feeDeliveryThreshold;
+    private int freeDeliveryThreshold;
     private int baseDeliveryFee;
 }

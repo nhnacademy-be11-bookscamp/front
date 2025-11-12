@@ -56,6 +56,6 @@ public interface BookFeignClient {
     @GetMapping("/api-server/bookDetail/{id}")
     BookInfoResponse getBookDetail(@PathVariable Long id);
 
-    @GetMapping("/api-server/books/allBooks")
-    ResponseEntity<List<BookIndexResponse>> getAllBooks();
+    @GetMapping("/api-server/books/indexBooks")
+    ResponseEntity<List<BookIndexResponse>> getRecommendBooks();
 }

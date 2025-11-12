@@ -124,6 +124,7 @@
             margin-left: 10px;
         }
     </style>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"/>
 </head>
 
 <body>
@@ -250,18 +251,21 @@
                                     </label>
                                 </div>
                             </div>
-
+-->
                             <!-- 목차 -->
                             <div class="checkout__input">
                                 <p>목차</p>
-                                <textarea name="content" rows="5" th:text="${aladinBook.content}"></textarea>
+                                <div id="tocEditor"></div> <!-- ✅ textarea 대신 div -->
+                                <input type="hidden" name="content" id="contentInput"> <!-- 폼으로 전송할 hidden input -->
                             </div>
 
                             <!-- 설명 -->
                             <div class="checkout__input">
                                 <p>설명</p>
-                                <textarea name="explanation" rows="6" th:text="${aladinBook.explanation}"></textarea>
+                                <div id="explanEditor"></div> <!-- ✅ textarea 대신 div -->
+                                <input type="hidden" name="explanation" id="explanationInput" th:value="${aladinBook.explanation}"> <!-- 폼으로 전송할 hidden input -->
                             </div>
+
 
                             <!-- 버튼 -->
                             <div class="btn-section" style="text-align:center; margin-top:35px;">
@@ -278,6 +282,7 @@
 
 <!-- ✅ JS: 태그 클릭 시 active 토글 -->
 <div layout:fragment="extra-js">
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const tagItems = document.querySelectorAll('.tag-item');
@@ -289,6 +294,30 @@
                     this.classList.toggle('active', checkbox.checked);
                 });
             });
+
+            const tocEditor = new toastui.Editor({
+                el: document.querySelector('#tocEditor'),
+                height: '200px',
+                initialEditType: 'wysiwyg',
+                previewStyle: 'vertical',
+                initialValue: ''
+            });
+            var explanation = document.querySelector('#explanationInput').value;
+
+            const explanEditor = new toastui.Editor({
+                el: document.querySelector('#explanEditor'),
+                height: '200px',
+                initialEditType: 'wysiwyg',
+                previewStyle: 'vertical',
+                initialValue: explanation
+            });
+
+
+            document.querySelector('form').addEventListener('submit', function () {
+                document.querySelector('#contentInput').value = tocEditor.getHTML();
+                document.querySelector('#explanationInput').value = explanEditor.getHTML();
+            });
+
         });
     </script>
 </div>

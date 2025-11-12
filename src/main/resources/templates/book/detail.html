@@ -141,7 +141,7 @@
                                 <i class="fa fa-book-open" style="margin-right: 10px; color: #7fad39;"></i>
                                 도서 소개
                             </h4>
-                            <div style="font-size: 15px; line-height: 1.8; color: #555;" th:text="${book.explanation}">
+                            <div style="font-size: 15px; line-height: 1.8; color: #555;" id="explanation">
                                 도서 설명이 여기에 표시됩니다.
                             </div>
                         </div>
@@ -208,7 +208,8 @@
 
     <script th:inline="javascript">
         const pathPrefix = /*[[${apiPrefix}]]*/ '';
-
+        let explanation = document. querySelector('#explanation');
+        explanation.innerHTML=[[${book.explanation}]];
         document.addEventListener("DOMContentLoaded", function() {
 
             // --- 1. (기존) 좋아요 버튼 로직 ---

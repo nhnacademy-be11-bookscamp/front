@@ -110,6 +110,30 @@
                             </div>
                         </div>
 
+                        <!-- 수량 선택 -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">수량</label>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="display: flex; border: 1px solid #ebebeb; border-radius: 4px; overflow: hidden;">
+                                    <button type="button" id="decreaseQty"
+                                            style="width: 40px; height: 40px; border: none; background: #f8f9fa; cursor: pointer; font-size: 18px; color: #333;">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
+                                    <input type="number" id="quantity" value="1" min="1" th:max="${book.stock}"
+                                           th:data-stock="${book.stock}"
+                                           style="width: 60px; height: 40px; border: none; text-align: center; font-size: 16px; font-weight: 600;"
+                                           readonly>
+                                    <button type="button" id="increaseQty"
+                                            style="width: 40px; height: 40px; border: none; background: #f8f9fa; cursor: pointer; font-size: 18px; color: #333;">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                </div>
+                                <span style="color: #666; font-size: 14px;">
+                                    재고: <span th:text="${book.stock}">10</span>권
+                                </span>
+                            </div>
+                        </div>
+
                         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                             <button type="button"
                                     class="site-btn"
@@ -125,9 +149,13 @@
                             </button>
                         </div>
                         <div>
-                            <button type="button" class="site-btn" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600;">
-                                <i class="fa fa-credit-card"></i> 바로 구매
-                            </button>
+                            <form th:action="@{/orders/prepare/direct}" method="post" id="directBuyForm">
+                                <input type="hidden" name="bookId" th:value="${book.id}">
+                                <input type="hidden" name="quantity" id="quantityInput" value="1">
+                                <button type="submit" class="site-btn" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600;" th:disabled="${book.stock == 0}">
+                                    <i class="fa fa-credit-card"></i> 바로 구매
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -273,7 +301,48 @@
             } // --- 좋아요 버튼 로직 종료 ---
 
 
-            // --- 2. (추가) Swiper 캐러셀 초기화 ---
+            // --- 2. (추가) 수량 증감 버튼 로직 ---
+            const quantityInput = document.getElementById('quantity');
+            const quantityHiddenInput = document.getElementById('quantityInput');
+            const decreaseBtn = document.getElementById('decreaseQty');
+            const increaseBtn = document.getElementById('increaseQty');
+
+            if (quantityInput && decreaseBtn && increaseBtn) {
+                const stock = parseInt(quantityInput.dataset.stock);
+
+                // 수량 감소 버튼
+                decreaseBtn.addEventListener('click', function() {
+                    let currentQty = parseInt(quantityInput.value);
+                    if (currentQty > 1) {
+                        currentQty--;
+                        quantityInput.value = currentQty;
+                        quantityHiddenInput.value = currentQty;
+                    }
+                });
+
+                // 수량 증가 버튼
+                increaseBtn.addEventListener('click', function() {
+                    let currentQty = parseInt(quantityInput.value);
+                    if (currentQty < stock) {
+                        currentQty++;
+                        quantityInput.value = currentQty;
+                        quantityHiddenInput.value = currentQty;
+                    } else {
+                        alert('재고 수량을 초과할 수 없습니다.');
+                    }
+                });
+
+                // 폼 제출 전 수량 동기화
+                const directBuyForm = document.getElementById('directBuyForm');
+                if (directBuyForm) {
+                    directBuyForm.addEventListener('submit', function(e) {
+                        quantityHiddenInput.value = quantityInput.value;
+                    });
+                }
+            } // --- 수량 증감 버튼 로직 종료 ---
+
+
+            // --- 3. (추가) Swiper 캐러셀 초기화 ---
             const swiper = new Swiper('.product-swiper-container', {
                 loop: true, // 무한 반복
                 autoplay: {

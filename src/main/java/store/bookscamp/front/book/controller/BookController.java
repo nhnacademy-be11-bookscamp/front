@@ -21,6 +21,7 @@ import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookDetailResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
+import store.bookscamp.front.book.service.BookService;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
 import store.bookscamp.front.booklike.feign.BookLikeFeignClient;
@@ -120,7 +121,7 @@ public class BookController {
     @PostMapping("/admin/aladin/books")
     public String aladinCreateBook(@ModelAttribute AladinCreateRequest req) {
 
-        bookFeignClient.createAladinBook(req);
+        bookFeignClient.createAladinBook(req, req.getImgUrls());
 
         return "redirect:/admin/books";
     }

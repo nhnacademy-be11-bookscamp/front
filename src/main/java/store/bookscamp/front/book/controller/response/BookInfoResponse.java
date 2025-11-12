@@ -1,6 +1,6 @@
 package store.bookscamp.front.book.controller.response;
 
-import store.bookscamp.front.book.BookStatus;
+import store.bookscamp.front.book.status.BookStatus;
 
 import java.time.LocalDate;
 import java.util.List;

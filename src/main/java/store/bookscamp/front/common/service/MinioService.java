@@ -25,6 +25,9 @@ public class MinioService {
     @Value("${minio.url}")
     private String minioUrl;
 
+    @Value("${minio.public-url}")
+    private String minioPublicUrl;
+
     @Value("${minio.bucket.book}")
     private String bookBucket;
 
@@ -87,7 +90,8 @@ public class MinioService {
                 );
 
                 String url = String.format("%s/%s/%s", minioUrl, bucketName, fileName);
-                urls.add(url);
+                String publicUrl = String.format("%s/%s/%s", minioPublicUrl, bucketName, fileName);
+                urls.add(publicUrl);
             }
         } catch (Exception e) {
             throw new RuntimeException();

@@ -34,7 +34,7 @@
         <div class="muted">
             사용자: <strong th:text="${username}">username</strong>
         </div>
-        <a class="btn" th:href="@{|/members/${username}/address/new|}">새 주소 추가</a>
+        <a class="btn" th:href="@{|/mypage/${username}/address/new|}">새 주소 추가</a>
     </div>
 
     <div th:if="${#lists.isEmpty(addresses)}" class="muted">등록된 주소가 없습니다.</div>
@@ -65,7 +65,7 @@
             <td class="row-actions">
                 <!-- edit: 컨트롤러가 쿼리파라미터로 값을 받도록 되어 있으므로 그대로 전달 -->
                 <a class="btn btn--subtle"
-                   th:href="@{/members/{username}/address/{id}/edit(
+                   th:href="@{/mypage/{username}/address/{id}/edit(
             username=${username},
             id=${addr.id},
             label=${addr.label},
@@ -78,7 +78,7 @@
                 </a>
 
                 <!-- delete: POST /members/{username}/address/{id}/delete -->
-                <form th:action="@{|/members/${username}/address/${addr.id}/delete|}" method="post"
+                <form th:action="@{|/mypage/${username}/address/${addr.id}/delete|}" method="post"
                       onsubmit="return confirm('정말 삭제하시겠어요?');" style="display:inline;">
                     <button class="btn btn--warn" type="submit">삭제</button>
                 </form>

@@ -38,7 +38,7 @@
 
     <!-- POST /members/{username}/address/{id}/edit -->
     <form class="form"
-          th:action="@{|/members/${username}/address/${id}/edit|}"
+          th:action="@{|/mypage/${username}/address/${id}/edit|}"
           method="post"
           th:object="${form}">
         <!-- 별칭 -->
@@ -80,10 +80,10 @@
 
         <div class="actions">
             <button class="btn" type="submit">저장</button>
-            <a class="btn btn--subtle" th:href="@{|/members/${username}/address|}">목록으로</a>
+            <a class="btn btn--subtle" th:href="@{|/mypage/${username}/address|}">목록으로</a>
 
             <!-- 삭제: POST /{id}/delete -->
-            <form th:action="@{|/members/${username}/address/${id}/delete|}" method="post"
+            <form th:action="@{|/mypage/${username}/address/${id}/delete|}" method="post"
                   onsubmit="return confirm('정말 삭제하시겠어요?');" style="display:inline;">
                 <button class="btn btn--warn" type="submit">삭제</button>
             </form>

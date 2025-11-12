@@ -32,7 +32,7 @@
     <h1>주소 등록</h1>
 
     <form class="form"
-          th:action="@{|/members/${username}/address|}"
+          th:action="@{|/mypage/${username}/address|}"
           method="post"
           th:object="${form}">
         <!-- 별칭 -->
@@ -74,7 +74,7 @@
 
         <div class="actions">
             <button class="btn" type="submit">등록</button>
-            <a class="btn btn--subtle" th:href="@{|/members/${username}/address|}">목록으로</a>
+            <a class="btn btn--subtle" th:href="@{|/mypage/${username}/address|}">목록으로</a>
         </div>
 
         <p class="muted">API Prefix: <code th:text="${apiPrefix}">/api</code></p>

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -20,7 +19,7 @@ import store.bookscamp.front.address.feign.AddressFeignClient;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/members/{username}/address")
+@RequestMapping("/mypage/{username}/address")
 public class AddressController {
 
     private final AddressFeignClient addressFeignClient;
@@ -54,7 +53,7 @@ public class AddressController {
                          @ModelAttribute("form") AddressCreateRequest form) {
         addressFeignClient.createAddress(username, form);
 
-        return "redirect:/members/" + username + "/address";
+        return "redirect:/mypage/" + username + "/address";
     }
 
     // 예: /members/{u}/address/{id}/edit?label=집&roadNameAddress=서울시..&zipCode=12345
@@ -84,7 +83,7 @@ public class AddressController {
                          RedirectAttributes ra) {
         addressFeignClient.updateAddress(username, id, form);
         ra.addFlashAttribute("message", "주소가 수정되었습니다!");
-        return "redirect:/members/" + username + "/address";
+        return "redirect:/mypage/" + username + "/address";
     }
 
     @PostMapping("{id}/delete")
@@ -93,6 +92,6 @@ public class AddressController {
                          RedirectAttributes ra) {
         addressFeignClient.deleteAddress(username, id);
         ra.addFlashAttribute("message", "주소가 삭제되었습니다!");
-        return "redirect:/members/" + username + "/address";
+        return "redirect:/mypage/" + username + "/address";
     }
 }

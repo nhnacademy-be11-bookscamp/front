@@ -83,18 +83,25 @@
                         <!-- 액션 버튼 -->
                         <div style="margin-bottom: 30px;">
                             <div class="row">
-                                <div class="col-lg-6" style="margin-bottom: 10px;">
+                                <div class="col-12 col-md-4" style="margin-bottom: 10px;">
                                     <a th:href="@{/mypage/edit-info}"
                                        class="site-btn"
                                        style="display: block; text-align: center; background: #0064FF; text-decoration: none; padding: 12px;">
                                         <i class="fa fa-edit"></i> 정보 수정
                                     </a>
                                 </div>
-                                <div class="col-lg-6" style="margin-bottom: 10px;">
+                                <div class="col-12 col-md-4" style="margin-bottom: 10px;">
                                     <a th:href="@{/members/{id}/change-password(id=${memberInfo.username})}"
                                        class="site-btn"
                                        style="display: block; text-align: center; background: #6f6f6f; text-decoration: none; padding: 12px;">
                                         <i class="fa fa-key"></i> 비밀번호 변경
+                                    </a>
+                                </div>
+                                <div class="col-12 col-md-4" style="margin-bottom: 10px;">
+                                    <a th:href="@{/mypage/{username}/address(username=${memberInfo.username})}"
+                                       class="site-btn"
+                                       style="display: block; text-align: center; background: #00B050; text-decoration: none; padding: 12px;">
+                                        <i class="fa fa-map-marker"></i> 주소 관리
                                     </a>
                                 </div>
                             </div>

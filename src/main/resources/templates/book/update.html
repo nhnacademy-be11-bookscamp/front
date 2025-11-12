@@ -250,15 +250,20 @@
 
                             <!-- 카테고리 -->
                             <div class="checkout__input">
-                                <p>카테고리</p>
-                                <select name="categoryId">
-                                    <option value="">카테고리를 선택하세요</option>
-                                    <option th:each="category : ${book.categoryList}"
-                                            th:value="${category.id}"
-                                            th:text="${category.name}">
-                                    </option>
+                                <p>카테고리<span>*</span></p>
+                                <select name="categoryId" required>
+                                    <option value="" disabled>카테고리를 선택하세요</option>
+                                    <th:block th:each="parent : ${categories}">
+                                        <optgroup th:label="${parent.name}">
+                                            <option th:each="child : ${parent.children}"
+                                                    th:value="${child.id}"
+                                                    th:text="${child.name}">
+                                            </option>
+                                        </optgroup>
+                                    </th:block>
                                 </select>
                             </div>
+
 
                             <!-- 태그 -->
                             <div class="checkout__input">

@@ -4,257 +4,322 @@
       layout:decorate="~{layout/default}">
 <head>
     <title>알라딘 도서 등록 | 북스캠프 관리자</title>
+
+    <style>
+        body {
+            background: #f9fafb;
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+        }
+        .book-edit-container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .book-edit-container h4 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .book-edit-container h4 i {
+            color: #0064FF;
+            margin-right: 10px;
+        }
+        .checkout__input {
+            margin-bottom: 25px;
+        }
+        .checkout__input p {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .checkout__input input[type=text],
+        .checkout__input input[type=number],
+        .checkout__input input[type=date],
+        .checkout__input select,
+        .checkout__input textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            transition: 0.2s ease;
+            font-size: 15px;
+        }
+        .checkout__input input:focus,
+        .checkout__input textarea:focus,
+        .checkout__input select:focus {
+            outline: none;
+            border-color: #0064FF;
+            box-shadow: 0 0 0 2px rgba(0,100,255,0.15);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        /* ✅ 태그 박스 (통일 디자인) */
+        .tag-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .tag-item {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .tag-item:hover {
+            background: #0064FF;
+            border-color: #0064FF;
+            color: #fff;
+        }
+        .tag-item input {
+            display: none;
+        }
+        .tag-item.active {
+            background: #0064FF;
+            border-color: #0064FF;
+            color: #fff;
+        }
+
+        .img-preview-box {
+            text-align: center;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .img-preview-box img {
+            width: 150px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .site-btn {
+            background: #0064FF;
+            border: none;
+            padding: 12px 30px;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: 0.2s ease;
+        }
+        .site-btn:hover {
+            background: #0050cc;
+        }
+        .cancel-btn {
+            background: #6f6f6f;
+            margin-left: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"/>
 </head>
 
 <body>
-    <!-- Hero 섹션 비우기 -->
-    <section layout:fragment="hero" class="hero" style="display: none;">
-    </section>
+<section layout:fragment="hero" class="hero" style="display:none;"></section>
 
-    <!-- 메인 콘텐츠 -->
-    <div layout:fragment="content">
-        <section class="product spad">
-            <div class="container">
-                <div class="row">
-                    <!-- 관리자 사이드바 -->
-                    <div class="col-lg-3">
-                        <div class="hero__categories">
-                            <div class="hero__categories__all">
-                                <i class="fa fa-bars"></i>
-                                <span>관리자 메뉴</span>
-                            </div>
-                            <ul th:replace="~{fragment/admin-sidebar :: sidebar}">
-                                <li><a href="#">메뉴</a></li>
-                            </ul>
+<div layout:fragment="content">
+    <section class="product spad">
+        <div class="container">
+            <div class="row">
+                <!-- 관리자 사이드바 -->
+                <div class="col-lg-3">
+                    <div class="hero__categories">
+                        <div class="hero__categories__all">
+                            <i class="fa fa-bars"></i>
+                            <span>관리자 메뉴</span>
                         </div>
+                        <ul th:replace="~{fragment/admin-sidebar :: sidebar}"></ul>
                     </div>
+                </div>
 
-                    <!-- 도서 정보 입력 폼 -->
-                    <div class="col-lg-9">
-                        <div class="checkout__form">
-                            <h4 style="margin-bottom: 30px;">
-                                <i class="fa fa-cloud-download" style="margin-right: 10px; color: #0064FF;"></i>
-                                알라딘 도서 등록
-                            </h4>
+                <!-- 도서 정보 입력 폼 -->
+                <div class="col-lg-9">
+                    <div class="book-edit-container">
+                        <h4><i class="fa fa-cloud-download"></i> 알라딘 도서 등록</h4>
 
-                            <form th:action="@{/admin/aladin/books}" method="post">
-                                <div class="row">
-                                    <!-- 제목 -->
-                                    <div class="col-lg-12">
-                                        <div class="checkout__input">
-                                            <p>제목<span>*</span></p>
-                                            <input type="text"
-                                                   name="title"
-                                                   th:value="${aladinBook.title}"
-                                                   required>
-                                        </div>
-                                    </div>
+                        <form th:action="@{/admin/aladin/books}" method="post">
+                            <!-- 제목 -->
+                            <div class="checkout__input">
+                                <p>제목<span>*</span></p>
+                                <input type="text" name="title" th:value="${aladinBook.title}" required>
+                            </div>
 
-                                    <!-- 기여자 -->
-                                    <div class="col-lg-6">
-                                        <div class="checkout__input">
-                                            <p>기여자<span>*</span></p>
-                                            <input type="text"
-                                                   name="contributors"
-                                                   th:value="${aladinBook.author}"
-                                                   required>
-                                        </div>
-                                    </div>
-
-                                    <!-- 출판사 -->
-                                    <div class="col-lg-6">
-                                        <div class="checkout__input">
-                                            <p>출판사<span>*</span></p>
-                                            <input type="text"
-                                                   name="publisher"
-                                                   th:value="${aladinBook.publisher}"
-                                                   required>
-                                        </div>
-                                    </div>
-
-                                    <!-- 출판일 -->
-                                    <div class="col-lg-4">
-                                        <div class="checkout__input">
-                                            <p>출판일</p>
-                                            <input type="text"
-                                                   name="publishDate"
-                                                   th:value="${aladinBook.publishDate}">
-                                        </div>
-                                    </div>
-
-                                    <!-- ISBN -->
-                                    <div class="col-lg-4">
-                                        <div class="checkout__input">
-                                            <p>ISBN</p>
-                                            <input type="text"
-                                                   name="isbn"
-                                                   th:value="${aladinBook.isbn13}"
-                                                   readonly>
-                                        </div>
-                                    </div>
-
-                                    <!-- 재고 -->
-                                    <div class="col-lg-4">
-                                        <div class="checkout__input">
-                                            <p>재고<span>*</span></p>
-                                            <input type="number"
-                                                   name="stock"
-                                                   placeholder="재고 수량"
-                                                   min="0"
-                                                   value="0"
-                                                   required>
-                                        </div>
-                                    </div>
-
-                                    <!-- 정가 -->
-                                    <div class="col-lg-6">
-                                        <div class="checkout__input">
-                                            <p>정가</p>
-                                            <input type="number"
-                                                   name="regularPrice"
-                                                   th:value="${aladinBook.regularPrice}"
-                                                   min="0">
-                                        </div>
-                                    </div>
-
-                                    <!-- 판매가 -->
-                                    <div class="col-lg-6">
-                                        <div class="checkout__input">
-                                            <p>판매가</p>
-                                            <input type="number"
-                                                   name="salePrice"
-                                                   th:value="${aladinBook.salePrice}"
-                                                   min="0">
-                                        </div>
-                                    </div>
-
-                                    <!-- 포장 가능 여부 -->
-                                    <div class="col-lg-12">
-                                        <div class="checkout__input">
-                                            <p>포장 가능 여부</p>
-                                            <div class="checkout__input__checkbox" style="margin-top: 10px;">
-                                                <label for="packable">
-                                                    포장 가능
-                                                    <input type="checkbox" id="packable" name="packable" value="true">
-                                                    <span class="checkmark"></span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- 이미지 미리보기 -->
-                                    <div class="col-lg-12">
-                                        <div class="checkout__input">
-                                            <p>도서 이미지</p>
-                                            <div style="text-align: center; padding: 20px; background: #f8f8f8; border-radius: 4px;">
-                                                <img th:src="${aladinBook.cover}"
-                                                     alt="도서 표지"
-                                                     style="width: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                                            </div>
-                                            <input type="hidden" name="imgUrls" th:value="${aladinBook.cover}">
-                                        </div>
-                                    </div>
-
-                                    <!-- 카테고리 -->
-                                    <div class="col-lg-6">
-                                        <div class="checkout__input">
-                                            <p>카테고리<span>*</span></p>
-                                            <select name="categoryId" required>
-                                                <option value="" disabled selected>카테고리를 선택하세요</option>
-                                                <th:block th:each="parent : ${categories}">
-                                                    <optgroup th:label="${parent.name}">
-                                                        <option th:each="child : ${parent.children}"
-                                                                th:value="${child.id}"
-                                                                th:text="${child.name}"></option>
-                                                    </optgroup>
-                                                </th:block>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <!-- 태그 -->
-                                    <div class="col-lg-6">
-                                        <div class="checkout__input">
-                                            <p>태그</p>
-                                            <select name="tagIds" multiple size="5">
-                                                <option th:each="tag : ${tags}"
-                                                        th:value="${tag.id}"
-                                                        th:text="${tag.name}"></option>
-                                            </select>
-                                            <small style="color: #6f6f6f; font-size: 13px; display: block; margin-top: 5px;">
-                                                Ctrl(또는 Cmd) 키를 누른 채로 여러 개 선택 가능
-                                            </small>
-                                        </div>
-                                    </div>
-
-                                    <!-- 목차 -->
-                                    <div class="col-lg-12">
-                                        <div class="checkout__input">
-                                            <p>목차</p>
-                                            <textarea name="content"
-                                                      rows="5"
-                                                      th:text="${aladinBook.content}"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <!-- 설명 -->
-                                    <div class="col-lg-12">
-                                        <div class="checkout__input">
-                                            <p>설명</p>
-                                            <textarea name="explanation"
-                                                      rows="5"
-                                                      th:text="${aladinBook.explanation}"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <!-- 버튼 -->
-                                    <div class="col-lg-12 text-center" style="margin-top: 20px;">
-                                        <button type="submit"
-                                                class="site-btn"
-                                                style="width: 200px; margin-right: 10px;">
-                                            등록
-                                        </button>
-                                        <a th:href="@{/admin/aladin/search}"
-                                           class="site-btn"
-                                           style="width: 200px; background: #6f6f6f; display: inline-block; text-align: center; text-decoration: none;">
-                                            취소
-                                        </a>
+                            <!-- 기여자 / 출판사 -->
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>기여자<span>*</span></p>
+                                        <input type="text" name="contributors" th:value="${aladinBook.author}" required>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>출판사<span>*</span></p>
+                                        <input type="text" name="publisher" th:value="${aladinBook.publisher}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 출판일 / ISBN / 재고 -->
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div class="checkout__input">
+                                        <p>출판일</p>
+                                        <input type="text" name="publishDate" th:value="${aladinBook.publishDate}">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="checkout__input">
+                                        <p>ISBN</p>
+                                        <input type="text" name="isbn" th:value="${aladinBook.isbn13}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="checkout__input">
+                                        <p>재고<span>*</span></p>
+                                        <input type="number" name="stock" min="0" value="0" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 가격 -->
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>정가</p>
+                                        <input type="number" name="regularPrice" th:value="${aladinBook.regularPrice}" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>판매가</p>
+                                        <input type="number" name="salePrice" th:value="${aladinBook.salePrice}" min="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 포장 -->
+                            <div class="checkout__input">
+                                <p>포장 가능 여부</p>
+                                <label><input type="checkbox" name="packable" value="true"> 포장 가능</label>
+                            </div>
+
+                            <!-- 이미지 미리보기 -->
+                            <div class="checkout__input">
+                                <p>도서 이미지</p>
+                                <div class="img-preview-box">
+                                    <img th:src="${aladinBook.cover}" alt="도서 표지">
+                                </div>
+                                <input type="hidden" name="imgUrls" th:value="${aladinBook.cover}">
+                            </div>
+
+                            <!-- 카테고리 -->
+                            <div class="checkout__input">
+                                <p>카테고리<span>*</span></p>
+                                <select name="categoryId" required>
+                                    <option value="" disabled selected>카테고리를 선택하세요</option>
+                                    <th:block th:each="parent : ${categories}">
+                                        <optgroup th:label="${parent.name}">
+                                            <option th:each="child : ${parent.children}"
+                                                    th:value="${child.id}"
+                                                    th:text="${child.name}"></option>
+                                        </optgroup>
+                                    </th:block>
+                                </select>
+                            </div>
+
+                            <!-- 태그 -->
+                            <div class="checkout__input">
+                                <p>태그</p>
+                                <div class="tag-box">
+                                    <label class="tag-item" th:each="tag : ${tags}">
+                                        <input type="checkbox" name="tagIds" th:value="${tag.id}">
+                                        <span th:text="${tag.name}">태그명</span>
+                                    </label>
+                                </div>
+                            </div>
+-->
+                            <!-- 목차 -->
+                            <div class="checkout__input">
+                                <p>목차</p>
+                                <div id="tocEditor"></div> <!-- ✅ textarea 대신 div -->
+                                <input type="hidden" name="content" id="contentInput"> <!-- 폼으로 전송할 hidden input -->
+                            </div>
+
+                            <!-- 설명 -->
+                            <div class="checkout__input">
+                                <p>설명</p>
+                                <div id="explanEditor"></div> <!-- ✅ textarea 대신 div -->
+                                <input type="hidden" name="explanation" id="explanationInput" th:value="${aladinBook.explanation}"> <!-- 폼으로 전송할 hidden input -->
+                            </div>
+
+
+                            <!-- 버튼 -->
+                            <div class="btn-section" style="text-align:center; margin-top:35px;">
+                                <button type="submit" class="site-btn">등록 완료</button>
+                                <a th:href="@{/admin/aladin/search}" class="site-btn cancel-btn">취소</a>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-        </section>
-    </div>
+        </div>
+    </section>
+</div>
 
-    <!-- 추가 JavaScript -->
-    <div layout:fragment="extra-js">
-        <script>
-            $(document).ready(function() {
-                // 관리자 사이드바 전용 토글
-                $('.admin-category-header').on('click', function(e) {
+<!-- ✅ JS: 태그 클릭 시 active 토글 -->
+<div layout:fragment="extra-js">
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tagItems = document.querySelectorAll('.tag-item');
+            tagItems.forEach(item => {
+                item.addEventListener('click', function (e) {
                     e.preventDefault();
-                    e.stopPropagation();
-
-                    var menuId = $(this).data('admin-menu');
-                    var $submenu = $('#admin-menu-' + menuId);
-                    var $toggle = $(this).find('.admin-toggle');
-
-                    // 토글 버튼 active 클래스 추가/제거 (아이콘 회전)
-                    $toggle.toggleClass('active');
-
-                    // 하위 메뉴 슬라이드 토글
-                    $submenu.slideToggle(300);
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                    this.classList.toggle('active', checkbox.checked);
                 });
-
-                // 초기화: aria 속성 설정
-                $('.admin-toggle').attr('role', 'button');
-                $('.admin-toggle').attr('aria-expanded', 'false');
-                $('.admin-toggle').attr('tabindex', '0');
             });
-        </script>
-    </div>
+
+            const tocEditor = new toastui.Editor({
+                el: document.querySelector('#tocEditor'),
+                height: '200px',
+                initialEditType: 'wysiwyg',
+                previewStyle: 'vertical',
+                initialValue: ''
+            });
+            var explanation = document.querySelector('#explanationInput').value;
+
+            const explanEditor = new toastui.Editor({
+                el: document.querySelector('#explanEditor'),
+                height: '200px',
+                initialEditType: 'wysiwyg',
+                previewStyle: 'vertical',
+                initialValue: explanation
+            });
+
+
+            document.querySelector('form').addEventListener('submit', function () {
+                document.querySelector('#contentInput').value = tocEditor.getHTML();
+                document.querySelector('#explanationInput').value = explanEditor.getHTML();
+            });
+
+        });
+    </script>
+</div>
 </body>
 </html>

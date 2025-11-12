@@ -98,22 +98,22 @@
                         <li class="nav-item">
                             <a class="nav-link"
                                th:classappend="${param.status == null || param.status == 'all'} ? 'active'"
-                               th:href="@{/my-coupons(status='all')}">전체</a>
+                               th:href="@{/mycoupon(status='ALL')}">전체</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
                                th:classappend="${param.status == 'AVAILABLE'} ? 'active'"
-                               th:href="@{/my-coupons(status='AVAILABLE')}">사용 가능</a>
+                               th:href="@{/mycoupon(status='AVAILABLE')}">사용 가능</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
                                th:classappend="${param.status == 'USED'} ? 'active'"
-                               th:href="@{/my-coupons(status='USED')}">사용 완료</a>
+                               th:href="@{/mycoupon(status='USED')}">사용 완료</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
                                th:classappend="${param.status == 'EXPIRED'} ? 'active'"
-                               th:href="@{/my-coupons(status='EXPIRED')}">기한 만료</a>
+                               th:href="@{/mycoupon(status='EXPIRED')}">기한 만료</a>
                         </li>
                     </ul>
                     <div th:if="${coupons == null || coupons.isEmpty()}" class="text-center" style="padding: 60px 0;">

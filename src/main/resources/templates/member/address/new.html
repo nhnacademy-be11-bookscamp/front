@@ -1,103 +1,131 @@
-<!-- templates/member/address/new.html -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
 <head>
     <meta charset="UTF-8" />
-    <title>주소 등록</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Daum Postcode -->
-    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    <style>
-        body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 20px; }
-        .container { max-width: 720px; margin: 0 auto; }
-        h1 { margin-bottom: 16px; }
-        .form { display: grid; gap: 14px; }
-        .field { display: grid; gap: 6px; }
-        label { font-weight: 600; }
-        input[type="text"], input[type="number"], textarea {
-            width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box;
-        }
-        textarea { min-height: 80px; }
-        .row-zip { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
-        .btn { display:inline-block; padding: 10px 14px; border-radius: 8px; text-decoration: none; background: #111827; color: white; text-align:center; }
-        .btn--subtle { background: #6b7280; }
-        .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .muted { color:#6b7280; font-size:14px; }
-        .switch { display:flex; align-items:center; gap:10px; }
-        .help { color:#6b7280; font-size:13px; }
-    </style>
+    <title>주소 등록 | 북스캠프</title>
 </head>
 <body>
-<div class="container">
-    <h1>주소 등록</h1>
 
-    <form class="form"
-          th:action="@{|/mypage/${username}/address|}"
-          method="post"
-          th:object="${form}">
-        <!-- 별칭 -->
-        <div class="field">
-            <label for="label">별칭</label>
-            <input id="label" type="text" th:field="*{label}" placeholder="예) 집, 회사" required />
-        </div>
+<section layout:fragment="hero" class="hero" style="display:none;"></section>
 
-        <!-- 우편번호 + 찾기 버튼 -->
-        <div class="field">
-            <label for="zipCode">우편번호</label>
-            <div class="row-zip">
-                <input id="zipCode" type="text" th:field="*{zipCode}" placeholder="예) 12345" readonly required />
-                <button type="button" class="btn" onclick="execDaumPostcode()">주소 찾기</button>
+<div layout:fragment="content">
+    <section class="checkout spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 offset-lg-2">
+
+                    <!-- 마이페이지 카드 -->
+                    <div style="background:#ffffff; padding: 32px; border:1px solid #ebebeb; border-radius:4px;">
+
+                        <!-- 제목 -->
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:24px; border-bottom:2px solid #ebebeb; padding-bottom:16px;">
+                            <i class="fa fa-map-marker" style="color:#7fad39;"></i>
+                            <h5 style="margin:0; font-weight:700; color:#333;">주소 등록</h5>
+                        </div>
+
+                        <!-- 등록 폼 -->
+                        <form th:action="@{|/mypage/${username}/address|}"
+                              method="post" th:object="${form}">
+
+                            <!-- 별칭 -->
+                            <div style="margin-bottom:18px;">
+                                <label style="font-weight:700; color:#333; margin-bottom:6px; display:block;">
+                                    별칭
+                                </label>
+                                <input th:field="*{label}"
+                                       placeholder="예) 집, 회사"
+                                       style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:6px;"
+                                       required />
+                            </div>
+
+                            <!-- 우편번호 -->
+                            <div style="margin-bottom:18px;">
+                                <label style="font-weight:700; color:#333; margin-bottom:6px; display:block;">
+                                    우편번호
+                                </label>
+                                <div style="display:flex; gap:10px;">
+                                    <input th:field="*{zipCode}" readonly required
+                                           placeholder="주소 찾기를 눌러주세요"
+                                           style="flex:1; padding:12px; border:1px solid #d1d5db; border-radius:6px; background:#f8f8f8;" />
+
+                                    <button type="button" class="site-btn"
+                                            onclick="execDaumPostcode()"
+                                            style="padding:10px 14px;">
+                                        주소 찾기
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 도로명 주소 -->
+                            <div style="margin-bottom:18px;">
+                                <label style="font-weight:700; color:#333; margin-bottom:6px; display:block;">
+                                    도로명 주소
+                                </label>
+                                <input th:field="*{roadNameAddress}" readonly required
+                                       placeholder="주소 찾기 버튼으로 입력됩니다"
+                                       style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:6px; background:#f8f8f8;" />
+                            </div>
+
+                            <!-- 상세 주소 -->
+                            <div style="margin-bottom:18px;">
+                                <label style="font-weight:700; color:#333; margin-bottom:6px; display:block;">
+                                    상세 주소
+                                </label>
+                                <input th:field="*{detailAddress}" required
+                                       placeholder="동/호수 등 상세 주소를 입력하세요"
+                                       style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:6px;" />
+                            </div>
+
+                            <!-- 기본 주소 -->
+                            <div style="margin-bottom:24px;">
+                                <label style="font-weight:700; color:#333; margin-bottom:6px; display:block;">
+                                    기본 주소
+                                </label>
+                                <label style="display:flex; align-items:center; gap:8px;">
+                                    <input type="checkbox" th:field="*{isDefault}" />
+                                    <span style="color:#333;">이 주소를 기본 배송지로 설정</span>
+                                </label>
+                            </div>
+
+                            <!-- 버튼 영역 -->
+                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <button type="submit" class="site-btn" style="padding:10px 20px;">
+                                    등록
+                                </button>
+                                <a th:href="@{|/mypage/${username}/address|}"
+                                   class="site-btn"
+                                   style="background:#6f6f6f; padding:10px 20px;">
+                                    목록으로
+                                </a>
+                            </div>
+                        </form>
+
+                    </div>
+                    <!-- /카드 -->
+
+                </div>
             </div>
-            <p class="help">우편번호/도로명 주소는 검색으로 자동 입력됩니다.</p>
         </div>
-
-        <!-- 도로명 주소 -->
-        <div class="field">
-            <label for="roadNameAddress">도로명 주소</label>
-            <input id="roadNameAddress" type="text" th:field="*{roadNameAddress}" placeholder="예) 서울특별시 …" readonly required />
-        </div>
-
-        <!-- 상세 주소 (사용자 입력 필수) -->
-        <div class="field">
-            <label for="detailAddress">상세 주소</label>
-            <textarea id="detailAddress" th:field="*{detailAddress}" placeholder="동/호수 등 상세 주소를 입력하세요" required></textarea>
-        </div>
-
-        <!-- 기본 주소 설정 (겹치지 않도록 단독 블록) -->
-        <div class="field">
-            <label for="isDefault">기본 주소</label>
-            <div class="switch">
-                <input id="isDefault" type="checkbox" th:field="*{isDefault}" />
-                <span>이 주소를 기본으로 설정</span>
-            </div>
-        </div>
-
-        <div class="actions">
-            <button class="btn" type="submit">등록</button>
-            <a class="btn btn--subtle" th:href="@{|/mypage/${username}/address|}">목록으로</a>
-        </div>
-
-        <p class="muted">API Prefix: <code th:text="${apiPrefix}">/api</code></p>
-    </form>
+    </section>
 </div>
 
-<script>
-    function execDaumPostcode() {
-        new daum.Postcode({
-            oncomplete: function(data) {
-                // 도로명 주소 우선
-                var roadAddr = data.roadAddress;      // 도로명
-                var zonecode = data.zonecode;         // 우편번호(5자리)
+<!-- 다음 주소 스크립트 -->
+<th:block layout:fragment="extra-js">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    document.getElementById('roadNameAddress').value = data.roadAddress || data.address;
+                    document.getElementById('zipCode').value = data.zonecode;
+                    document.getElementById('detailAddress').focus();
+                }
+            }).open();
+        }
+    </script>
+</th:block>
 
-                // 입력 반영
-                document.getElementById('roadNameAddress').value = roadAddr || '';
-                document.getElementById('zipCode').value = zonecode || '';
-
-                // 상세주소로 포커스
-                document.getElementById('detailAddress').focus();
-            }
-        }).open();
-    }
-</script>
 </body>
 </html>

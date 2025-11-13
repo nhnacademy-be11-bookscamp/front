@@ -4,10 +4,12 @@ package store.bookscamp.front.address.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -76,7 +78,7 @@ public class AddressController {
 
     }
 
-    @PostMapping("/{id}/edit")
+    @PutMapping("/{id}/edit")
     public String update(@PathVariable String username,
                          @PathVariable Long id,
                          @ModelAttribute("form") AddressUpdateRequest form,
@@ -86,7 +88,7 @@ public class AddressController {
         return "redirect:/mypage/" + username + "/address";
     }
 
-    @PostMapping("{id}/delete")
+    @DeleteMapping("/{id}/delete")
     public String delete(@PathVariable String username,
                          @PathVariable Long id,
                          RedirectAttributes ra) {

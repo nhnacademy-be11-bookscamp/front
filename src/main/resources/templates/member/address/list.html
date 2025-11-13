@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default}">
+
 <head>
     <meta charset="UTF-8">
     <title>마이페이지 | 북스캠프</title>
@@ -56,43 +57,39 @@
                             <table style="width:100%; border-collapse:collapse;">
                                 <thead style="background:#f8f8f8;">
                                 <tr>
-                                    <th style="padding:10px; border-bottom:1px solid #e5e7eb;">별칭</th>
-                                    <th style="padding:10px; border-bottom:1px solid #e5e7eb;">도로명 주소</th>
-                                    <th style="padding:10px; border-bottom:1px solid #e5e7eb;">우편번호</th>
-                                    <th style="padding:10px; border-bottom:1px solid #e5e7eb;">기본</th>
-                                    <th style="padding:10px; border-bottom:1px solid #e5e7eb;">상세 주소</th>
-                                    <th style="padding:10px; border-bottom:1px solid #e5e7eb;">액션</th>
+                                    <th style="padding:10px;">별칭</th>
+                                    <th style="padding:10px;">도로명 주소</th>
+                                    <th style="padding:10px;">우편번호</th>
+                                    <th style="padding:10px;">기본</th>
+                                    <th style="padding:10px;">상세 주소</th>
+                                    <th style="padding:10px;">액션</th>
                                 </tr>
                                 </thead>
 
                                 <tbody>
 
-                                <!-- ① 기본 주소 먼저 + 회색 배경 강조 -->
+                                <!-- ① 기본 주소 (먼저 출력) -->
                                 <tr th:each="addr : ${addresses}"
                                     th:if="${addr.isDefault}"
                                     style="background:#f3f4f6; font-weight:600;">
 
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"
-                                        th:text="${addr.label}"></td>
+                                    <td style="padding:10px;" th:text="${addr.label}"></td>
+                                    <td style="padding:10px;" th:text="${addr.roadNameAddress}"></td>
+                                    <td style="padding:10px;" th:text="${addr.zipCode}"></td>
 
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"
-                                        th:text="${addr.roadNameAddress}"></td>
-
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"
-                                        th:text="${addr.zipCode}"></td>
-
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;">
+                                    <td style="padding:10px;">
                                         <span style="padding:3px 8px; border-radius:999px; font-size:12px;
                                                      background:#7fad39; color:#fff; font-weight:700;">
                                             기본
                                         </span>
                                     </td>
 
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"
-                                        th:text="${addr.detailAddress}"></td>
+                                    <td style="padding:10px;" th:text="${addr.detailAddress}"></td>
 
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;">
+                                    <td style="padding:10px;">
                                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+                                            <!-- 수정: 컨트롤러 @RequestParam 에 맞춰 전체 주소를 쿼리스트링으로 전달 -->
                                             <a class="site-btn"
                                                style="background:#6f6f6f; padding:8px 12px;"
                                                th:href="@{/mypage/{username}/address/{id}/edit(
@@ -107,15 +104,18 @@
                                                 수정
                                             </a>
 
+                                            <!-- 삭제 (POST + hidden delete) -->
                                             <form th:action="@{|/mypage/${username}/address/${addr.id}/delete|}"
                                                   method="post"
                                                   onsubmit="return confirm('정말 삭제하시겠어요?');">
+                                                <input type="hidden" name="_method" value="delete"/>
                                                 <button class="site-btn"
                                                         type="submit"
                                                         style="background:#dc3545; padding:8px 12px;">
                                                     삭제
                                                 </button>
                                             </form>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -123,28 +123,22 @@
                                 <!-- ② 일반 주소 -->
                                 <tr th:each="addr : ${addresses}"
                                     th:if="${!addr.isDefault}"
-                                    style="transition: background .15s ease;"
+                                    style="transition:background .15s ease;"
                                     onmouseover="this.style.background='#f9fafb'"
                                     onmouseout="this.style.background=''">
 
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"
-                                        th:text="${addr.label}"></td>
-
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"
-                                        th:text="${addr.roadNameAddress}"></td>
-
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"
-                                        th:text="${addr.zipCode}"></td>
-
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;">
+                                    <td style="padding:10px;" th:text="${addr.label}"></td>
+                                    <td style="padding:10px;" th:text="${addr.roadNameAddress}"></td>
+                                    <td style="padding:10px;" th:text="${addr.zipCode}"></td>
+                                    <td style="padding:10px;">
                                         <span style="color:#6f6f6f;">-</span>
                                     </td>
+                                    <td style="padding:10px;" th:text="${addr.detailAddress}"></td>
 
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;"
-                                        th:text="${addr.detailAddress}"></td>
-
-                                    <td style="padding:10px; border-bottom:1px solid #e5e7eb;">
+                                    <td style="padding:10px;">
                                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+                                            <!-- 수정 (일반 주소도 동일하게 전체 파라미터 전달) -->
                                             <a class="site-btn"
                                                style="background:#6f6f6f; padding:8px 12px;"
                                                th:href="@{/mypage/{username}/address/{id}/edit(
@@ -159,15 +153,18 @@
                                                 수정
                                             </a>
 
+                                            <!-- 삭제 -->
                                             <form th:action="@{|/mypage/${username}/address/${addr.id}/delete|}"
                                                   method="post"
                                                   onsubmit="return confirm('정말 삭제하시겠어요?');">
+                                                <input type="hidden" name="_method" value="delete"/>
                                                 <button class="site-btn"
                                                         type="submit"
                                                         style="background:#dc3545; padding:8px 12px;">
                                                     삭제
                                                 </button>
                                             </form>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -186,5 +183,6 @@
 </div>
 
 <th:block layout:fragment="extra-js"></th:block>
+
 </body>
 </html>

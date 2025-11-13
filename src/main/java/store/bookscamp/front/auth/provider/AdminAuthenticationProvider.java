@@ -35,6 +35,7 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
                 throw new BadCredentialsException("Access Token을 받지 못했습니다.");
             }
             String rawJwtToken = "Bearer " + body.getAccessToken();
+            String name = body.getName();
 
             String rtCookieString = authResponse.getHeaders().getFirst("Set-Cookie");
             if (rtCookieString == null) {
@@ -45,7 +46,7 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
             UsernamePasswordAuthenticationToken result =
                     new UsernamePasswordAuthenticationToken(tempDetails, null, tempDetails.getAuthorities());
 
-            result.setDetails(new LoginAuthDetails(rawJwtToken, rtCookieString));
+            result.setDetails(new LoginAuthDetails(rawJwtToken, rtCookieString,name));
             return result;
 
         } catch (FeignException e) {

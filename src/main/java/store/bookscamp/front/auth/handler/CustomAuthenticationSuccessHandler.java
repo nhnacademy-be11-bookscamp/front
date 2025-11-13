@@ -5,6 +5,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -35,9 +36,19 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             response.addCookie(cookie);
         }
 
-        String rtCookieString = loginDetails.getRtCookieString(); //
+        String rtCookieString = loginDetails.getRtCookieString();
         if (rtCookieString != null) {
             response.addHeader("Set-Cookie", rtCookieString);
+        }
+
+        String name = loginDetails.getName();
+        if (name != null) {
+            Cookie nameCookie = new Cookie("member_name", URLEncoder.encode(name, "UTF-8"));
+            nameCookie.setPath("/");
+            nameCookie.setHttpOnly(false);
+            nameCookie.setMaxAge(60 * 30);
+
+            response.addCookie(nameCookie);
         }
 
         this.delegate.onAuthenticationSuccess(request, response, authentication);

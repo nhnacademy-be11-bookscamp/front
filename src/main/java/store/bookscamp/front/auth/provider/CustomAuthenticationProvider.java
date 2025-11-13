@@ -3,11 +3,14 @@ package store.bookscamp.front.auth.provider;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import store.bookscamp.front.auth.dto.AccessTokenResponse;
+import store.bookscamp.front.auth.dto.LoginAuthDetails;
 import store.bookscamp.front.auth.user.CustomMemberDetails;
 import store.bookscamp.front.member.controller.MemberLoginFeignClient;
 import store.bookscamp.front.member.controller.request.MemberLoginRequest;
@@ -24,18 +27,25 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         try {
             MemberLoginRequest request = new MemberLoginRequest(username, password);
-            var authResponse = memberLoginFeignClient.doLogin(request);
 
-            String rawJwtToken = authResponse.getHeaders().getFirst("Authorization");
+            ResponseEntity<AccessTokenResponse> authResponse = memberLoginFeignClient.doLogin(request);
 
-            if (rawJwtToken == null || !rawJwtToken.startsWith("Bearer ")) {
-                throw new BadCredentialsException("토큰을 찾을 수 없거나 형식이 잘못되었습니다.");
+            AccessTokenResponse body = authResponse.getBody();
+            if (body == null || body.getAccessToken() == null) {
+                throw new BadCredentialsException("Access Token을 받지 못했습니다.");
+            }
+            String rawJwtToken = "Bearer " + body.getAccessToken();
+
+            String rtCookieString = authResponse.getHeaders().getFirst("Set-Cookie");
+            if (rtCookieString == null) {
+                throw new BadCredentialsException("Refresh Token 쿠키를 받지 못했습니다.");
             }
 
             CustomMemberDetails tempDetails = new CustomMemberDetails("ROLE_USER", rawJwtToken);
             UsernamePasswordAuthenticationToken result =
                     new UsernamePasswordAuthenticationToken(tempDetails, null, tempDetails.getAuthorities());
-            result.setDetails(rawJwtToken);
+
+            result.setDetails(new LoginAuthDetails(rawJwtToken, rtCookieString));
             return result;
 
         } catch (FeignException e) {

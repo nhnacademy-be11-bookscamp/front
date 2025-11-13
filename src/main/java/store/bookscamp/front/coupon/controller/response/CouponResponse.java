@@ -12,6 +12,7 @@ public record CouponResponse(
         int discountValue,
         int minOrderAmount,
         Integer maxDiscountAmount,
-        Integer validDays
+        Integer validDays,
+        String name
 ) {
 }

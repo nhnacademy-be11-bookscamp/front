@@ -1,4 +1,4 @@
-package store.bookscamp.front.book;
+package store.bookscamp.front.book.status;
 
 public enum BookStatus {
     AVAILABLE,   // 판매가능

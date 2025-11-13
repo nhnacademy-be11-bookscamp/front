@@ -11,8 +11,7 @@
             max-width: 100%;
             box-sizing: border-box;
             text-align: center;
-            /* [추가] 그리드 아이템 간의 하단 여백 */
-            margin-bottom: 30px;
+            /* margin-bottom: 30px; */ /* Owl Carousel의 margin 옵션으로 대체 */
         }
 
         .featured__item__pic {
@@ -37,6 +36,16 @@
             text-decoration: underline;
         }
     </style>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css"
+          integrity="sha512-tS3S5qG0BlhnQROyJXvNjeEM4UpMXHrQfTGmbQ1gKmelCxlSEBUaxhRBj/EFTzpbP4RVSrpEikbmdJobCvhE3g=="
+          crossorigin="anonymous" />
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css"
+          integrity="sha512-sMXtMNL1zRzolHYKEujM2AqCLUR9F2C4/05cdbxjjLSRvMQIciEPCQZo++nk7go3BtSuK9kfa/s+a4f4i5pLkw=="
+          crossorigin="anonymous" />
 </head>
 <body>
 <div layout:fragment="content">
@@ -51,15 +60,12 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div th:each="book : ${books}" class="col-lg-4 col-md-6 col-sm-12">
+            <div class="featured__carousel owl-carousel owl-theme">
+
+                <div th:each="book : ${books}">
                     <div class="featured__item">
                         <div class="featured__item__pic set-bg"
                              th:attr="data-setbg=${book.thumbnail != null ? book.thumbnail : '/img/no-image.png'}">
-<!--                            <ul class="featured__item__pic__hover">-->
-<!--                                <li><a href="#"><i class="fa fa-heart"></i></a></li>-->
-<!--                                <li><a href="#"><i class="fa fa-shopping-cart"></i></a></li>-->
-<!--                            </ul>-->
                         </div>
                         <div class="featured__item__text">
                             <h6>
@@ -70,6 +76,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -77,19 +84,54 @@
 
 <th:block layout:fragment="extra-js">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mixitup/3.3.1/mixitup.min.js"
-            integrity="sha512-nKZDK+ztK6Ug+2B6iZWR+OJp0cpJlgPGvfljbjCR0WqZCfaEjDZJ/dgbf+oAU8t1Z1/17Y0MKnmYFjYu+/N/YA=="
+            integrity="sha512-nKZDK+ztK6Ug+2B6DZx+QtgeyAmo9YThZob8O3xgjqhw2IVQdAITFasl/jqbyDwclMkLXFOZRiytnUrXk/PM6A=="
+            crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"
+            integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw=="
             crossorigin="anonymous"></script>
 
     <script th:inline="javascript">
         $(document).ready(function () {
 
-            // 1. 'set-bg' 스크립트는 이미지를 표시하기 위해 "필수"이므로 남겨둡니다.
+            // 1. 'set-bg' 스크립트 (기존 코드 유지)
             $('.set-bg').each(function () {
                 var bg = $(this).data('setbg');
                 if (bg) {
                     $(this).css('background-image', 'url(' + bg + ')');
                 } else {
                     $(this).css('background-color', '#f4f4f4');
+                }
+            });
+
+            // 2. [추가] Owl Carousel 초기화 스크립트
+            $(".featured__carousel").owlCarousel({
+                loop: true,             // 무한 반복
+                margin: 30,             // 아이템 간 여백 (30px)
+                nav: true,              // < > 화살표 네비게이션
+                dots: true,             // ... (페이지네이션 점)
+
+                items: 3,               // ★ 기본 3개 표시
+                slideBy: 3,             // ★ [추가] 3개씩 넘기기 (기본)
+
+                autoplay: true,         // ★ 자동 넘김 활성화
+                autoplayTimeout: 10000, // ★ 10초 (10000ms)
+                autoplayHoverPause: true, // 마우스 올리면 잠시 멈춤
+
+                // 반응형 설정 (화면 너비에 따라 아이템 개수 조절)
+                responsive: {
+                    0: { // 0px ~ 767px
+                        items: 1, // 모바일에서는 1개
+                        slideBy: 1  // ★ [추가] 모바일에선 1개씩
+                    },
+                    768: { // 768px ~ 991px
+                        items: 2, // 태블릿에서는 2개
+                        slideBy: 2  // ★ [추가] 태블릿에선 2개씩
+                    },
+                    992: { // 992px 이상
+                        items: 3, // 데스크탑에서는 3개
+                        slideBy: 3  // ★ [추가] 데스크탑에선 3개씩
+                    }
                 }
             });
         });

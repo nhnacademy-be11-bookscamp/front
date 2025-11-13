@@ -6,59 +6,77 @@
     <title>주문서 작성 | 북스캠프</title>
     <style>
         body {
-            background: #f5f5f5;
+            background: #ffffff;
         }
 
         .order-container {
             max-width: 1200px;
             margin: 40px auto;
             display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 20px;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
             padding: 0 20px;
         }
 
         .order-main {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
 
         .order-section {
             background: #ffffff;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid rgba(49,130,246,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .order-section:hover {
+            box-shadow: 0 8px 30px rgba(49,130,246,0.15);
+            transform: translateY(-2px);
         }
 
         .section-title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
             color: #1a1a1a;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            position: relative;
+            padding-bottom: 16px;
         }
 
-        .section-title::before {
+        .section-title::after {
             content: '';
-            width: 4px;
-            height: 20px;
-            background: #3182F6;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #3182F6 0%, #60a5fa 100%);
             border-radius: 2px;
+        }
+
+        .section-title i {
+            color: #3182F6;
+            font-size: 24px;
         }
 
         /* 주문 도서 아이템 */
         .order-item {
             display: flex;
-            gap: 20px;
-            padding: 24px;
-            margin-bottom: 16px;
-            border: 1px solid #e8e8e8;
+            gap: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
-            background: #fafafa;
-            transition: all 0.2s;
+            background: #ffffff;
+            transition: all 0.2s ease;
+            align-items: flex-start;
         }
 
         .order-item:hover {
@@ -72,13 +90,12 @@
 
         .item-image {
             flex-shrink: 0;
-            width: 100px;
-            height: 130px;
+            width: 80px;
+            height: 105px;
             overflow: hidden;
             border-radius: 8px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #e5e7eb;
             background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
 
         .item-image img {
@@ -91,152 +108,182 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
+            min-width: 0;
         }
 
         .item-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: #1a1a1a;
-            line-height: 1.5;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .item-detail {
-            font-size: 14px;
+            font-size: 13px;
             color: #666;
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
         }
 
         .item-detail span:first-child {
             font-weight: 600;
-            color: #333;
+            color: #3182F6;
         }
 
         .item-price-display {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             color: #3182F6;
-            margin-top: auto;
         }
 
         /* 포장지 선택 */
         .packaging-select-area {
-            margin-top: 12px;
-            padding: 16px;
-            background: white;
+            flex-shrink: 0;
+            width: 200px;
+            padding: 12px;
+            background: #fff7ed;
             border-radius: 8px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #fed7aa;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .packaging-select-area label {
-            display: block;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
+            color: #ea580c;
+            margin: 0;
         }
 
         .packaging-select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e8e8e8;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 8px 10px;
+            border: 1px solid #fed7aa;
+            border-radius: 6px;
+            font-size: 12px;
             transition: all 0.2s;
             cursor: pointer;
+            background: white;
         }
 
         .packaging-select:hover {
-            border-color: #3182F6;
+            border-color: #fb923c;
         }
 
         .packaging-select:focus {
             outline: none;
-            border-color: #3182F6;
-            box-shadow: 0 0 0 3px rgba(49,130,246,0.1);
+            border-color: #ea580c;
+            box-shadow: 0 0 0 3px rgba(251,146,60,0.1);
         }
 
         /* 포장 불가 안내 */
         .packaging-unavailable-notice {
-            margin-top: 12px;
-            padding: 12px 16px;
+            flex-shrink: 0;
+            width: 200px;
+            padding: 10px 12px;
             background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 3px solid #999;
-            font-size: 13px;
-            color: #666;
+            border-radius: 6px;
+            border-left: 3px solid #94a3b8;
+            font-size: 11px;
+            color: #64748b;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            line-height: 1.4;
         }
 
         .packaging-unavailable-notice i {
-            color: #999;
+            color: #94a3b8;
+            font-size: 12px;
+            flex-shrink: 0;
         }
 
         /* 배송지 폼 */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            position: relative;
         }
 
         .form-label {
             display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-label i {
+            color: #3182F6;
+            font-size: 16px;
         }
 
         .form-label .required {
-            color: #ff4444;
+            color: #ef4444;
             margin-left: 4px;
+            font-size: 18px;
         }
 
         .form-input, .form-textarea {
             width: 100%;
-            padding: 14px;
-            border: 2px solid #e8e8e8;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 16px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
             box-sizing: border-box;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            background: #fafbff;
         }
 
         .form-input:hover {
-            border-color: #d0d0d0;
+            border-color: #bfdbfe;
+            background: white;
         }
 
         .form-input:focus, .form-textarea:focus {
             outline: none;
             border-color: #3182F6;
-            box-shadow: 0 0 0 3px rgba(49,130,246,0.1);
+            box-shadow: 0 0 0 4px rgba(49,130,246,0.1);
+            background: white;
         }
 
         .address-row {
             display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .address-btn {
-            padding: 14px 24px;
-            background: #3182F6;
+            padding: 16px 28px;
+            background: linear-gradient(135deg, #3182F6 0%, #2563eb 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
             white-space: nowrap;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(49,130,246,0.3);
         }
 
         .address-btn:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(49,130,246,0.3);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(49,130,246,0.4);
+        }
+
+        .address-btn:active {
+            transform: translateY(0);
         }
 
         /* 사이드바 - 결제 정보 */
@@ -247,137 +294,240 @@
         }
 
         .payment-summary {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 8px 32px rgba(49,130,246,0.15);
+            border: 2px solid rgba(49,130,246,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-summary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3182F6 0%, #60a5fa 50%, #3182F6 100%);
         }
 
         .summary-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 24px;
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 28px;
             color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-title::before {
+            content: '💳';
+            font-size: 24px;
         }
 
         .price-row {
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
-            font-size: 15px;
+            padding: 14px 0;
+            font-size: 16px;
             color: #333;
+            align-items: center;
         }
 
         .price-row .label {
-            color: #666;
+            color: #64748b;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .price-row .label::before {
+            content: '•';
+            color: #3182F6;
+            font-size: 20px;
+            font-weight: 900;
         }
 
         .price-row .value {
-            font-weight: 600;
+            font-weight: 700;
             color: #1a1a1a;
+            font-size: 17px;
         }
 
         .price-divider {
-            height: 1px;
-            background: #e8e8e8;
-            margin: 16px 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+            margin: 20px 0;
         }
 
         .price-row.total {
             font-size: 20px;
-            font-weight: 700;
-            padding: 20px 0 0;
-            margin-top: 16px;
-            border-top: 2px solid #1a1a1a;
+            font-weight: 800;
+            padding: 24px 20px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-radius: 16px;
+            border: 2px solid #3182F6;
+        }
+
+        .price-row.total .label {
+            color: #1a1a1a;
+        }
+
+        .price-row.total .label::before {
+            content: '💰';
+            font-size: 24px;
         }
 
         .price-row.total .value {
             color: #3182F6;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+        .price-row.discount .label::before {
+            content: '🎫';
         }
 
         .price-row.discount .value {
-            color: #ff4444;
+            color: #ef4444;
+            font-weight: 800;
         }
 
         .delivery-info {
             background: #eff6ff;
-            padding: 16px;
-            border-radius: 8px;
+            padding: 16px 18px;
+            border-radius: 10px;
             font-size: 13px;
             color: #1e40af;
             margin-top: 16px;
             border-left: 3px solid #3182F6;
+            font-weight: 600;
+            line-height: 1.6;
         }
 
         /* 쿠폰/포인트 */
         .coupon-select, .point-input {
             width: 100%;
-            padding: 14px;
-            border: 2px solid #e8e8e8;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-top: 12px;
-            transition: all 0.2s;
+            padding: 16px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            margin-top: 14px;
+            transition: all 0.3s;
+            background: #fafbff;
+            font-weight: 600;
         }
 
         .coupon-select:hover, .point-input:hover {
-            border-color: #d0d0d0;
+            border-color: #bfdbfe;
+            background: white;
         }
 
         .coupon-select:focus, .point-input:focus {
             outline: none;
             border-color: #3182F6;
-            box-shadow: 0 0 0 3px rgba(49,130,246,0.1);
+            box-shadow: 0 0 0 4px rgba(49,130,246,0.1);
+            background: white;
         }
 
         .point-info {
             font-size: 14px;
-            color: #666;
-            margin-top: 8px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 6px;
+            color: #475569;
+            margin-top: 12px;
+            padding: 16px 18px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 10px;
+            border-left: 4px solid #3182F6;
+            font-weight: 600;
         }
 
         .point-info strong {
             color: #3182F6;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 800;
         }
 
         /* 주문하기 버튼 */
         .order-button {
             width: 100%;
-            padding: 18px;
+            padding: 22px;
             background: linear-gradient(135deg, #3182F6 0%, #2563eb 100%);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
+            border-radius: 16px;
+            font-size: 20px;
+            font-weight: 800;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 24px;
             transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(49,130,246,0.3);
+            box-shadow: 0 8px 24px rgba(49,130,246,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .order-button::before {
+            content: '🛒';
+            margin-right: 10px;
+            font-size: 22px;
+        }
+
+        .order-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
         .order-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(49,130,246,0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(49,130,246,0.5);
+        }
+
+        .order-button:hover::after {
+            width: 300px;
+            height: 300px;
         }
 
         .order-button:active {
-            transform: translateY(0);
+            transform: translateY(-1px);
         }
 
         /* 페이지 타이틀 */
         .page-title {
             text-align: center;
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 40px;
+            font-size: 36px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #1a1a1a 0%, #3182F6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 48px;
             grid-column: 1 / -1;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #3182F6 0%, #60a5fa 100%);
+            border-radius: 2px;
         }
 
         /* 반응형 */
@@ -389,6 +539,35 @@
             .order-sidebar {
                 position: static;
             }
+
+            .page-title {
+                font-size: 28px;
+            }
+        }
+
+        /* 애니메이션 효과 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .order-section {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .order-section:nth-child(1) { animation-delay: 0.1s; }
+        .order-section:nth-child(2) { animation-delay: 0.2s; }
+        .order-section:nth-child(3) { animation-delay: 0.3s; }
+        .order-section:nth-child(4) { animation-delay: 0.4s; }
+
+        .payment-summary {
+            animation: fadeInUp 0.6s ease-out 0.2s both;
         }
     </style>
 </head>
@@ -484,27 +663,28 @@
                         <div class="item-price-display">
                             <span th:text="${#numbers.formatInteger(item.bookTotalAmount, 0, 'COMMA')}">0</span>원
                         </div>
+                    </div>
 
-                        <!-- 포장지 선택 -->
-                        <div th:if="${item.packagingAvailable != null and item.packagingAvailable and orderData.availablePackagings != null and !orderData.availablePackagings.isEmpty()}" class="packaging-select-area">
-                            <label th:for="'packaging-' + ${iterStat.index}">🎁 포장지 선택</label>
-                            <select class="packaging-select"
-                                    th:id="'packaging-' + ${iterStat.index}"
-                                    th:data-book-id="${item.bookId}"
-                                    onchange="calculateTotalAmount()">
-                                <option value="">포장 안함</option>
-                                <option th:each="pkg : ${orderData.availablePackagings}"
-                                        th:value="${pkg.packagingId}"
+                    <!-- 포장지 선택 -->
+                    <div th:if="${item.packagingAvailable != null and item.packagingAvailable and orderData.availablePackagings != null and !orderData.availablePackagings.isEmpty()}" class="packaging-select-area">
+                        <label th:for="'packaging-' + ${iterStat.index}">🎁 포장지 선택</label>
+                        <select class="packaging-select"
+                                th:id="'packaging-' + ${iterStat.index}"
+                                th:data-book-id="${item.bookId}"
+                                onchange="calculateTotalAmount()">
+                            <option value="">포장 안함</option>
+                            <th:block th:each="pkg : ${orderData.availablePackagings}">
+                                <option th:value="${pkg.packagingId}"
                                         th:attr="data-price=${pkg.price}"
                                         th:text="${pkg.name} + ' (+' + ${#numbers.formatInteger(pkg.price, 0, 'COMMA')} + '원)'">
                                 </option>
-                            </select>
-                        </div>
+                            </th:block>
+                        </select>
+                    </div>
 
-                        <!-- 포장 불가 안내 -->
-                        <div th:if="${item.packagingAvailable != null and !item.packagingAvailable}" class="packaging-unavailable-notice">
-                            <i class="fa fa-info-circle"></i> 이 도서는 포장이 불가능합니다.
-                        </div>
+                    <!-- 포장 불가 안내 -->
+                    <div th:if="${item.packagingAvailable != null and !item.packagingAvailable}" class="packaging-unavailable-notice">
+                        <i class="fa fa-info-circle"></i> 이 도서는 포장이 불가능합니다.
                     </div>
                 </div>
             </div>
@@ -516,7 +696,7 @@
                     <select class="coupon-select" id="coupon-select" onchange="calculateTotalAmount()">
                         <option value="">쿠폰을 선택하세요</option>
                         <option th:each="coupon : ${orderData.availableCoupons}"
-                                th:value="${coupon.couponId}"
+                                th:value="${coupon.couponIssueId}"
                                 th:attr="data-type=${coupon.discountType},
                                         data-value=${coupon.discountValue},
                                         data-min=${coupon.minOrderAmount},
@@ -601,7 +781,7 @@
 <th:block layout:fragment="extra-js">
     <!-- Daum 우편번호 서비스 -->
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    
+
     <script th:inline="javascript">
         /*<![CDATA[*/
         const orderData = {
@@ -630,18 +810,38 @@
 
         // 총 금액 계산 함수
         function calculateTotalAmount() {
+            console.log('=== calculateTotalAmount 호출 ===');
+
             // 1. 도서 금액
             let total = orderData.netAmount;
 
             // 2. 포장비 계산 (사용자가 선택한 포장지 합계)
             let totalPackagingAmount = 0;
-            document.querySelectorAll('.packaging-select').forEach(select => {
+            const packagingSelects = document.querySelectorAll('.packaging-select');
+            console.log('포장지 선택 드롭다운 개수:', packagingSelects.length);
+
+            packagingSelects.forEach((select, index) => {
+                console.log(`드롭다운 ${index}:`, {
+                    value: select.value,
+                    hasOptions: select.options.length
+                });
+
                 if (select.value) {
                     const selectedOption = select.options[select.selectedIndex];
+                    console.log(`선택된 옵션:`, {
+                        text: selectedOption.text,
+                        value: selectedOption.value,
+                        dataPrice: selectedOption.dataset.price,
+                        getAttribute: selectedOption.getAttribute('data-price')
+                    });
+
                     const price = parseInt(selectedOption.dataset.price) || 0;
+                    console.log('파싱된 가격:', price);
                     totalPackagingAmount += price;
                 }
             });
+
+            console.log('총 포장비:', totalPackagingAmount);
 
             // 포장비 표시
             if (totalPackagingAmount > 0) {
@@ -772,9 +972,9 @@
                 };
             });
 
-            // 4. 쿠폰 선택 정보
+            // 4. 쿠폰 선택 정보 (couponIssueId 사용)
             const couponSelect = document.getElementById('coupon-select');
-            const couponId = couponSelect && couponSelect.value ? parseInt(couponSelect.value) : null;
+            const couponIssueId = couponSelect && couponSelect.value ? parseInt(couponSelect.value) : null;
 
             // 5. 포인트 사용 정보
             const pointInput = document.getElementById('point-input');
@@ -796,7 +996,7 @@
                     desiredDeliveryDate: desiredDeliveryDate,
                     deliveryMemo: deliveryMemo
                 },
-                couponId: couponId,
+                couponIssueId: couponIssueId,
                 usedPoint: usedPoint
             };
 
@@ -833,8 +1033,8 @@
                 // 주문 완료 - orderId와 finalAmount를 받음
                 alert(`주문이 완료되었습니다!\n주문번호: ${result.orderId}\n결제금액: ${result.finalAmount.toLocaleString()}원`);
 
-                // TODO: 주문 완료 페이지로 이동
-                // window.location.href = '/orders/' + result.orderId;
+                // 메인 페이지로 이동
+                window.location.href = '/';
 
             } catch (error) {
                 console.error('주문 생성 오류:', error);

@@ -1,12 +1,12 @@
 package store.bookscamp.front.deliverypolicy.controller.request;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 public record DeliveryPolicyUpdateRequest(
-        @NotNull
-        Integer freeDeliveryThreshold,  // 무료배송 기준 금액 (수정 선택적)
+        @PositiveOrZero
+        Integer freeDeliveryThreshold,
 
-        @NotNull
-        Integer baseDeliveryFee  // 기본 배송비 (수정 선택적)
+        @PositiveOrZero
+        Integer baseDeliveryFee
 ) {
 }

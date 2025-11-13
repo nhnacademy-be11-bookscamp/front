@@ -1,15 +1,14 @@
 package store.bookscamp.front.deliverypolicy.controller;
 
-import java.util.List;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import store.bookscamp.front.deliverypolicy.controller.request.DeliveryPolicyCreateRequest;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import store.bookscamp.front.deliverypolicy.controller.request.DeliveryPolicyUpdateRequest;
 import store.bookscamp.front.deliverypolicy.controller.response.DeliveryPolicyResponse;
 import store.bookscamp.front.deliverypolicy.service.DeliveryPolicyService;
@@ -18,31 +17,49 @@ import store.bookscamp.front.deliverypolicy.service.DeliveryPolicyService;
 @RequiredArgsConstructor
 public class DeliveryPolicyController {
 
-    private final DeliveryPolicyService deliveryPolicyService;
+    private final DeliveryPolicyService service;
 
-    @GetMapping("/admin/delivery-policies")
-    public String viewAdminDeliveryPolicies(Model model) {
-        model.addAttribute("policies", deliveryPolicyService.getAllDeliveryPolicies());
+    /*
+    @GetMapping("/admin/delivery-policy")
+    public String getAdminDeliveryPolicy(Model model) {
+        model.addAttribute("policy", service.getDeliveryPolicy());
         return "admin/delivery-policy";
     }
 
-    @PostMapping("/admin/delivery-policies")
-    public String createDeliveryPolicy(DeliveryPolicyCreateRequest createRequest) {
-        deliveryPolicyService.createDeliveryPolicy(createRequest);
-        return "redirect:/admin/delivery-policies"; // 단수인지 복수인지
+    @PostMapping("/admin/delivery-policy") // PutMapping
+    public String updateDeliveryPolicy(@Valid DeliveryPolicyUpdateRequest request) {
+        service.updateDeliveryPolicy(request);
+        return "redirect:/admin/delivery-policy";
+    }
+     */
+
+    @GetMapping("/admin/delivery-policy")
+    public String getDeliveryPolicy(Model model) {
+        DeliveryPolicyResponse policy = service.getDeliveryPolicy();
+        DeliveryPolicyUpdateRequest form = new DeliveryPolicyUpdateRequest(
+                policy.getFreeDeliveryThreshold(),
+                policy.getBaseDeliveryFee()
+        );
+        model.addAttribute("policy", policy);
+        model.addAttribute("form", form);
+        return "admin/delivery-policy";
     }
 
-    @PutMapping("/admin/delivery-policies/{id}")
-    public String updateDeliveryPolicy(@PathVariable Long id,
-                                       DeliveryPolicyUpdateRequest updateRequest) {
-        deliveryPolicyService.updateDeliveryPolicy(id, updateRequest);
-        return "redirect:/admin/delivery-policies";
+    @PostMapping("/admin/delivery-policy")
+    public String updateDeliveryPolicy(
+            @Valid @ModelAttribute("form") DeliveryPolicyUpdateRequest form,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes ra) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("policy", service.getDeliveryPolicy());
+            return "admin/delivery-policy";
+        }
+        service.updateDeliveryPolicy(form);
+        ra.addFlashAttribute("successMessage", "저장되었습니다.");
+        return "redirect:/admin/delivery-policy";
     }
 
-    @PostMapping("/admin/delivery-policies/{id}/delete")
-    public String deleteDeliveryPolicy(@PathVariable Long id) {
-        deliveryPolicyService.delete(id);
-        return "redirect:/admin/delivery-policies";
-    }
+
 
 }

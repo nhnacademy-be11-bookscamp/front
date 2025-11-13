@@ -17,12 +17,6 @@ import store.bookscamp.front.coupon.controller.response.CouponResponse;
 )
 public interface CouponFeignClient {
 
-    @PostMapping("/api-server/coupons")
-    ResponseEntity<Void> createCoupon();
-
     @GetMapping("/api-server/coupons")
     ResponseEntity<List<CouponResponse>> listCoupons();
-
-    @DeleteMapping("/api-server/coupons/{couponId}")
-    ResponseEntity<Void> deleteCoupon(@PathVariable Long couponId);
 }

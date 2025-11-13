@@ -16,6 +16,7 @@ import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookIndexResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
+import store.bookscamp.front.book.controller.response.BookWishListResponse;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.common.config.FeignConfig;
 
@@ -58,4 +59,7 @@ public interface BookFeignClient {
 
     @GetMapping("/api-server/books/indexBooks")
     ResponseEntity<List<BookIndexResponse>> getRecommendBooks();
+
+    @GetMapping("/api-server/wishlist")
+    ResponseEntity<RestPageImpl<BookWishListResponse>> getWishListBooks();
 }

@@ -4,6 +4,7 @@ package store.bookscamp.front.address.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +21,7 @@ import store.bookscamp.front.address.feign.AddressFeignClient;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/members/{username}/address")
+@RequestMapping("/mypage/{username}/address")
 public class AddressController {
 
     private final AddressFeignClient addressFeignClient;
@@ -54,7 +55,7 @@ public class AddressController {
                          @ModelAttribute("form") AddressCreateRequest form) {
         addressFeignClient.createAddress(username, form);
 
-        return "redirect:/members/" + username + "/address";
+        return "redirect:/mypage/" + username + "/address";
     }
 
     // 예: /members/{u}/address/{id}/edit?label=집&roadNameAddress=서울시..&zipCode=12345
@@ -77,22 +78,22 @@ public class AddressController {
 
     }
 
-    @PostMapping("/{id}/edit")
+    @PutMapping("/{id}/edit")
     public String update(@PathVariable String username,
                          @PathVariable Long id,
                          @ModelAttribute("form") AddressUpdateRequest form,
                          RedirectAttributes ra) {
         addressFeignClient.updateAddress(username, id, form);
         ra.addFlashAttribute("message", "주소가 수정되었습니다!");
-        return "redirect:/members/" + username + "/address";
+        return "redirect:/mypage/" + username + "/address";
     }
 
-    @PostMapping("{id}/delete")
+    @DeleteMapping("/{id}/delete")
     public String delete(@PathVariable String username,
                          @PathVariable Long id,
                          RedirectAttributes ra) {
         addressFeignClient.deleteAddress(username, id);
         ra.addFlashAttribute("message", "주소가 삭제되었습니다!");
-        return "redirect:/members/" + username + "/address";
+        return "redirect:/mypage/" + username + "/address";
     }
 }

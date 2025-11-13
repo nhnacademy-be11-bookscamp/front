@@ -29,8 +29,15 @@
                             <i class="fa fa-user"></i> 로그인
                         </a>
                         <!-- 로그아웃 버튼-->
-                        <a sec:authorize="isAuthenticated()" th:href="@{/logout}"> <i class="fa fa-sign-out"></i> 로그아웃
-                        </a>
+                        <div sec:authorize="isAuthenticated()" class="header__auth__links" style="display: flex; justify-content: space-between; align-items: center;">
+                            <a th:href="@{/mypage}" style="color: #333; margin-right: 10px;">
+                                <i class="fa fa-user-circle-o"></i>
+                                <span id="mobile-member-name"></span>님
+                            </a>
+                            <a th:href="@{/logout}" style="color: #333;">
+                                <i class="fa fa-sign-out"></i> 로그아웃
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -89,6 +96,22 @@
                         </a>
 
                         <div sec:authorize="isAuthenticated()" class="header__login" style="margin-left: 20px; display: flex; align-items: center; font-size: 14px;">
+
+                            <a sec:authorize="hasRole('ADMIN')"
+                               th:href="@{/admin/dashboard}"
+                               id="mypage-link"
+                               style="color: #333; margin-right: 15px;">
+                                <i class="fa fa-user-circle-o"></i>
+                                <span id="header-member-name"></span>님
+                            </a>
+
+                            <a sec:authorize="hasRole('USER')"
+                               th:href="@{/mypage}"
+                               id="mypage-link"
+                               style="color: #333; margin-right: 15px;">
+                                <i class="fa fa-user-circle-o"></i>
+                                <span id="header-member-name"></span>님
+                            </a>
 
                             <a th:href="@{/logout}" style="color: #333;">
                                 <i class="fa fa-sign-out"></i> 로그아웃

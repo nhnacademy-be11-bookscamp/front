@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>관리자 | 배송비 정책</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .card { border-radius: 12px; }
+            .form-label { font-weight: 600; }
+            .help-text { font-size: .9rem; color: #6c757d; }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<!-- Hero 영역 교체(간단한 타이틀/크럼브) -->
+<section class="hero" layout:fragment="hero">
+    <div class="container py-3">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="mb-1">배송비 정책 관리</h3>
+                <div class="text-muted">현재 정책 확인 및 수정</div>
+            </div>
+            <div class="col-auto">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Delivery Policy</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 메인 콘텐츠 -->
+<div layout:fragment="content">
+    <div class="container my-4">
+
+        <!-- 알림 영역 (성공/에러 메시지 노출용; 컨트롤러에서 model에 넣어주면 표시됩니다) -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <strong>현재 배송비 정책</strong>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted mb-1">무료배송 기준(원)</div>
+                            <div class="fs-4 fw-bold" th:text="${#numbers.formatInteger(policy.freeDeliveryThreshold, 0, 'COMMA')}">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted mb-1">기본 배송비(원)</div>
+                            <div class="fs-4 fw-bold" th:text="${#numbers.formatInteger(policy.baseDeliveryFee, 0, 'COMMA')}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 수정 폼 -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white">
+                <strong>정책 수정</strong>
+            </div>
+            <div class="card-body">
+                <!-- 브라우저 제약으로 POST 전송 + _method=put -->
+                <form th:action="@{/admin/delivery-policy}" method="post"
+                      th:object="${form}" class="needs-validation">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="freeDeliveryThreshold" class="form-label">무료배송 기준(원)</label>
+                            <input type="number" class="form-control" id="freeDeliveryThreshold"
+                                   th:field="*{freeDeliveryThreshold}" min="0" step="100">
+                            <div class="help-text mt-1">0 이상, 100원 단위 권장</div>
+                            <div class="text-danger mt-1"
+                                 th:if="${#fields.hasErrors('freeDeliveryThreshold')}"
+                                 th:errors="*{freeDeliveryThreshold}">유효성 오류</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="baseDeliveryFee" class="form-label">기본 배송비(원)</label>
+                            <input type="number" class="form-control" id="baseDeliveryFee"
+                                   th:field="*{baseDeliveryFee}" min="0" step="100">
+                            <div class="help-text mt-1">0 이상, 100원 단위 권장</div>
+                            <div class="text-danger mt-1"
+                                 th:if="${#fields.hasErrors('baseDeliveryFee')}"
+                                 th:errors="*{baseDeliveryFee}">유효성 오류</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">변경 사항 저장</button>
+                        <a href="/admin/delivery-policy" class="btn btn-outline-secondary">초기값으로 되돌리기</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- 유의사항 -->
+        <div class="alert alert-info mt-4">
+            <i class="fa fa-info-circle me-1"></i>
+            값 입력을 비워서 제출하면 해당 필드는 변경되지 않습니다.
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script>
+        const apiUrl = "/admin/delivery-policy";
+
+        document.getElementById("policyForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const freeDeliveryThreshold = document.getElementById("freeDeliveryThreshold").value;
+            const baseDeliveryFee = document.getElementById("baseDeliveryFee").value;
+
+            const body = {
+                freeDeliveryThreshold: freeDeliveryThreshold ? Number(freeDeliveryThreshold) : null,
+                baseDeliveryFee: baseDeliveryFee ? Number(baseDeliveryFee) : null
+            };
+
+            try {
+                const res = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",   // ★★★ 반드시 포함 ★★★
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    throw new Error("정책 수정 요청 실패");
+                }
+
+                const data = await res.json();
+
+                document.getElementById("currentFreeDelivery").innerText =
+                    data.freeDeliveryThreshold.toLocaleString();
+
+                document.getElementById("currentBaseDelivery").innerText =
+                    data.baseDeliveryFee.toLocaleString();
+
+                showSuccess("저장되었습니다.");
+
+            } catch (e) {
+                showError("수정 중 오류가 발생했습니다.");
+            }
+        });
+
+        function showSuccess(msg) {
+            const box = document.getElementById("successMessage");
+            box.classList.remove("d-none");
+            box.innerText = msg;
+
+            setTimeout(() => box.classList.add("d-none"), 2000);
+        }
+
+        function showError(msg) {
+            const box = document.getElementById("errorMessage");
+            box.classList.remove("d-none");
+            box.innerText = msg;
+
+            setTimeout(() => box.classList.add("d-none"), 2000);
+        }
+    </script>
+</th:block>
+</body>
+</html>

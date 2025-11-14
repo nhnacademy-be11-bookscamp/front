@@ -43,7 +43,7 @@ public class AddressController {
 
     @GetMapping("/new")
     public ModelAndView showCreateAddressForm(@PathVariable String username) {
-        ModelAndView mav = new ModelAndView("/member/address/new");
+        ModelAndView mav = new ModelAndView("member/address/new");
         mav.addObject("apiPrefix", apiPrefix);
         mav.addObject("username", username);
         mav.addObject("form", new AddressCreateRequest(null, null, null, null, null));
@@ -68,7 +68,7 @@ public class AddressController {
                                      @RequestParam boolean isDefault,
                                      @RequestParam String detailAddress) {
 
-        ModelAndView mav = new ModelAndView("/member/address/edit");
+        ModelAndView mav = new ModelAndView("member/address/edit");
         mav.addObject("apiPrefix", apiPrefix);
         mav.addObject("username", username);
         mav.addObject("id", id);

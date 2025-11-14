@@ -186,6 +186,7 @@ public class BookController {
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
+        System.out.println(response.getBody().getContent());
 
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);

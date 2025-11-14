@@ -14,6 +14,8 @@ public record BookSortResponse(
         Integer salePrice,
         Integer stock,
         String thumbnailUrl,
-        long viewCount
+        long viewCount,
+        String aiRecommand,
+        Integer aiRank
 ) {
 }

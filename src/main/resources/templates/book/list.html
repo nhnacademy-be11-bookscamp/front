@@ -49,6 +49,21 @@
             text-decoration: line-through;
             margin-right: 8px;
         }
+
+        .book-list-item.rank-1 {
+            border: 2px solid #e74c3c;   /* 빨강 */
+            border-radius: 8px;
+        }
+
+        .book-list-item.rank-2 {
+            border: 2px solid #3498db;   /* 파랑 */
+            border-radius: 8px;
+        }
+
+        .book-list-item.rank-3 {
+            border: 2px solid #2ecc71;   /* 초록 */
+            border-radius: 8px;
+        }
     </style>
 </head>
 
@@ -110,19 +125,21 @@
         <!-- 도서 목록 -->
         <div class="book-list-container">
 
-            <div class="book-list-item" th:each="book : ${booksPage.content}">
+            <div class="book-list-item" th:each="book : ${booksPage.content}" th:classappend="|rank-${book.aiRank()}|">
                 <div class="book-list-item__thumb">
                     <a th:href="@{/books/{id}(id=${book.id})}">
                         <img th:src="${book.thumbnailUrl}" th:alt="${book.title}">
                     </a>
                 </div>
 
-                <div class="book-list-item__info">
+                <div class="book-list-item__info" >
+                    <div class="book-list-item__meta" th:text="${book.aiRecommand()}"></div>
                     <h5>
                         <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">도서 제목</a>
                     </h5>
                     <div class="book-list-item__meta" th:text="${book.contributors}">저자/기여자</div>
                     <div class="book-list-item__meta" th:text="${book.publisher}">출판사</div>
+
 
                     <div class="book-list-item__price">
                         <span class="regular-price"
@@ -168,6 +185,7 @@
                 $(this).closest('form').submit();
             });
         });
+
     </script>
 </th:block>
 

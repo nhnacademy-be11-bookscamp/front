@@ -2,7 +2,6 @@ package store.bookscamp.front.book.controller;
 
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -223,6 +222,7 @@ public class BookController {
         }
 
         model.addAttribute("isLikedByCurrentUser", likeStatus);
+
         model.addAttribute("apiPrefix", apiPrefix);
 
         return "book/detail";

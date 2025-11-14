@@ -177,13 +177,12 @@
                             </button>
                         </div>
                         <div>
-                            <form th:action="@{/orders/prepare/direct}" method="post" id="directBuyForm">
-                                <input type="hidden" name="bookId" th:value="${book.id}">
-                                <input type="hidden" name="quantity" id="quantityInput" value="1">
-                                <button type="submit" class="site-btn" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600;" th:disabled="${book.stock == 0}">
-                                    <i class="fa fa-credit-card"></i> 바로 구매
-                                </button>
-                            </form>
+                            <button type="button" class="site-btn" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600;" 
+                                    th:disabled="${book.stock == 0}"
+                                    th:attr="data-book-id=${book.id}"
+                                    onclick="directBuy(this)">
+                                <i class="fa fa-credit-card"></i> 바로 구매
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -510,13 +509,6 @@
                     }
                 });
 
-                // 폼 제출 전 수량 동기화
-                const directBuyForm = document.getElementById('directBuyForm');
-                if (directBuyForm) {
-                    directBuyForm.addEventListener('submit', function(e) {
-                        quantityHiddenInput.value = quantityInput.value;
-                    });
-                }
             } // --- 수량 증감 버튼 로직 종료 ---
 
 
@@ -546,6 +538,46 @@
             // --- 쿠폰 기능 초기화 종료 ---
 
         });
+
+        // 바로 구매 함수
+        async function directBuy(button) {
+            const bookId = button.getAttribute('data-book-id');
+            const quantity = document.getElementById('quantity').value;
+
+            // JSON 형식으로 주문 준비 요청
+            const requestData = {
+                items: [
+                    {
+                        bookId: parseInt(bookId),
+                        quantity: parseInt(quantity)
+                    }
+                ]
+            };
+
+            try {
+                const response = await fetch('/orders/prepare', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData),
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    // HTML 응답을 받아서 페이지 이동
+                    const html = await response.text();
+                    document.open();
+                    document.write(html);
+                    document.close();
+                } else {
+                    alert('주문 준비 중 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('주문 준비 오류:', error);
+                alert('주문 준비 중 오류가 발생했습니다.');
+            }
+        }
 
         /*]]>*/ // Thymeleaf + JS 안전 블록
     </script>

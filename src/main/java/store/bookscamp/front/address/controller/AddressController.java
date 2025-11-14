@@ -3,6 +3,7 @@ package store.bookscamp.front.address.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,8 +11,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import store.bookscamp.front.address.controller.request.AddressCreateRequest;
@@ -41,9 +44,15 @@ public class AddressController {
         return mav;
     }
 
+    @GetMapping(produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<AddressListResponse> getAddressesJson(@PathVariable("username") String username) {
+        return addressFeignClient.getAddresses(username);
+    }
+
     @GetMapping("/new")
     public ModelAndView showCreateAddressForm(@PathVariable String username) {
-        ModelAndView mav = new ModelAndView("/member/address/new");
+        ModelAndView mav = new ModelAndView("member/address/new");
         mav.addObject("apiPrefix", apiPrefix);
         mav.addObject("username", username);
         mav.addObject("form", new AddressCreateRequest(null, null, null, null, null));
@@ -58,6 +67,13 @@ public class AddressController {
         return "redirect:/mypage/" + username + "/address";
     }
 
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Void> createJson(@PathVariable String username,
+                                           @RequestBody AddressCreateRequest form) {
+        return addressFeignClient.createAddress(username, form);
+    }
+
     // 예: /members/{u}/address/{id}/edit?label=집&roadNameAddress=서울시..&zipCode=12345
     @GetMapping("/{id}/edit")
     public ModelAndView showEditForm(@PathVariable String username,
@@ -68,7 +84,7 @@ public class AddressController {
                                      @RequestParam boolean isDefault,
                                      @RequestParam String detailAddress) {
 
-        ModelAndView mav = new ModelAndView("/member/address/edit");
+        ModelAndView mav = new ModelAndView("member/address/edit");
         mav.addObject("apiPrefix", apiPrefix);
         mav.addObject("username", username);
         mav.addObject("id", id);

@@ -9,8 +9,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import store.bookscamp.front.address.controller.response.AddressListResponse;
+import store.bookscamp.front.address.feign.AddressFeignClient;
+import store.bookscamp.front.member.controller.MemberFeignClient;
+import store.bookscamp.front.member.controller.response.MemberGetResponse;
 import store.bookscamp.front.order.dto.OrderCreateRequest;
 import store.bookscamp.front.order.dto.OrderCreateResponse;
 import store.bookscamp.front.order.dto.OrderPrepareRequest;
@@ -18,7 +21,9 @@ import store.bookscamp.front.order.dto.OrderPrepareResponse;
 import store.bookscamp.front.order.feign.OrderFeignClient;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/orders")
@@ -26,19 +31,16 @@ import java.util.List;
 public class OrderController {
 
     private final OrderFeignClient orderFeignClient;
+    private final AddressFeignClient addressFeignClient;
+    private final MemberFeignClient memberFeignClient;
 
-    @PostMapping("/prepare/direct")
-    public String prepareDirectOrder(
-            @RequestParam Long bookId,
-            @RequestParam(defaultValue = "1") Integer quantity,
+    @PostMapping("/prepare")
+    public String prepareOrder(
+            @RequestBody OrderPrepareRequest prepareRequest,
             HttpServletRequest request,
             Model model
     ) {
         boolean isMember = isAuthenticatedMember(request);
-
-        OrderPrepareRequest.OrderItemRequest item =
-                new OrderPrepareRequest.OrderItemRequest(bookId, quantity);
-        OrderPrepareRequest prepareRequest = new OrderPrepareRequest(List.of(item));
 
         ResponseEntity<OrderPrepareResponse> response = orderFeignClient.prepareOrder(prepareRequest);
         OrderPrepareResponse orderData = response.getBody();
@@ -46,22 +48,30 @@ public class OrderController {
         model.addAttribute("orderData", orderData);
         model.addAttribute("isMember", isMember);
 
-        return "order/order-prepare";
-    }
-
-    @PostMapping("/prepare/cart")
-    public String prepareCartOrder(
-            @RequestBody OrderPrepareRequest request,
-            HttpServletRequest httpRequest,
-            Model model
-    ) {
-        boolean isMember = isAuthenticatedMember(httpRequest);
-
-        ResponseEntity<OrderPrepareResponse> response = orderFeignClient.prepareOrder(request);
-        OrderPrepareResponse orderData = response.getBody();
-
-        model.addAttribute("orderData", orderData);
-        model.addAttribute("isMember", isMember);
+        if (isMember) {
+            try {
+                MemberGetResponse memberInfo = memberFeignClient.getMember();
+                String username = memberInfo.username();
+                
+                ResponseEntity<AddressListResponse> addressResponse = addressFeignClient.getAddresses(username);
+                AddressListResponse addressList = addressResponse.getBody();
+                
+                List<AddressListResponse.AddressResponse> sortedAddresses = addressList != null && addressList.addresses() != null
+                    ? addressList.addresses().stream()
+                        .sorted(Comparator.comparing(AddressListResponse.AddressResponse::isDefault).reversed())
+                        .collect(Collectors.toList())
+                    : List.of();
+                
+                model.addAttribute("addresses", sortedAddresses);
+                model.addAttribute("username", username);
+            } catch (Exception e) {
+                model.addAttribute("addresses", List.of());
+                model.addAttribute("username", null);
+            }
+        } else {
+            model.addAttribute("addresses", List.of());
+            model.addAttribute("username", null);
+        }
 
         return "order/order-prepare";
     }

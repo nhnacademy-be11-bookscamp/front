@@ -24,7 +24,7 @@ public class CustomMemberDetails implements UserDetails, TokenDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        return List.of(new SimpleGrantedAuthority( role));
     }
 
     @Override

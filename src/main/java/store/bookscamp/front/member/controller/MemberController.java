@@ -1,9 +1,6 @@
 package store.bookscamp.front.member.controller;
 
 import feign.FeignException;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Cookie;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import store.bookscamp.front.member.controller.request.MemberCreateRequest;
-import store.bookscamp.front.member.controller.request.MemberLoginRequest;
 import store.bookscamp.front.member.controller.request.MemberPasswordUpdateRequest;
 import store.bookscamp.front.member.controller.request.MemberUpdateRequest;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
@@ -32,13 +28,15 @@ public class MemberController {
 
     private final MemberFeignClient memberFeignClient;
     private final PasswordEncoder passwordEncoder;
-    private final MemberLoginFeignClient memberLoginFeignClient;
 
     @Value("${app.api.prefix}")
     private String apiPrefix;
 
     @GetMapping("/signup")
-    public String showPage(Model model){
+    public String showPage(Authentication authentication, Model model){
+        if(authentication !=null && authentication.isAuthenticated()){
+            return "redirect:/";
+        }
         model.addAttribute("apiPrefix", apiPrefix);
         return "member/signup";
     }
@@ -50,21 +48,6 @@ public class MemberController {
             return "redirect:/";
         }
         return "member/login";
-    }
-
-    @PostMapping("/login")
-    public String doLogin(@Valid MemberLoginRequest memberLoginRequest, HttpServletResponse response) {
-        try {
-            ResponseEntity<Void> responseEntity = memberLoginFeignClient.doLogin(memberLoginRequest);
-
-            String jwtToken = responseEntity.getHeaders().getFirst("X-Auth-Token");
-            Cookie cookie = new Cookie("Authorization", jwtToken);
-            response.addCookie(cookie);
-            return "redirect:/";
-
-        } catch (FeignException e) {
-            return "redirect:/login?error";
-        }
     }
 
     @GetMapping("/mypage/edit-info")

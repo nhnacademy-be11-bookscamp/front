@@ -2,7 +2,6 @@ package store.bookscamp.front.book.feign;
 
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +15,7 @@ import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookIndexResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
+import store.bookscamp.front.book.controller.response.BookWishListResponse;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.common.config.FeignConfig;
 
@@ -58,4 +58,7 @@ public interface BookFeignClient {
 
     @GetMapping("/api-server/books/indexBooks")
     ResponseEntity<List<BookIndexResponse>> getRecommendBooks();
+
+    @GetMapping("/api-server/wishlist")
+    ResponseEntity<RestPageImpl<BookWishListResponse>> getWishListBooks();
 }

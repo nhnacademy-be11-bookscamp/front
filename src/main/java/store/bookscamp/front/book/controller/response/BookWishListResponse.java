@@ -1,8 +1,9 @@
 package store.bookscamp.front.book.controller.response;
 
 import java.time.LocalDate;
+import store.bookscamp.front.book.status.BookStatus;
 
-public record BookSortResponse(
+public record BookWishListResponse(
 
         Long id,
         String title,
@@ -12,10 +13,7 @@ public record BookSortResponse(
         boolean packable,
         Integer regularPrice,
         Integer salePrice,
-        Integer stock,
-        String thumbnailUrl,
-        long viewCount,
-        String aiRecommand,
-        Integer aiRank
+        BookStatus status,
+        String thumbnailUrl
 ) {
 }

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>위시리스트 | 북스캠프</title>
+
+    <th:block layout:fragment="extra-css">
+        <style>
+            /* (기존 버튼 스타일...) */
+            .btn-cart-buy, .btn-buy-now {
+                color: white;
+                padding: 10px 20px;
+                border-radius: 4px;
+                text-decoration: none;
+                border: none;
+                cursor: pointer;
+                transition: all 0.2s;
+                font-size: 15px;
+                width: 120px;
+                text-align: center;
+                display: block;
+            }
+            .btn-cart-buy { background: #7fad39; margin-bottom: 10px; }
+            .btn-cart-buy:hover { background: #6d9631; }
+            .btn-buy-now { background: #6a6a6a; }
+            .btn-buy-now:hover { background: #5a5a5a; }
+            .btn-delete {
+                background: #dc3545;
+                color: white;
+                padding: 5px 12px;
+                border-radius: 4px;
+                border: none;
+                cursor: pointer;
+                transition: all 0.2s;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            .btn-delete:hover { background: #c82333; }
+
+            /* (기존 테이블 스타일...) */
+            .wishlist__table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0 15px;
+            }
+            .wishlist__table tbody tr {
+                background-color: #fcfcfc;
+                border-radius: 8px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                transition: all 0.2s;
+            }
+            .wishlist__table tbody tr:hover {
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+            .wishlist__item-row td {
+                padding: 20px 25px;
+                vertical-align: middle;
+            }
+
+            /* (기존 상품 정보 스타일...) */
+            .wishlist__item-info {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                width: 70%;
+            }
+            .wishlist__item-info img {
+                width: 100px;
+                height: 140px;
+                object-fit: cover;
+                border: 1px solid #eee;
+                border-radius: 4px;
+            }
+            .wishlist__item-info-text { flex-grow: 1; }
+            .wishlist__item-info-text h5 {
+                font-size: 18px;
+                font-weight: 700;
+                color: #333;
+                margin-bottom: 8px;
+            }
+            .wishlist__item-info-text h5 a { color: #333; transition: color 0.2s; }
+            .wishlist__item-info-text h5 a:hover { color: #7fad39; }
+            .wishlist__item-info-text p {
+                color: #666;
+                font-size: 14px;
+                line-height: 1.5;
+                margin-bottom: 5px;
+            }
+            .wishlist__item-info-text .price-area { margin-top: 10px; }
+            .wishlist__item-info-text .sale-price {
+                font-size: 18px;
+                font-weight: 700;
+                color: #333;
+                margin-right: 10px;
+            }
+            .wishlist__item-info-text .original-price {
+                font-size: 15px;
+                color: #999;
+                text-decoration: line-through;
+            }
+            .wishlist__item-info-text .discount-rate {
+                font-size: 16px;
+                font-weight: 600;
+                color: #dc3545;
+                margin-right: 10px;
+            }
+            .badge-packable {
+                display: inline-block;
+                background-color: #f0f8ff;
+                color: #0064FF;
+                border: 1px solid #bde0ff;
+                padding: 3px 8px;
+                font-size: 12px;
+                font-weight: 500;
+                border-radius: 4px;
+                margin-top: 8px;
+            }
+            .wishlist__item-actions {
+                width: 30%;
+                text-align: right;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+
+            /* *** [ 1. 수정 ] 눈에 보이지 않게 숨기는 CSS 클래스 추가 *** */
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                border: 0;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<section layout:fragment="hero" class="hero" style="display: none;"></section>
+
+<div layout:fragment="content">
+    <section class="shoping-cart spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div style="background: #ffffff; padding: 30px; border: 1px solid #ebebeb; border-radius: 4px;">
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                            <h4 style="margin: 0; font-weight: 700;">
+                                <i class="fa fa-heart" style="margin-right: 10px; color: #dc3545;"></i>
+                                위시리스트
+                            </h4>
+                        </div>
+
+                        <div class="wishlist__items">
+                            <table class="wishlist__table">
+                                <thead class="sr-only">
+                                <tr>
+                                    <th>상품 정보</th>
+                                    <th>구매 및 삭제</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="item : ${wishlistItems}" th:id="'wishlist-item-' + ${item.id}" class="wishlist__item-row"
+                                    th:with="discountRate=${(item.regularPrice > item.salePrice) ? (100 * (item.regularPrice - item.salePrice) / item.regularPrice) : 0}">
+
+                                    <td>
+                                        <div class="wishlist__item-info">
+                                            <a th:href="@{/books/{id}(id=${item.id})}">
+                                                <img th:src="${item.thumbnailUrl}" alt="도서 표지">
+                                            </a>
+                                            <div class="wishlist__item-info-text">
+                                                <h5><a th:href="@{/books/{id}(id=${item.id})}" th:text="${item.title}">[도서명]</a></h5>
+                                                <p th:text="${item.contributors + ' · ' + item.publisher}">저자 · 출판사</p>
+
+                                                <div class="price-area">
+                                                    <span class="discount-rate" th:if="${discountRate > 0}" th:text="${#numbers.formatInteger(discountRate, 0)} + '%'">10%</span>
+                                                    <span class="sale-price" th:text="${#numbers.formatDecimal(item.salePrice, 0, 'COMMA', 0, 'POINT')} + '원'">16,020원</span>
+                                                    <span class="original-price" th:if="${discountRate > 0}" th:text="${#numbers.formatDecimal(item.regularPrice, 0, 'COMMA', 0, 'POINT')} + '원'">17,800원</span>
+                                                </div>
+
+                                                <div class="badge-packable" th:if="${item.packable}">
+                                                    <i class="fa fa-check"></i> 포장 가능
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="wishlist__item-actions">
+                                            <button type="button" class="btn-cart-buy"
+                                                    onclick="alert('장바구니 기능은 준비 중입니다.');">장바구니</button>
+                                            <button type="button" class="btn-buy-now"
+                                                    onclick="alert('바로구매(주문) 기능은 준비 중입니다.');">바로구매</button>
+
+                                            <button class="btn-delete" style="border:none; cursor:pointer; margin-top: 15px;"
+                                                    th:onclick="'submitDelete(this, ' + ${item.id} + ');'">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr th:if="${wishlistItems == null or #lists.isEmpty(wishlistItems)}">
+                                    <td colspan="2" class="text-center" style="padding: 50px; font-size: 16px; color: #777;">
+                                        위시리스트에 담긴 상품이 없습니다.
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div layout:fragment="extra-js">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const pathPrefix = /*[[${apiPrefix}]]*/ '';
+
+        let csrfToken = null;
+        let csrfHeader = null;
+        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+
+        if (csrfTokenMeta && csrfHeaderMeta) {
+            csrfToken = csrfTokenMeta.content;
+            csrfHeader = csrfHeaderMeta.content;
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
+        async function submitDelete(buttonElement, itemId) {
+            if (!confirm('위시리스트에서 이 상품을 삭제하시겠습니까?')) {
+                return;
+            }
+            const apiUrl = pathPrefix + `/api-server/wishlist/${itemId}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'DELETE',
+                    headers: headers,
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    let errorMsg = '삭제에 실패했습니다.';
+                    try {
+                        const errorData = await response.json();
+                        errorMsg += `\n${errorData.message || '서버 오류'}`;
+                    } catch(e) {}
+                    throw new Error(errorMsg);
+                }
+
+                alert('위시리스트에서 삭제되었습니다.');
+                const row = document.getElementById('wishlist-item-' + itemId);
+                if (row) {
+                    row.remove();
+                } else {
+                    location.reload(); // Fallback
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+            }
+        }
+        /*]]>*/
+    </script>
+</div>
+
+</body>
+</html>

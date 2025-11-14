@@ -13,14 +13,12 @@
             <!-- 장바구니 및 로그인 영역 -->
             <div class="humberger__menu__cart__wrapper">
                 <div class="humberger__menu__cart">
-                    <ul>
+                    <ul style="display: flex; gap: 25px;">
                         <!-- 위시리스트 -->
                         <li><a href="#"><i class="fa fa-heart"></i> <span th:text="${likedCount ?: 0}">0</span></a></li>
                         <!-- 장바구니 -->
                         <li><a th:href="@{/cart}"><i class="fa fa-shopping-bag"></i> <span th:text="${cartItemCount ?: 0}">0</span></a></li>
                     </ul>
-                    <!-- 장바구니 총액 (동적 데이터: cartTotalAmount) -->
-                    <div class="header__cart__price">총: <span th:text="${cartTotalAmount != null ? #numbers.formatInteger(cartTotalAmount, 0, 'COMMA') + '원' : '0원'}">0원</span></div>
                 </div>
                 <div class="humberger__menu__widget">
                     <div class="header__top__right__auth">
@@ -47,7 +45,6 @@
                     <li class="active"><a th:href="@{/}">홈</a></li>
                     <li><a th:href="@{/books/best}">베스트</a></li>
                     <li><a th:href="@{/books/new}">신상품</a></li>
-                    <li><a href="#">Team3</a></li>
                 </ul>
             </nav>
             <div id="mobile-menu-wrap"></div>
@@ -57,12 +54,271 @@
 
     <!-- 헤더 영역 시작 (Sticky Header - 스크롤 시 상단 고정) -->
     <header th:fragment="header" class="header">
+        <style>
+            /* 헤더 전체 스타일 - 메인 블루 컬러 사용 */
+            .header {
+                background: linear-gradient(135deg, #0064FF 0%, #2563eb 100%);
+                box-shadow: 0 4px 20px rgba(49, 130, 246, 0.3);
+                padding: 0;
+            }
+
+            .header .container {
+                position: relative;
+            }
+
+            /* 로고 영역 스타일링 */
+            .header__logo {
+                padding: 12px 0;
+            }
+
+            .header__logo a {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                text-decoration: none;
+                font-size: 22px;
+                font-weight: 800;
+                color: #ffffff;
+                letter-spacing: -0.5px;
+                transition: all 0.3s ease;
+                font-family: 'Noto Sans KR', sans-serif;
+            }
+
+            .header__logo a:hover {
+                transform: translateY(-2px);
+                text-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
+            }
+
+            .header__logo__icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 8px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .header__logo__icon img {
+                width: 24px;
+                height: 24px;
+                object-fit: contain;
+            }
+
+            .header__logo__text {
+                display: flex;
+                align-items: center;
+                line-height: 1;
+            }
+
+            .header__logo__main {
+                font-size: 20px;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+            }
+
+            /* 네비게이션 메뉴 - 화이트 텍스트 */
+            .header__menu {
+                padding: 12px 0;
+            }
+
+            .header__menu ul {
+                display: flex;
+                justify-content: center;
+                gap: 30px;
+                margin: 0;
+                padding: 0;
+            }
+
+            .header__menu ul li {
+                margin: 0 !important;
+            }
+
+            .header__menu ul li a {
+                color: #ffffff !important;
+                font-size: 14px;
+                font-weight: 600;
+                text-decoration: none !important;
+                padding: 8px 16px;
+                border-radius: 20px;
+                transition: all 0.3s ease;
+                display: inline-block;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .header__menu ul li a::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.2);
+                transition: left 0.3s ease;
+                z-index: -1;
+            }
+
+            .header__menu ul li a:hover::before,
+            .header__menu ul li.active a::before {
+                left: 0;
+            }
+
+            .header__menu ul li a:hover,
+            .header__menu ul li.active a {
+                background: rgba(255, 255, 255, 0.15);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            /* 우측 아이콘 영역 */
+            .header__right {
+                padding: 12px 0;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+            }
+
+            /* 장바구니 & 위시리스트 아이콘 */
+            .header__cart ul {
+                display: flex;
+                gap: 12px;
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            .header__cart ul li {
+                margin: 0 !important;
+            }
+
+            .header__cart ul li a {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 8px 12px;
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 20px;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                backdrop-filter: blur(10px);
+            }
+
+            .header__cart ul li a:hover {
+                background: rgba(255, 255, 255, 0.25);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            .header__cart ul li a i {
+                font-size: 16px;
+                color: #ffffff;
+            }
+
+            .header__cart ul li a span {
+                background: #ff4757;
+                color: #ffffff;
+                font-size: 10px;
+                font-weight: 700;
+                min-width: 18px;
+                height: 18px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                padding: 0 5px;
+                box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+            }
+
+            /* 로그인/로그아웃 버튼 */
+            .header__login {
+                margin-left: 12px;
+                padding: 8px 16px;
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 20px;
+                color: #ffffff !important;
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                backdrop-filter: blur(10px);
+            }
+
+            .header__login:hover {
+                background: rgba(255, 255, 255, 0.25);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            .header__login i {
+                font-size: 14px;
+                color: #ffffff !important;
+            }
+
+            /* 로그인된 사용자 정보 */
+            .header__right > div[sec\\:authorize="isAuthenticated()"] {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-left: 12px;
+            }
+
+            .header__right > div a {
+                color: #ffffff !important;
+                padding: 8px 14px;
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 500;
+                text-decoration: none !important;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                backdrop-filter: blur(10px);
+            }
+
+            .header__right > div a:hover {
+                background: rgba(255, 255, 255, 0.25);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            .header__right > div a i {
+                font-size: 14px;
+            }
+
+            /* 반응형 - 작은 화면 */
+            @media (max-width: 991px) {
+                .header__menu ul {
+                    gap: 20px;
+                }
+                
+                .header__menu ul li a {
+                    padding: 8px 15px;
+                    font-size: 14px;
+                }
+            }
+        </style>
+
         <div class="container">
             <div class="row">
                 <!-- 로고 영역 (좌측) -->
                 <div class="col-lg-3">
                     <div class="header__logo">
-                        <a th:href="@{/}"><img th:src="@{/img/logo.png}" alt="북스캠프" style="max-height: 50px; width: auto;"></a>
+                        <a th:href="@{/}">
+                            <span class="header__logo__icon">
+                                <img th:src="@{/img/favicon.png}" alt="BooksCamp">
+                            </span>
+                            <span class="header__logo__text">
+                                <span class="header__logo__main">BooksCamp</span>
+                            </span>
+                        </a>
                     </div>
                 </div>
                 <!-- 네비게이션 메뉴 (중앙) -->
@@ -72,8 +328,6 @@
                             <li class="active"><a th:href="@{/}">홈</a></li>
                             <li><a th:href="@{/books/best}">베스트</a></li>
                             <li><a th:href="@{/books/new}">신상품</a></li>
-                            <li><a href="#">Team3</a></li>
-                            <li><a href="#">살려줘</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -83,24 +337,23 @@
                         <div class="header__cart">
                             <ul>
                                 <!-- 위시리스트 (동적 데이터: likedCount) -->
-                                <li><a href="#"><i class="fa fa-heart"></i> <span th:text="${likedCount ?: 0}">0</span></a></li>
+                                <li><a href="#" title="위시리스트"><i class="fa fa-heart"></i> <span th:text="${likedCount ?: 0}">0</span></a></li>
                                 <!-- 장바구니 (동적 데이터: cartItemCount) -->
-                                <li><a th:href="@{/cart}"><i class="fa fa-shopping-bag"></i> <span th:text="${cartItemCount ?: 0}">0</span></a></li>
+                                <li><a th:href="@{/cart}" title="장바구니"><i class="fa fa-shopping-bag"></i> <span th:text="${cartItemCount ?: 0}">0</span></a></li>
                             </ul>
-                            <!-- 장바구니 총액 (동적 데이터: cartTotalAmount, 천단위 쉼표 포맷) -->
-                            <div class="header__cart__price">총: <span th:text="${cartTotalAmount != null ? #numbers.formatInteger(cartTotalAmount, 0, 'COMMA') + '원' : '0원'}">0원</span></div>
                         </div>
                         <!-- 로그인 버튼 -->
-                        <a sec:authorize="isAnonymous()" th:href="@{/login}" class="header__login" style="margin-left: 20px;">
+                        <a sec:authorize="isAnonymous()" th:href="@{/login}" class="header__login">
                             <i class="fa fa-user"></i> 로그인
                         </a>
 
-                        <div sec:authorize="isAuthenticated()" class="header__login" style="margin-left: 20px; display: flex; align-items: center; font-size: 14px;">
+                        <div sec:authorize="isAuthenticated()" style="display: flex; align-items: center; gap: 15px; margin-left: 20px; font-size: 14px; white-space: nowrap;">
 
                             <a sec:authorize="hasRole('ADMIN')"
                                th:href="@{/admin/dashboard}"
                                id="mypage-link"
-                               style="color: #333; margin-right: 15px;">
+                               style="color: #333; display: inline-flex; align-items: center; gap: 5px; text-decoration: none;"
+                               title="관리자 대시보드">
                                 <i class="fa fa-user-circle-o"></i>
                                 <span id="header-member-name"></span>님
                             </a>
@@ -108,12 +361,13 @@
                             <a sec:authorize="hasRole('USER')"
                                th:href="@{/mypage}"
                                id="mypage-link"
-                               style="color: #333; margin-right: 15px;">
+                               style="color: #333; display: inline-flex; align-items: center; gap: 5px; text-decoration: none;"
+                               title="마이페이지">
                                 <i class="fa fa-user-circle-o"></i>
                                 <span id="header-member-name"></span>님
                             </a>
 
-                            <a th:href="@{/logout}" style="color: #333;">
+                            <a th:href="@{/logout}" style="color: #333; display: inline-flex; align-items: center; gap: 5px; text-decoration: none;" title="로그아웃">
                                 <i class="fa fa-sign-out"></i> 로그아웃
                             </a>
                         </div>

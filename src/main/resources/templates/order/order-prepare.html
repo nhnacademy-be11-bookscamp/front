@@ -57,12 +57,12 @@
             left: 0;
             width: 60px;
             height: 3px;
-            background: linear-gradient(90deg, #3182F6 0%, #60a5fa 100%);
+            background: linear-gradient(90deg, #0064FF 0%, #60a5fa 100%);
             border-radius: 2px;
         }
 
         .section-title i {
-            color: #3182F6;
+            color: #0064FF;
             font-size: 24px;
         }
 
@@ -80,7 +80,7 @@
         }
 
         .order-item:hover {
-            border-color: #3182F6;
+            border-color: #0064FF;
             box-shadow: 0 4px 12px rgba(49,130,246,0.1);
         }
 
@@ -133,13 +133,13 @@
 
         .item-detail span:first-child {
             font-weight: 600;
-            color: #3182F6;
+            color: #0064FF;
         }
 
         .item-price-display {
             font-size: 16px;
             font-weight: 700;
-            color: #3182F6;
+            color: #0064FF;
         }
 
         /* 포장지 선택 */
@@ -223,7 +223,7 @@
         }
 
         .form-label i {
-            color: #3182F6;
+            color: #0064FF;
             font-size: 16px;
         }
 
@@ -251,7 +251,7 @@
 
         .form-input:focus, .form-textarea:focus {
             outline: none;
-            border-color: #3182F6;
+            border-color: #0064FF;
             box-shadow: 0 0 0 4px rgba(49,130,246,0.1);
             background: white;
         }
@@ -264,7 +264,7 @@
 
         .address-btn {
             padding: 16px 28px;
-            background: linear-gradient(135deg, #3182F6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #0064FF 0%, #2563eb 100%);
             color: white;
             border: none;
             border-radius: 12px;
@@ -310,7 +310,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #3182F6 0%, #60a5fa 50%, #3182F6 100%);
+            background: linear-gradient(90deg, #0064FF 0%, #60a5fa 50%, #0064FF 100%);
         }
 
         .summary-title {
@@ -347,7 +347,7 @@
 
         .price-row .label::before {
             content: '•';
-            color: #3182F6;
+            color: #0064FF;
             font-size: 20px;
             font-weight: 900;
         }
@@ -371,7 +371,7 @@
             margin-top: 20px;
             background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
             border-radius: 16px;
-            border: 2px solid #3182F6;
+            border: 2px solid #0064FF;
         }
 
         .price-row.total .label {
@@ -384,7 +384,7 @@
         }
 
         .price-row.total .value {
-            color: #3182F6;
+            color: #0064FF;
             font-size: 28px;
             font-weight: 900;
         }
@@ -405,7 +405,7 @@
             font-size: 13px;
             color: #1e40af;
             margin-top: 16px;
-            border-left: 3px solid #3182F6;
+            border-left: 3px solid #0064FF;
             font-weight: 600;
             line-height: 1.6;
         }
@@ -430,7 +430,7 @@
 
         .coupon-select:focus, .point-input:focus {
             outline: none;
-            border-color: #3182F6;
+            border-color: #0064FF;
             box-shadow: 0 0 0 4px rgba(49,130,246,0.1);
             background: white;
         }
@@ -442,12 +442,12 @@
             padding: 16px 18px;
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             border-radius: 10px;
-            border-left: 4px solid #3182F6;
+            border-left: 4px solid #0064FF;
             font-weight: 600;
         }
 
         .point-info strong {
-            color: #3182F6;
+            color: #0064FF;
             font-size: 18px;
             font-weight: 800;
         }
@@ -456,7 +456,7 @@
         .order-button {
             width: 100%;
             padding: 22px;
-            background: linear-gradient(135deg, #3182F6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #0064FF 0%, #2563eb 100%);
             color: white;
             border: none;
             border-radius: 16px;
@@ -468,12 +468,15 @@
             box-shadow: 0 8px 24px rgba(49,130,246,0.4);
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .order-button::before {
-            content: '🛒';
-            margin-right: 10px;
+        .order-button i {
             font-size: 22px;
+            color: white;
         }
 
         .order-button::after {
@@ -508,7 +511,7 @@
             text-align: center;
             font-size: 36px;
             font-weight: 900;
-            background: linear-gradient(135deg, #1a1a1a 0%, #3182F6 100%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #0064FF 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -526,7 +529,7 @@
             transform: translateX(-50%);
             width: 100px;
             height: 4px;
-            background: linear-gradient(90deg, #3182F6 0%, #60a5fa 100%);
+            background: linear-gradient(90deg, #0064FF 0%, #60a5fa 100%);
             border-radius: 2px;
         }
 
@@ -772,7 +775,10 @@
                     <span class="value" id="final-amount" th:text="${#numbers.formatInteger(orderData.priceInfo.totalAmount, 0, 'COMMA')} + '원'">0원</span>
                 </div>
 
-                <button class="order-button" onclick="submitOrder()">주문하기</button>
+                <button class="order-button" onclick="submitOrder()">
+                    <i class="fa fa-shopping-cart"></i>
+                    주문하기
+                </button>
             </div>
         </div>
     </div>

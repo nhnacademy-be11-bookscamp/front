@@ -42,10 +42,9 @@
                 padding: 10px 15px;
             }
 
-            /* ##### [추가] 필터 탭 활성화 스타일 ##### */
             .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
                 color: #fff;
-                background-color: #0b5ed7; /* 사이트 메인 컬러와 통일 */
+                background-color: #0b5ed7;
             }
             .nav-pills .nav-link {
                 color: #0b5ed7;
@@ -54,9 +53,20 @@
                 font-weight: 500;
             }
             .nav-pills .nav-item {
-                margin-bottom: 10px; /* 모바일에서 줄바꿈 시 간격 */
+                margin-bottom: 10px;
             }
-            /* ##### /필터 탭 활성화 스타일 ##### */
+
+            .pagination-container .page-item.active .page-link {
+                background-color: #0b5ed7;
+                border-color: #0b5ed7;
+                color: white;
+            }
+            .pagination-container .page-link {
+                color: #0b5ed7;
+            }
+            .pagination-container .page-item.disabled .page-link {
+                color: #6c757d;
+            }
 
         </style>
     </th:block>
@@ -97,37 +107,53 @@
                     <ul class="nav nav-pills mb-4" id="coupon-filter-tabs">
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${param.status == null || param.status == 'all'} ? 'active'"
+                               th:classappend="${currentStatus == 'ALL'} ? 'active'"
                                th:href="@{/mycoupon(status='ALL')}">전체</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${param.status == 'AVAILABLE'} ? 'active'"
+                               th:classappend="${currentStatus == 'AVAILABLE'} ? 'active'"
                                th:href="@{/mycoupon(status='AVAILABLE')}">사용 가능</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${param.status == 'USED'} ? 'active'"
+                               th:classappend="${currentStatus == 'USED'} ? 'active'"
                                th:href="@{/mycoupon(status='USED')}">사용 완료</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link"
-                               th:classappend="${param.status == 'EXPIRED'} ? 'active'"
+                               th:classappend="${currentStatus == 'EXPIRED'} ? 'active'"
                                th:href="@{/mycoupon(status='EXPIRED')}">기한 만료</a>
                         </li>
                     </ul>
-                    <div th:if="${coupons == null || coupons.isEmpty()}" class="text-center" style="padding: 60px 0;">
+
+                    <div th:if="${couponPage == null || couponPage.empty}" class="text-center" style="padding: 60px 0;">
                         <h4>보유한 쿠폰이 없습니다.</h4>
                         <p class="text-secondary">다양한 이벤트에 참여하고 쿠폰을 받아보세요!</p>
                     </div>
 
-                    <div th:unless="${coupons == null || coupons.isEmpty()}">
+                    <div th:unless="${couponPage == null || couponPage.empty}">
 
-                        <div th:each="coupon : ${coupons}" class="coupon-card">
+                        <div th:each="coupon : ${couponPage.content}" class="coupon-card">
 
                             <div class="coupon-details">
                                 <h4 th:text="${coupon.name}">[웰컴 쿠폰] 15% 할인</h4>
-                                <p class="discount-info" th:text="${coupon.discountValue()}">전 상품 15% (최대 10,000원)</p>
+
+                                <p class="discount-info" th:switch="${coupon.discountType}">
+                                    <span th:case="'RATE'">
+                                        <span th:text="${coupon.discountValue} + '% 할인'">15% 할인</span>
+                                        <span th:if="${coupon.maxDiscountAmount != null and coupon.maxDiscountAmount > 0}"
+                                              th:text="' (최대 ' + ${#numbers.formatInteger(coupon.maxDiscountAmount, 0, 'COMMA')} + '원)'">
+                                            (최대 10,000원)
+                                        </span>
+                                    </span>
+
+                                    <span th:case="'AMOUNT'">
+                                        <span th:text="${#numbers.formatInteger(coupon.discountValue, 0, 'COMMA')} + '원 할인'">1,000원 할인</span>
+                                    </span>
+
+                                    <span th:case="*">할인 혜택</span>
+                                </p>
                                 <p class="expiry">
                                     유효기간: <span th:text="${#temporals.format(coupon.expiredAt, 'yyyy-MM-dd')}"></span> 까지
                                 </p>
@@ -135,14 +161,46 @@
 
                             <div class="coupon-action">
                                 <form th:action="@{/my-coupons/delete}" method="post" onsubmit="return confirm('이 쿠폰을 목록에서 삭제하시겠습니까?');">
-
                                     <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <input type="hidden" name="couponIssueId" th:value="${coupon.couponIssueId}" />
 
                                     <button type="submit" class="btn delete-btn">삭제</button>
                                 </form>
                             </div>
                         </div>
                     </div>
+
+                    <div class="pagination-container" style="margin-top: 30px;"
+                         th:if="${couponPage != null and couponPage.totalPages > 1}">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+
+                                <li class="page-item" th:classappend="${couponPage.first} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/mycoupon(status=${currentStatus}, page=${couponPage.number - 1}, size=${couponPage.size})}"
+                                       aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+
+                                <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, couponPage.totalPages - 1)}"
+                                    th:classappend="${pageNumber == couponPage.number} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/mycoupon(status=${currentStatus}, page=${pageNumber}, size=${couponPage.size})}"
+                                       th:text="${pageNumber + 1}">1</a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${couponPage.last} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/mycoupon(status=${currentStatus}, page=${couponPage.number + 1}, size=${couponPage.size})}"
+                                       aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
                 </div>
             </div>
         </div>

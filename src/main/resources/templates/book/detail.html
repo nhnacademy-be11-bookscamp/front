@@ -264,7 +264,12 @@
     <script th:inline="javascript">
         /*<![CDATA[*/ // Thymeleaf + JS 안전 블록
 
-        const pathPrefix = /*[[${apiPrefix}]]*/ '';
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
         let explanation = document. querySelector('#explanation');
         explanation.innerHTML=[[${book.explanation}]];
 
@@ -281,7 +286,7 @@
             try {
                 // 2. API 경로: pathPrefix와 coupon-issue API 경로 조합
                 // (고라니님의 API 서버 주소에 맞게 '/api-server' 부분은 수정/제거 하세요)
-                const apiUrl = pathPrefix + '/api-server/coupon-issue/issue';
+                const apiUrl = '/api-server/coupon-issue/issue';
 
                 const response = await fetch(apiUrl, {
                     method: 'POST',
@@ -355,7 +360,7 @@
 
             try {
                 // 1. API 경로 설정 (다운로드 가능 쿠폰 조회)
-                const apiUrl = pathPrefix + `/api-server/coupon-issue/downloadable`;
+                const apiUrl = `/api-server/coupon-issue/downloadable`;
 
                 const response = await fetch(`${apiUrl}/${bookId}`, {
                     method: 'GET',
@@ -424,7 +429,7 @@
                 const likeCountElement = document.getElementById('likeCount');
                 // const bookId = /*[[${book.id}]]*/ null; // (위로 이동됨)
                 const isAlreadyLiked = /*[[${isLikedByCurrentUser}]]*/ false;
-                const apiUrl = pathPrefix + '/api-server/books/like';
+                const apiUrl = '/api-server/books/like';
 
                 let currentLikeCount = parseInt(likeCountElement.innerText, 10);
 
@@ -451,7 +456,7 @@
                     })
                         .then(res => {
                             if (!res.ok) {
-                                throw new Error('Server response was not ok');
+                                throw new Error('Server response was not ok');F
                             }
                             return res.text();
                         })
@@ -538,46 +543,6 @@
             // --- 쿠폰 기능 초기화 종료 ---
 
         });
-
-        // 바로 구매 함수
-        async function directBuy(button) {
-            const bookId = button.getAttribute('data-book-id');
-            const quantity = document.getElementById('quantity').value;
-
-            // JSON 형식으로 주문 준비 요청
-            const requestData = {
-                items: [
-                    {
-                        bookId: parseInt(bookId),
-                        quantity: parseInt(quantity)
-                    }
-                ]
-            };
-
-            try {
-                const response = await fetch('/orders/prepare', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData),
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    // HTML 응답을 받아서 페이지 이동
-                    const html = await response.text();
-                    document.open();
-                    document.write(html);
-                    document.close();
-                } else {
-                    alert('주문 준비 중 오류가 발생했습니다.');
-                }
-            } catch (error) {
-                console.error('주문 준비 오류:', error);
-                alert('주문 준비 중 오류가 발생했습니다.');
-            }
-        }
 
         /*]]>*/ // Thymeleaf + JS 안전 블록
     </script>

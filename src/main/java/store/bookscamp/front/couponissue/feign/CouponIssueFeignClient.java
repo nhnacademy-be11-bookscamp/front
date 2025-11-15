@@ -33,4 +33,10 @@ public interface CouponIssueFeignClient {
 
     @DeleteMapping("/api-server/coupon-issue/{couponIssueId}")
     ResponseEntity<Void> deleteCouponIssue(@PathVariable Long couponIssueId);
+
+    @GetMapping("/api-server/coupon-issue/downloadable/{bookId}")
+    ResponseEntity<List<CouponIssueDownloadResponse>> getDownloadableCoupons(@PathVariable Long bookId);
+
+    @PostMapping("/api-server/coupon-issue/issue")
+    ResponseEntity<Long> issueCoupon(@RequestBody CouponIssueRequest couponIssueRequest);
 }

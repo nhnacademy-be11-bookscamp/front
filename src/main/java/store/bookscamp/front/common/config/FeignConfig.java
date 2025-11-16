@@ -21,6 +21,11 @@ public class FeignConfig {
     }
 
     @Bean
+    public RequestInterceptor cartTokenCookieInterceptor() {
+        return new CartTokenCookieInterceptor();
+    }
+
+    @Bean
     public ErrorDecoder feignErrorDecoder(TokenRefreshService tokenRefreshService) {
         return new FeignErrorDecoder(tokenRefreshService);
     }

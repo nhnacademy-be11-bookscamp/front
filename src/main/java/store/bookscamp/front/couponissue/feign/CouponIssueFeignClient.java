@@ -1,6 +1,5 @@
 package store.bookscamp.front.couponissue.feign;
 
-import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Pageable;

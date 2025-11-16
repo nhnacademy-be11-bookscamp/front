@@ -130,6 +130,11 @@
             <version>8.5.10</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+
 
 	</dependencies>
 

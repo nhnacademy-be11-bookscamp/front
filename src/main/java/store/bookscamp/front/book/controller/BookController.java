@@ -1,9 +1,7 @@
 package store.bookscamp.front.book.controller;
 
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +19,7 @@ import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookDetailResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
+import store.bookscamp.front.book.controller.response.BookWishListResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
 import store.bookscamp.front.booklike.feign.BookLikeFeignClient;
@@ -55,6 +54,7 @@ public class BookController {
         ResponseEntity<RestPageImpl<BookSortResponse>> response = bookFeignClient.getBooks(
                 categoryId,
                 keyWord,
+                sortType,
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
@@ -119,7 +119,7 @@ public class BookController {
     @PostMapping("/admin/aladin/books")
     public String aladinCreateBook(@ModelAttribute AladinCreateRequest req) {
 
-        bookFeignClient.createAladinBook(req);
+        bookFeignClient.createAladinBook(req, req.getImgUrls());
 
         return "redirect:/admin/books";
     }
@@ -180,9 +180,11 @@ public class BookController {
         ResponseEntity<RestPageImpl<BookSortResponse>> response = bookFeignClient.getBooks(
                 categoryId,
                 keyWord,
+                sortType,
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
+        System.out.println(response.getBody().getContent());
 
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
@@ -219,5 +221,22 @@ public class BookController {
         model.addAttribute("apiPrefix", apiPrefix);
 
         return "book/detail";
+    }
+
+    @GetMapping("/wishlist")
+    public String wishList(
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model
+    ){
+        if (userDetails == null){
+            return "redirect:/login";
+        }
+
+        List<BookWishListResponse> item = bookFeignClient.getWishListBooks().getBody().getContent();
+
+        model.addAttribute("wishlistItems", item);
+        model.addAttribute("apiPrefix", apiPrefix);
+
+        return "member/wishlist";
     }
 }

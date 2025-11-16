@@ -3,7 +3,7 @@ package store.bookscamp.front.book.controller.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import store.bookscamp.front.book.BookStatus;
+import store.bookscamp.front.book.status.BookStatus;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>주문서 작성 | 북스캠프</title>
+    <style>
+        body {
+            background: #ffffff;
+        }
+
+        .order-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+            padding: 0 20px;
+        }
+
+        .order-main {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .order-section {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid rgba(49,130,246,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .order-section:hover {
+            box-shadow: 0 8px 30px rgba(49,130,246,0.15);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 28px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            padding-bottom: 16px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #0064FF 0%, #60a5fa 100%);
+            border-radius: 2px;
+        }
+
+        .section-title i {
+            color: #0064FF;
+            font-size: 24px;
+        }
+
+        /* 주문 도서 아이템 */
+        .order-item {
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #ffffff;
+            transition: all 0.2s ease;
+            align-items: flex-start;
+        }
+
+        .order-item:hover {
+            border-color: #0064FF;
+            box-shadow: 0 4px 12px rgba(49,130,246,0.1);
+        }
+
+        .order-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .item-image {
+            flex-shrink: 0;
+            width: 80px;
+            height: 105px;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-detail {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .item-detail span:first-child {
+            font-weight: 600;
+            color: #0064FF;
+        }
+
+        .item-price-display {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0064FF;
+        }
+
+        /* 포장지 선택 */
+        .packaging-select-area {
+            flex-shrink: 0;
+            width: 200px;
+            padding: 12px;
+            background: #fff7ed;
+            border-radius: 8px;
+            border: 1px solid #fed7aa;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .packaging-select-area label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #ea580c;
+            margin: 0;
+        }
+
+        .packaging-select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #fed7aa;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: white;
+        }
+
+        .packaging-select:hover {
+            border-color: #fb923c;
+        }
+
+        .packaging-select:focus {
+            outline: none;
+            border-color: #ea580c;
+            box-shadow: 0 0 0 3px rgba(251,146,60,0.1);
+        }
+
+        /* 포장 불가 안내 */
+        .packaging-unavailable-notice {
+            flex-shrink: 0;
+            width: 200px;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #94a3b8;
+            font-size: 11px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            line-height: 1.4;
+        }
+
+        .packaging-unavailable-notice i {
+            color: #94a3b8;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        /* 배송지 폼 */
+        .form-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .form-label .required {
+            color: #ef4444;
+            margin-left: 2px;
+            font-size: 14px;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-input:hover {
+            border-color: #9ca3af;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #0064FF;
+            box-shadow: 0 0 0 3px rgba(0,100,255,0.1);
+        }
+
+        .address-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .address-btn {
+            padding: 10px 16px;
+            background: #0064FF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .address-btn:hover {
+            background: #2563eb;
+        }
+
+        .address-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 사이드바 - 결제 정보 */
+        .order-sidebar {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .payment-summary {
+            background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 8px 32px rgba(49,130,246,0.15);
+            border: 2px solid rgba(49,130,246,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-summary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0064FF 0%, #60a5fa 50%, #0064FF 100%);
+        }
+
+        .summary-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 28px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-title::before {
+            content: '💳';
+            font-size: 24px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            font-size: 16px;
+            color: #333;
+            align-items: center;
+        }
+
+        .price-row .label {
+            color: #64748b;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .price-row .label::before {
+            content: '•';
+            color: #0064FF;
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .price-row .value {
+            font-weight: 700;
+            color: #1a1a1a;
+            font-size: 17px;
+        }
+
+        .price-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+            margin: 20px 0;
+        }
+
+        .price-row.total {
+            font-size: 20px;
+            font-weight: 800;
+            padding: 24px 20px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-radius: 16px;
+            border: 2px solid #0064FF;
+        }
+
+        .price-row.total .label {
+            color: #1a1a1a;
+        }
+
+        .price-row.total .label::before {
+            content: '💰';
+            font-size: 24px;
+        }
+
+        .price-row.total .value {
+            color: #0064FF;
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+        .price-row.discount .label::before {
+            content: '🎫';
+        }
+
+        .price-row.discount .value {
+            color: #ef4444;
+            font-weight: 800;
+        }
+
+        .delivery-info {
+            background: #eff6ff;
+            padding: 16px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #1e40af;
+            margin-top: 16px;
+            border-left: 3px solid #0064FF;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        /* 쿠폰/포인트 */
+        .coupon-select, .point-input {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            margin-top: 14px;
+            transition: all 0.3s;
+            background: #fafbff;
+            font-weight: 600;
+        }
+
+        .coupon-select:hover, .point-input:hover {
+            border-color: #bfdbfe;
+            background: white;
+        }
+
+        .coupon-select:focus, .point-input:focus {
+            outline: none;
+            border-color: #0064FF;
+            box-shadow: 0 0 0 4px rgba(49,130,246,0.1);
+            background: white;
+        }
+
+        .point-info {
+            font-size: 14px;
+            color: #475569;
+            margin-top: 12px;
+            padding: 16px 18px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 10px;
+            border-left: 4px solid #0064FF;
+            font-weight: 600;
+        }
+
+        .point-info strong {
+            color: #0064FF;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        /* 포인트 전액 사용 버튼 */
+        .point-all-btn {
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #0064FF 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,100,255,0.3);
+        }
+
+        .point-all-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,100,255,0.4);
+        }
+
+        .point-all-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 주문하기 버튼 */
+        .order-button {
+            width: 100%;
+            padding: 22px;
+            background: linear-gradient(135deg, #0064FF 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(49,130,246,0.4);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .order-button i {
+            font-size: 22px;
+            color: white;
+        }
+
+        .order-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .order-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(49,130,246,0.5);
+        }
+
+        .order-button:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .order-button:active {
+            transform: translateY(-1px);
+        }
+
+        /* 페이지 타이틀 */
+        .page-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0064FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 48px;
+            grid-column: 1 / -1;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #0064FF 0%, #60a5fa 100%);
+            border-radius: 2px;
+        }
+
+        /* 반응형 */
+        @media (max-width: 1024px) {
+            .order-container {
+                grid-template-columns: 1fr;
+            }
+
+            .order-sidebar {
+                position: static;
+            }
+
+            .page-title {
+                font-size: 28px;
+            }
+        }
+
+        /* 애니메이션 효과 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .order-section {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .order-section:nth-child(1) { animation-delay: 0.1s; }
+        .order-section:nth-child(2) { animation-delay: 0.2s; }
+        .order-section:nth-child(3) { animation-delay: 0.3s; }
+        .order-section:nth-child(4) { animation-delay: 0.4s; }
+
+        .payment-summary {
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        /* 작은 배송지 버튼 */
+        .address-small-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .address-small-btn:hover {
+            border-color: #0064FF;
+            background: #f0f7ff;
+            color: #0064FF;
+        }
+
+        .address-small-btn i {
+            font-size: 12px;
+        }
+
+        /* 배송지 선택 모달 */
+        .address-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .address-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .address-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        .address-modal-header {
+            padding: 20px 24px;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .address-modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .address-modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .address-modal-close:hover {
+            background: #e5e7eb;
+            transform: rotate(90deg);
+        }
+
+        .address-modal-close i {
+            font-size: 16px;
+            color: #6b7280;
+        }
+
+        .address-modal-body {
+            padding: 20px 24px;
+        }
+
+        /* 배송지 목록 아이템 */
+        .address-list-item {
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .address-list-item:hover {
+            border-color: #0064FF;
+            background: #f0f7ff;
+            transform: translateX(4px);
+        }
+
+        .address-list-item.default {
+            border-color: #0064FF;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        }
+
+        .address-list-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .address-list-item-label {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .address-list-item-badge {
+            padding: 4px 10px;
+            background: #0064FF;
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .address-list-item-info {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* 새 배송지 추가 버튼 */
+        .address-add-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0064FF 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .address-add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 100, 255, 0.4);
+        }
+
+        /* 모달 폼 스타일 */
+        .modal-form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .modal-form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .modal-form-input:focus {
+            outline: none;
+            border-color: #0064FF;
+            box-shadow: 0 0 0 3px rgba(0, 100, 255, 0.1);
+        }
+
+        .modal-search-btn {
+            padding: 10px 16px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .modal-search-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        .modal-cancel-btn {
+            flex: 1;
+            padding: 12px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-cancel-btn:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .modal-submit-btn {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #0064FF 0%, #2563eb 100%);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .modal-submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 100, 255, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+<section layout:fragment="hero" class="hero" style="display: none;">
+</section>
+
+<div layout:fragment="content">
+    <div class="order-container">
+        <h2 class="page-title">주문서 작성</h2>
+
+        <!-- 왼쪽 메인 영역 -->
+        <div class="order-main">
+            <!-- 배송지 정보 -->
+            <div class="order-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;">
+                    <div class="section-title" style="margin-bottom: 0; padding-bottom: 0;">배송지 정보</div>
+                    
+                    <!-- 회원인 경우 배송지 선택 옵션 표시 -->
+                    <div th:if="${isMember}" style="display: flex; gap: 8px;">
+                        <button type="button" class="address-small-btn" onclick="openAddressModal()">
+                            <i class="fa fa-list"></i> 배송지 선택
+                        </button>
+                        <button type="button" class="address-small-btn" onclick="clearAddressForm()">
+                            <i class="fa fa-plus"></i> 새 배송지 입력
+                        </button>
+                    </div>
+                </div>
+
+                <form id="delivery-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label class="form-label" for="recipient-name">수령인 <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="recipient-name" name="recipientName"
+                                   placeholder="이름" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="recipient-phone">연락처 <span class="required">*</span></label>
+                            <input type="tel" class="form-input" id="recipient-phone" name="recipientPhone"
+                                   placeholder="010-0000-0000" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">주소 <span class="required">*</span></label>
+                        <div class="address-row">
+                            <input type="text" class="form-input" id="postcode" name="postcode"
+                                   placeholder="우편번호" readonly required style="flex: 0 0 100px;">
+                            <button type="button" class="address-btn" onclick="execDaumPostcode()">
+                                <i class="fa fa-search"></i> 검색
+                            </button>
+                        </div>
+                        <input type="text" class="form-input" id="address" name="address"
+                               placeholder="도로명 주소" readonly required style="margin-bottom: 8px;">
+                        <input type="text" class="form-input" id="detail-address" name="detailAddress"
+                               placeholder="상세 주소" required>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label class="form-label" for="desired-delivery-date">희망 배송일</label>
+                            <input type="date" class="form-input" id="desired-delivery-date" name="desiredDeliveryDate">
+                        </div>
+
+                        <!-- 비회원 주문 조회 비밀번호 -->
+                        <div class="form-group" th:if="${!isMember}">
+                            <label class="form-label" for="order-password">주문 비밀번호 <span class="required">*</span></label>
+                            <input type="password" class="form-input" id="order-password" name="orderPassword"
+                                   placeholder="4~8자리" minlength="4" maxlength="8" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="delivery-memo">배송 메모</label>
+                        <textarea class="form-input form-textarea" id="delivery-memo" name="deliveryMemo"
+                                  placeholder="배송 시 요청사항 (예: 문 앞에 놔주세요)" rows="2" style="resize: vertical;"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 주문 도서 목록 -->
+            <div class="order-section">
+                <div class="section-title">주문 도서</div>
+                <div th:each="item, iterStat : ${orderData.orderItems}" class="order-item">
+                    <!-- 도서 이미지 -->
+                    <div class="item-image">
+                        <img th:if="${item.bookImageUrl != null and !item.bookImageUrl.isEmpty()}"
+                             th:src="${item.bookImageUrl}"
+                             th:alt="${item.bookTitle}"
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                        <div th:if="${item.bookImageUrl == null or item.bookImageUrl.isEmpty()}"
+                             style="width: 100%; height: 100%; background: #f8f8f8; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa fa-book" style="font-size: 40px; color: #ccc;"></i>
+                        </div>
+                    </div>
+
+                    <!-- 도서 정보 -->
+                    <div class="item-content">
+                        <div class="item-title" th:text="${item.bookTitle}">도서 제목</div>
+                        <div class="item-detail">
+                            <span th:text="${#numbers.formatInteger(item.bookPrice, 0, 'COMMA')}">0</span>원
+                            × <span th:text="${item.quantity}">0</span>권
+                        </div>
+                        <div class="item-price-display">
+                            <span th:text="${#numbers.formatInteger(item.bookTotalAmount, 0, 'COMMA')}">0</span>원
+                        </div>
+                    </div>
+
+                    <!-- 포장지 선택 -->
+                    <div th:if="${item.packagingAvailable != null and item.packagingAvailable and orderData.availablePackagings != null and !orderData.availablePackagings.isEmpty()}" class="packaging-select-area">
+                        <label th:for="'packaging-' + ${iterStat.index}">🎁 포장지 선택</label>
+                        <select class="packaging-select"
+                                th:id="'packaging-' + ${iterStat.index}"
+                                th:data-book-id="${item.bookId}"
+                                onchange="calculateTotalAmount()">
+                            <option value="">포장 안함</option>
+                            <th:block th:each="pkg : ${orderData.availablePackagings}">
+                                <option th:value="${pkg.packagingId}"
+                                        th:attr="data-price=${pkg.price}"
+                                        th:text="${pkg.name} + ' (+' + ${#numbers.formatInteger(pkg.price, 0, 'COMMA')} + '원)'">
+                                </option>
+                            </th:block>
+                        </select>
+                    </div>
+
+                    <!-- 포장 불가 안내 -->
+                    <div th:if="${item.packagingAvailable != null and !item.packagingAvailable}" class="packaging-unavailable-notice">
+                        <i class="fa fa-info-circle"></i> 이 도서는 포장이 불가능합니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 쿠폰 선택 (회원만) -->
+            <div class="order-section" th:if="${isMember}">
+                <div class="section-title">쿠폰 선택</div>
+                <div th:if="${orderData.availableCoupons != null and !orderData.availableCoupons.isEmpty()}">
+                    <select class="coupon-select" id="coupon-select" onchange="calculateTotalAmount()">
+                        <option value="">쿠폰을 선택하세요</option>
+                        <option th:each="coupon : ${orderData.availableCoupons}"
+                                th:value="${coupon.couponIssueId}"
+                                th:attr="data-type=${coupon.discountType},
+                                        data-value=${coupon.discountValue},
+                                        data-min=${coupon.minOrderAmount},
+                                        data-max=${coupon.maxDiscountAmount}">
+                            <span th:text="'[' + ${coupon.couponName} + '] '"></span>
+                        </option>
+                    </select>
+                </div>
+                <div th:if="${orderData.availableCoupons == null or orderData.availableCoupons.isEmpty()}" class="point-info">
+                    사용 가능한 쿠폰이 없습니다.
+                </div>
+            </div>
+
+            <!-- 포인트 사용 (회원만) -->
+            <div class="order-section" th:if="${isMember}">
+                <div class="section-title">포인트 사용</div>
+                <div th:if="${orderData.availablePoint != null and orderData.availablePoint > 0}">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="number"
+                               class="point-input"
+                               id="point-input"
+                               placeholder="사용할 포인트를 입력하세요"
+                               min="0"
+                               th:max="${orderData.availablePoint}"
+                               oninput="calculateTotalAmount()"
+                               style="flex: 1; margin-top: 0;">
+                        <button type="button" class="point-all-btn" onclick="useAllPoints()">
+                            전액 사용
+                        </button>
+                    </div>
+                    <div class="point-info">
+                        보유 포인트: <strong th:text="${#numbers.formatInteger(orderData.availablePoint, 0, 'COMMA')}">0</strong>P
+                    </div>
+                </div>
+                <div th:if="${orderData.availablePoint == null or orderData.availablePoint == 0}" class="point-info">
+                    사용 가능한 포인트가 없습니다. (보유 포인트: 0P)
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽 사이드바 - 결제 정보 -->
+        <div class="order-sidebar">
+            <div class="payment-summary">
+                <div class="summary-title">결제 금액</div>
+
+                <div class="price-row">
+                    <span class="label">도서 금액</span>
+                    <span class="value" id="book-amount" th:text="${#numbers.formatInteger(orderData.priceInfo.netAmount, 0, 'COMMA')} + '원'">0원</span>
+                </div>
+
+                <div class="price-row" id="packaging-amount-row" style="display: none;">
+                    <span class="label">포장비</span>
+                    <span class="value" id="packaging-amount">0원</span>
+                </div>
+
+                <div class="price-row">
+                    <span class="label">배송비</span>
+                    <span class="value" id="delivery-fee" th:text="${#numbers.formatInteger(orderData.priceInfo.deliveryFee, 0, 'COMMA')} + '원'">0원</span>
+                </div>
+
+                <div class="delivery-info">
+                    <span th:text="${#numbers.formatInteger(orderData.priceInfo.freeDeliveryThreshold, 0, 'COMMA')}">30,000</span>원 이상 구매 시 무료 배송(도서금액)
+                </div>
+
+                <div class="price-divider"></div>
+
+                <div class="price-row discount" id="coupon-discount-row" style="display: none;">
+                    <span class="label">쿠폰 할인</span>
+                    <span class="value" id="coupon-discount">-0원</span>
+                </div>
+
+                <div class="price-row discount" id="point-discount-row" style="display: none;">
+                    <span class="label">포인트 사용</span>
+                    <span class="value" id="point-discount">-0원</span>
+                </div>
+
+                <div class="price-row total">
+                    <span>최종 결제 금액</span>
+                    <span class="value" id="final-amount" th:text="${#numbers.formatInteger(orderData.priceInfo.totalAmount, 0, 'COMMA')} + '원'">0원</span>
+                </div>
+
+                <button class="order-button" onclick="submitOrder()">
+                    <i class="fa fa-shopping-cart"></i>
+                    주문하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 배송지 선택 모달 -->
+    <div class="address-modal" id="addressModal" th:if="${isMember}">
+        <div class="address-modal-content">
+            <div class="address-modal-header">
+                <h3><i class="fa fa-map-marker"></i> 배송지 관리</h3>
+                <button class="address-modal-close" onclick="closeAddressModal()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="address-modal-body">
+                <!-- 배송지 목록 -->
+                <div id="addressListSection">
+                    <div th:if="${addresses != null and !addresses.isEmpty()}">
+                        <div th:each="address : ${addresses}" 
+                             class="address-list-item"
+                             th:classappend="${address.isDefault} ? 'default' : ''"
+                             th:data-zipcode="${address.zipCode}"
+                             th:data-road-address="${address.roadNameAddress}"
+                             th:data-detail-address="${address.detailAddress}"
+                             onclick="selectAddressFromData(this)">
+                            <div class="address-list-item-header">
+                                <div class="address-list-item-label">
+                                    <i th:class="${address.isDefault} ? 'fa fa-star' : 'fa fa-map-marker'"></i>
+                                    <span th:text="${address.label}">집</span>
+                                </div>
+                                <span th:if="${address.isDefault}" class="address-list-item-badge">기본 배송지</span>
+                            </div>
+                            <div class="address-list-item-info">
+                                <div>[<span th:text="${address.zipCode}">12345</span>] <span th:text="${address.roadNameAddress}">서울시 강남구</span></div>
+                                <div th:text="${address.detailAddress}">상세주소</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${addresses == null or addresses.isEmpty()}" style="text-align: center; padding: 40px 20px; color: #9ca3af;">
+                        <i class="fa fa-map-marker" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <p>등록된 배송지가 없습니다.</p>
+                    </div>
+                </div>
+
+                <!-- 새 배송지 추가 버튼 -->
+                <button class="address-add-btn" onclick="showAddAddressForm()">
+                    <i class="fa fa-plus"></i> 새 배송지 추가
+                </button>
+
+                <!-- 새 배송지 추가 폼 (처음엔 숨김) -->
+                <div id="addAddressForm" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+                    <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #1a1a1a;">
+                        <i class="fa fa-plus-circle"></i> 새 배송지 추가
+                    </h4>
+                    <form id="newAddressForm" onsubmit="submitNewAddress(event)">
+                        <div class="modal-form-group">
+                            <label class="modal-form-label">배송지 이름 <span style="color: #ef4444;">*</span></label>
+                            <input type="text" class="modal-form-input" id="new-label" placeholder="예: 집, 회사" required>
+                        </div>
+                        <div class="modal-form-group">
+                            <label class="modal-form-label">주소 <span style="color: #ef4444;">*</span></label>
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <input type="text" class="modal-form-input" id="new-postcode" placeholder="우편번호" readonly required style="flex: 0 0 100px;">
+                                <button type="button" class="modal-search-btn" onclick="execModalPostcode()">
+                                    <i class="fa fa-search"></i> 주소 검색
+                                </button>
+                            </div>
+                            <input type="text" class="modal-form-input" id="new-address" placeholder="도로명 주소" readonly required style="margin-bottom: 8px;">
+                            <input type="text" class="modal-form-input" id="new-detail-address" placeholder="상세 주소" required>
+                        </div>
+                        <div class="modal-form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="new-is-default" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span style="font-size: 14px; color: #374151;">기본 배송지로 설정</span>
+                            </label>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: 20px;">
+                            <button type="button" class="modal-cancel-btn" onclick="hideAddAddressForm()">
+                                취소
+                            </button>
+                            <button type="submit" class="modal-submit-btn">
+                                <i class="fa fa-check"></i> 저장
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <!-- Daum 우편번호 서비스 -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const orderData = {
+            netAmount: /*[[${orderData.priceInfo.netAmount}]]*/ 0,
+            deliveryFee: /*[[${orderData.priceInfo.deliveryFee}]]*/ 0,
+            freeDeliveryThreshold: /*[[${orderData.priceInfo.freeDeliveryThreshold}]]*/ 0,
+            availablePoint: /*[[${orderData.availablePoint}]]*/ 0,
+            orderItems: /*[[${orderData.orderItems}]]*/ []
+        };
+
+        const isMember = /*[[${isMember}]]*/ false;
+        const username = /*[[${username}]]*/ null;
+        const addresses = /*[[${addresses}]]*/ [];
+
+        // 배송지 선택 모달 열기
+        function openAddressModal() {
+            const modal = document.getElementById('addressModal');
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        // 배송지 선택 모달 닫기
+        function closeAddressModal() {
+            const modal = document.getElementById('addressModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        // 모달 외부 클릭 시 닫기
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('addressModal');
+            if (modal && e.target === modal) {
+                closeAddressModal();
+            }
+        });
+
+        // 새 배송지 입력 (폼 초기화)
+        function clearAddressForm() {
+            document.getElementById('postcode').value = '';
+            document.getElementById('address').value = '';
+            document.getElementById('detail-address').value = '';
+            document.getElementById('postcode').focus();
+        }
+
+        // 배송지 선택 (data 속성에서 읽기)
+        function selectAddressFromData(element) {
+            const zipCode = element.getAttribute('data-zipcode');
+            const roadAddress = element.getAttribute('data-road-address');
+            const detailAddress = element.getAttribute('data-detail-address');
+            
+            document.getElementById('postcode').value = zipCode;
+            document.getElementById('address').value = roadAddress;
+            document.getElementById('detail-address').value = detailAddress;
+            
+            // 모달 닫기
+            closeAddressModal();
+        }
+
+        // 새 배송지 추가 폼 표시
+        function showAddAddressForm() {
+            document.getElementById('addressListSection').style.display = 'none';
+            document.querySelector('.address-add-btn').style.display = 'none';
+            document.getElementById('addAddressForm').style.display = 'block';
+        }
+
+        // 새 배송지 추가 폼 숨기기
+        function hideAddAddressForm() {
+            document.getElementById('addressListSection').style.display = 'block';
+            document.querySelector('.address-add-btn').style.display = 'flex';
+            document.getElementById('addAddressForm').style.display = 'none';
+            
+            // 폼 초기화
+            document.getElementById('newAddressForm').reset();
+        }
+
+        // 모달용 주소 검색
+        function execModalPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    document.getElementById('new-postcode').value = data.zonecode;
+                    document.getElementById('new-address').value = data.roadAddress;
+                    document.getElementById('new-detail-address').focus();
+                }
+            }).open();
+        }
+
+        // 배송지 목록 다시 불러오기
+        async function reloadAddressList() {
+            try {
+                const response = await fetch(`/mypage/${username}/address`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateAddressList(data.addresses);
+                } else {
+                    console.error('배송지 목록 로드 실패');
+                }
+            } catch (error) {
+                console.error('배송지 목록 로드 오류:', error);
+            }
+        }
+
+        // 배송지 목록 UI 업데이트
+        function updateAddressList(addresses) {
+            const listContainer = document.querySelector('.address-modal-body > div:first-child');
+            
+            if (!addresses || addresses.length === 0) {
+                listContainer.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
+                        <i class="fa fa-map-marker" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <p>등록된 배송지가 없습니다.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 기본 배송지를 맨 위로 정렬
+            const sortedAddresses = [...addresses].sort((a, b) => {
+                const aIsDefault = a.is_default || a.isDefault;
+                const bIsDefault = b.is_default || b.isDefault;
+                if (aIsDefault && !bIsDefault) return -1;
+                if (!aIsDefault && bIsDefault) return 1;
+                return 0;
+            });
+
+            listContainer.innerHTML = sortedAddresses.map(address => {
+                // JSON 필드명이 snake_case이므로 변환
+                const zipCode = address.zip_code || address.zipCode;
+                const roadAddress = address.road_name_address || address.roadNameAddress;
+                const detailAddress = address.detail_address || address.detailAddress;
+                const isDefault = address.is_default || address.isDefault;
+                
+                return `
+                    <div class="address-list-item" 
+                         data-zip-code="${zipCode}"
+                         data-road-address="${roadAddress}"
+                         data-detail-address="${detailAddress}"
+                         onclick="selectAddressFromData(this)">
+                        <div class="address-list-item-header">
+                            <div class="address-list-item-label">
+                                <i class="${isDefault ? 'fa fa-star' : 'fa fa-map-marker'}"></i>
+                                <span>${address.label}</span>
+                            </div>
+                            ${isDefault ? '<span class="address-list-item-badge">기본 배송지</span>' : ''}
+                        </div>
+                        <div class="address-list-item-info">
+                            <div>[${zipCode}] ${roadAddress}</div>
+                            <div>${detailAddress}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 새 배송지 저장
+        async function submitNewAddress(event) {
+            event.preventDefault();
+            
+            if (!isMember || !username) {
+                alert('회원만 배송지를 추가할 수 있습니다.');
+                return;
+            }
+
+            const formData = {
+                label: document.getElementById('new-label').value,
+                road_name_address: document.getElementById('new-address').value,
+                zip_code: parseInt(document.getElementById('new-postcode').value),
+                is_default: document.getElementById('new-is-default').checked,
+                detail_address: document.getElementById('new-detail-address').value
+            };
+
+            try {
+                const response = await fetch(`/mypage/${username}/address`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('배송지가 추가되었습니다.');
+                    
+                    // 폼 초기화
+                    document.getElementById('newAddressForm').reset();
+                    hideAddAddressForm();
+                    
+                    // 배송지 목록 다시 불러오기 (새로고침 없이!)
+                    await reloadAddressList();
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(errorText || '배송지 추가에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('배송지 추가 오류:', error);
+                alert('배송지 추가 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // 주소 검색 함수
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var roadAddr = data.roadAddress;
+                    var zonecode = data.zonecode;
+
+                    document.getElementById('postcode').value = zonecode || '';
+                    document.getElementById('address').value = roadAddr || '';
+                    document.getElementById('detail-address').focus();
+                }
+            }).open();
+        }
+
+        // 총 금액 계산 함수
+        function calculateTotalAmount() {
+            console.log('=== calculateTotalAmount 호출 ===');
+
+            // 1. 도서 금액
+            let total = orderData.netAmount;
+
+            // 2. 포장비 계산 (사용자가 선택한 포장지 합계)
+            let totalPackagingAmount = 0;
+            const packagingSelects = document.querySelectorAll('.packaging-select');
+            console.log('포장지 선택 드롭다운 개수:', packagingSelects.length);
+
+            packagingSelects.forEach((select, index) => {
+                console.log(`드롭다운 ${index}:`, {
+                    value: select.value,
+                    hasOptions: select.options.length
+                });
+
+                if (select.value) {
+                    const selectedOption = select.options[select.selectedIndex];
+                    console.log(`선택된 옵션:`, {
+                        text: selectedOption.text,
+                        value: selectedOption.value,
+                        dataPrice: selectedOption.dataset.price,
+                        getAttribute: selectedOption.getAttribute('data-price')
+                    });
+
+                    const price = parseInt(selectedOption.dataset.price) || 0;
+                    console.log('파싱된 가격:', price);
+                    totalPackagingAmount += price;
+                }
+            });
+
+            console.log('총 포장비:', totalPackagingAmount);
+
+            // 포장비 표시
+            if (totalPackagingAmount > 0) {
+                document.getElementById('packaging-amount-row').style.display = 'flex';
+                document.getElementById('packaging-amount').textContent = totalPackagingAmount.toLocaleString() + '원';
+            } else {
+                document.getElementById('packaging-amount-row').style.display = 'none';
+            }
+
+            total += totalPackagingAmount;
+
+            // 3. 배송비
+            total += orderData.deliveryFee;
+
+            // 4. 쿠폰 할인 계산 (총 주문 금액에 적용)
+            const couponSelect = document.getElementById('coupon-select');
+            let couponDiscount = 0;
+            if (couponSelect && couponSelect.value) {
+                const selectedOption = couponSelect.options[couponSelect.selectedIndex];
+                const discountType = selectedOption.dataset.type;
+                const discountValue = parseInt(selectedOption.dataset.value);
+                const minAmount = parseInt(selectedOption.dataset.min);
+                const maxAmount = selectedOption.dataset.max ? parseInt(selectedOption.dataset.max) : null;
+
+                // 최소 주문 금액 확인 (총 주문 금액 기준)
+                if (total >= minAmount) {
+                    if (discountType === 'AMOUNT') {
+                        couponDiscount = discountValue;
+                    } else if (discountType === 'RATE') {
+                        couponDiscount = Math.floor(total * discountValue / 100);
+                        if (maxAmount && couponDiscount > maxAmount) {
+                            couponDiscount = maxAmount;
+                        }
+                    }
+                }
+
+                document.getElementById('coupon-discount-row').style.display = 'flex';
+                document.getElementById('coupon-discount').textContent = '-' + couponDiscount.toLocaleString() + '원';
+            } else if (document.getElementById('coupon-discount-row')) {
+                document.getElementById('coupon-discount-row').style.display = 'none';
+            }
+            total -= couponDiscount;
+
+            // 5. 포인트 사용
+            const pointInput = document.getElementById('point-input');
+            let pointDiscount = 0;
+            if (pointInput && pointInput.value) {
+                const inputValue = parseInt(pointInput.value) || 0;
+                const maxUsablePoint = Math.min(orderData.availablePoint, total);
+                
+                // 입력값이 최대 사용 가능 포인트를 초과하면 자동으로 조정
+                if (inputValue > maxUsablePoint) {
+                    pointInput.value = maxUsablePoint;
+                    pointDiscount = maxUsablePoint;
+                } else {
+                    pointDiscount = inputValue;
+                }
+
+                document.getElementById('point-discount-row').style.display = 'flex';
+                document.getElementById('point-discount').textContent = '-' + pointDiscount.toLocaleString() + '원';
+            } else if (document.getElementById('point-discount-row')) {
+                document.getElementById('point-discount-row').style.display = 'none';
+            }
+            total -= pointDiscount;
+
+            // 6. 최종 금액 (0원 미만 방지)
+            total = Math.max(0, total);
+
+            document.getElementById('final-amount').textContent = total.toLocaleString() + '원';
+        }
+
+        // 주문하기 버튼 클릭 시 폼 검증 및 주문 생성
+        async function submitOrder() {
+            // 1. 배송지 정보 검증
+            const recipientName = document.getElementById('recipient-name').value.trim();
+            const recipientPhone = document.getElementById('recipient-phone').value.trim();
+            const postcode = document.getElementById('postcode').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const detailAddress = document.getElementById('detail-address').value.trim();
+
+            if (!recipientName) {
+                alert('수령인 이름을 입력해주세요.');
+                document.getElementById('recipient-name').focus();
+                return;
+            }
+
+            if (!recipientPhone) {
+                alert('연락처를 입력해주세요.');
+                document.getElementById('recipient-phone').focus();
+                return;
+            }
+
+            if (!postcode || !address) {
+                alert('주소를 입력해주세요. 주소 검색 버튼을 눌러주세요.');
+                return;
+            }
+
+            if (!detailAddress) {
+                alert('상세 주소를 입력해주세요.');
+                document.getElementById('detail-address').focus();
+                return;
+            }
+
+            // 2. 비회원인 경우 주문 조회 비밀번호 검증
+            let orderPassword = null;
+            if (!isMember) {
+                const passwordInput = document.getElementById('order-password');
+                if (passwordInput) {
+                    const passwordValue = passwordInput.value.trim();
+                    if (!passwordValue) {
+                        alert('주문 조회 비밀번호를 입력해주세요.');
+                        passwordInput.focus();
+                        return;
+                    }
+                    if (passwordValue.length < 4 || passwordValue.length > 8) {
+                        alert('주문 조회 비밀번호는 4~8자리여야 합니다.');
+                        passwordInput.focus();
+                        return;
+                    }
+                    orderPassword = passwordValue;
+                }
+            }
+
+            // 3. 주문 아이템 정보 수집 (포장 포함)
+            const items = orderData.orderItems.map((item, index) => {
+                const packagingSelect = document.getElementById('packaging-' + index);
+                const packagingId = packagingSelect && packagingSelect.value ? parseInt(packagingSelect.value) : null;
+
+                return {
+                    bookId: item.bookId,
+                    quantity: item.quantity,
+                    packagingId: packagingId
+                };
+            });
+
+            // 4. 쿠폰 선택 정보 (couponIssueId 사용)
+            const couponSelect = document.getElementById('coupon-select');
+            const couponIssueId = couponSelect && couponSelect.value ? parseInt(couponSelect.value) : null;
+
+            // 5. 포인트 사용 정보
+            const pointInput = document.getElementById('point-input');
+            const usedPoint = pointInput && pointInput.value ? parseInt(pointInput.value) : null;
+
+            // 6. 배송 희망일 및 메모
+            const desiredDeliveryDate = document.getElementById('desired-delivery-date').value.trim() || null;
+            const deliveryMemo = document.getElementById('delivery-memo').value.trim() || null;
+
+            // 7. 주문 요청 데이터 구성
+            const orderRequest = {
+                items: items,
+                deliveryInfo: {
+                    recipientName: recipientName,
+                    recipientPhone: recipientPhone,
+                    zipCode: parseInt(postcode),
+                    roadNameAddress: address,
+                    detailAddress: detailAddress,
+                    desiredDeliveryDate: desiredDeliveryDate,
+                    deliveryMemo: deliveryMemo
+                },
+                couponIssueId: couponIssueId,
+                usedPoint: usedPoint
+            };
+
+            // 비회원인 경우 nonMemberInfo 추가
+            if (!isMember && orderPassword) {
+                orderRequest.nonMemberInfo = {
+                    password: orderPassword
+                };
+            }
+
+            // 7. 주문 생성 API 호출
+            try {
+                // 버튼 비활성화
+                const orderButton = document.querySelector('.order-button');
+                orderButton.disabled = true;
+                orderButton.textContent = '주문 처리 중...';
+
+                const response = await fetch('/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(orderRequest)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || '주문 처리 중 오류가 발생했습니다.');
+                }
+
+                const result = await response.json();
+
+                // 주문 완료 - orderId와 finalAmount를 받음
+                alert(`주문이 완료되었습니다!\n주문번호: ${result.orderId}\n결제금액: ${result.finalAmount.toLocaleString()}원`);
+
+                // 메인 페이지로 이동
+                window.location.href = '/';
+
+            } catch (error) {
+                console.error('주문 생성 오류:', error);
+                alert(error.message || '주문 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+
+                // 버튼 복구
+                const orderButton = document.querySelector('.order-button');
+                orderButton.disabled = false;
+                orderButton.textContent = '주문하기';
+            }
+        }
+
+        // 기본 배송지 자동 입력
+        function loadDefaultAddress() {
+            if (!isMember || !addresses || addresses.length === 0) {
+                return;
+            }
+
+            // 기본 배송지 찾기
+            const defaultAddress = addresses.find(addr => addr.isDefault || addr.is_default);
+            
+            if (defaultAddress) {
+                const zipCode = defaultAddress.zipCode || defaultAddress.zip_code;
+                const roadAddress = defaultAddress.roadNameAddress || defaultAddress.road_name_address;
+                const detailAddress = defaultAddress.detailAddress || defaultAddress.detail_address;
+                
+                document.getElementById('postcode').value = zipCode || '';
+                document.getElementById('address').value = roadAddress || '';
+                document.getElementById('detail-address').value = detailAddress || '';
+            }
+        }
+
+        // 포인트 전액 사용
+        function useAllPoints() {
+            const pointInput = document.getElementById('point-input');
+            if (!pointInput) return;
+
+            // 보유 포인트를 입력
+            pointInput.value = orderData.availablePoint;
+            
+            // 금액 재계산 (자동으로 최대 사용 가능 포인트로 조정됨)
+            calculateTotalAmount();
+        }
+
+        // 페이지 로드 시 초기 계산
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateTotalAmount();
+            loadDefaultAddress(); // 기본 배송지 자동 입력
+
+            // 전화번호 자동 포맷팅
+            const recipientPhone = document.getElementById('recipient-phone');
+            if (recipientPhone) {
+                recipientPhone.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/[^0-9]/g, '');
+                    if (value.length > 11) {
+                        value = value.slice(0, 11);
+                    }
+                    if (value.length > 6) {
+                        e.target.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7);
+                    } else if (value.length > 3) {
+                        e.target.value = value.slice(0, 3) + '-' + value.slice(3);
+                    } else {
+                        e.target.value = value;
+                    }
+                });
+            }
+
+            // 포인트 입력 검증
+            const pointInput = document.getElementById('point-input');
+            if (pointInput) {
+                pointInput.addEventListener('blur', function(e) {
+                    const inputValue = parseInt(e.target.value) || 0;
+                    
+                    // 음수 방지
+                    if (inputValue < 0) {
+                        e.target.value = 0;
+                        calculateTotalAmount();
+                        return;
+                    }
+                    
+                    // 최대값 초과 방지
+                    if (inputValue > orderData.availablePoint) {
+                        alert(`보유 포인트(${orderData.availablePoint.toLocaleString()}P)를 초과할 수 없습니다.`);
+                        e.target.value = orderData.availablePoint;
+                        calculateTotalAmount();
+                    }
+                });
+            }
+        });
+        /*]]>*/
+    </script>
+</th:block>
+</body>
+</html>

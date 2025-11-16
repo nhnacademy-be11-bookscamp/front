@@ -49,6 +49,21 @@
             text-decoration: line-through;
             margin-right: 8px;
         }
+
+        .book-list-item.rank-1 {
+            border: 2px solid #e74c3c;   /* 빨강 */
+            border-radius: 8px;
+        }
+
+        .book-list-item.rank-2 {
+            border: 2px solid #3498db;   /* 파랑 */
+            border-radius: 8px;
+        }
+
+        .book-list-item.rank-3 {
+            border: 2px solid #2ecc71;   /* 초록 */
+            border-radius: 8px;
+        }
     </style>
 </head>
 
@@ -64,36 +79,67 @@
             </div>
         </div>
 
+        <!-- ✅ 검색 + 정렬 폼 (수정됨) -->
         <form th:action="@{/books}" method="get" style="margin-bottom: 1.5rem;">
-            <label>정렬:
-                <select name="sortType">
-                    <option value="id" th:selected="${sortType == 'id'}">기본</option>
-                    <option value="bookLike" th:selected="${sortType == 'bookLike'}">인기도순</option>
-                    <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
-                    <option value="low-price" th:selected="${sortType == 'low-price'}">낮은가격순</option>
-                    <option value="high-price" th:selected="${sortType == 'high-price'}">높은가격순</option>
-                    <option value="rating" th:selected="${sortType == 'rating'}">평점높은순</option>
-                    <option value="review" th:selected="${sortType == 'review'}">리뷰많은순</option>
-                </select>
-            </label>
-            <button type="submit" style="display: none;">검색</button>
-        </form>
+            <div class="row">
 
+                <!-- 키워드 입력 -->
+                <div class="col-lg-3 col-md-6" style="margin-bottom: 15px;">
+                    <div class="checkout__input">
+                        <p>키워드</p>
+                        <input type="text"
+                               name="keyWord"
+                               th:value="${keyWord}"
+                               placeholder="도서 제목 검색">
+                    </div>
+                </div>
+
+                <!-- 검색 버튼 -->
+                <div class="col-lg-3 col-md-6" style="margin-bottom: 15px; display: flex; align-items: flex-end;">
+                    <button type="submit"
+                            class="site-btn"
+                            style="width: 100%; padding: 14px;">
+                        <i class="fa fa-search"></i> 검색
+                    </button>
+                </div>
+
+                <!-- 정렬 옵션 -->
+                <div class="col-lg-3 col-md-6" style="margin-bottom: 15px;">
+                    <label>정렬:
+                        <select name="sortType">
+                            <option value="id" th:selected="${sortType == 'id'}">기본</option>
+                            <option value="bookLike" th:selected="${sortType == 'bookLike'}">인기도순</option>
+                            <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
+                            <option value="low-price" th:selected="${sortType == 'low-price'}">낮은가격순</option>
+                            <option value="high-price" th:selected="${sortType == 'high-price'}">높은가격순</option>
+                            <option value="rating" th:selected="${sortType == 'rating'}">평점높은순</option>
+                            <option value="review" th:selected="${sortType == 'review'}">리뷰많은순</option>
+                        </select>
+                    </label>
+                </div>
+
+            </div>
+        </form>
+        <!-- ✅ 폼 끝 -->
+
+        <!-- 도서 목록 -->
         <div class="book-list-container">
 
-            <div class="book-list-item" th:each="book : ${booksPage.content}">
+            <div class="book-list-item" th:each="book : ${booksPage.content}" th:classappend="|rank-${book.aiRank()}|">
                 <div class="book-list-item__thumb">
                     <a th:href="@{/books/{id}(id=${book.id})}">
                         <img th:src="${book.thumbnailUrl}" th:alt="${book.title}">
                     </a>
                 </div>
 
-                <div class="book-list-item__info">
+                <div class="book-list-item__info" >
+                    <div class="book-list-item__meta" th:text="${book.aiRecommand()}"></div>
                     <h5>
                         <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">도서 제목</a>
                     </h5>
                     <div class="book-list-item__meta" th:text="${book.contributors}">저자/기여자</div>
                     <div class="book-list-item__meta" th:text="${book.publisher}">출판사</div>
+
 
                     <div class="book-list-item__price">
                         <span class="regular-price"
@@ -104,12 +150,14 @@
                 </div>
             </div>
 
+            <!-- 조회 결과 없을 때 -->
             <div th:if="${#lists.isEmpty(booksPage.content)}"
                  style="text-align:center; padding: 50px; color: #6f6f6f; font-size: 1.1rem;">
                 조회된 도서가 없습니다.
             </div>
         </div>
 
+        <!-- 페이지네이션 -->
         <div style="margin-top: 1.5rem; text-align: center;">
             <span th:text="'현재 페이지: ' + (${booksPage.number + 1}) + ' / ' + ${booksPage.totalPages}"></span>
 
@@ -126,13 +174,18 @@
             </div>
         </div>
 
-    </div> </div> <th:block layout:fragment="extra-js">
+    </div>
+</div>
+
+<!-- JS -->
+<th:block layout:fragment="extra-js">
     <script th:inline="javascript">
         $(document).ready(function() {
             $('select[name="sortType"]').on('change', function() {
                 $(this).closest('form').submit();
             });
         });
+
     </script>
 </th:block>
 

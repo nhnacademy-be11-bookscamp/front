@@ -31,8 +31,10 @@ logging:
     org.springframework.cloud.openfeign: DEBUG
 
 minio:
-  # 브라우저에서 접근 가능한 public base URL (리턴용)
+  # 내부 통신용 (SDK)
   url: http://storage.java21.net:8000
+  # 브라우저 노출용 (이미지 URL 반환용)
+  public-url: https://bookscamp.store
   access-key: EvJ2FP8gy27lDYolEWGQ
   secret-key: h9uzw85pZPDchOTHzslEOUlNd5cDPFLQnJCofZfH
   bucket:

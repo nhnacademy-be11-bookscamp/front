@@ -1,27 +1,41 @@
 package store.bookscamp.front.common.config;
 
-
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.Cookie;
+import java.util.Arrays;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
+import store.bookscamp.front.auth.filter.JwtAuthenticationFilter;
 import store.bookscamp.front.auth.handler.CustomAuthenticationSuccessHandler;
 import store.bookscamp.front.auth.provider.AdminAuthenticationProvider;
 import store.bookscamp.front.auth.provider.CustomAuthenticationProvider;
 import store.bookscamp.front.common.exception.CustomAccessDeniedHandler;
 import store.bookscamp.front.member.controller.MemberLoginFeignClient;
 
+@Slf4j
 @Configuration
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final MemberLoginFeignClient memberLoginFeignClient;
     private final AdminLoginFeignClient adminLoginFeignClient;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+
+    public SecurityConfig(@Lazy MemberLoginFeignClient memberLoginFeignClient,
+                          @Lazy AdminLoginFeignClient adminLoginFeignClient,
+                          CustomAccessDeniedHandler customAccessDeniedHandler) {
+        this.memberLoginFeignClient = memberLoginFeignClient;
+        this.adminLoginFeignClient = adminLoginFeignClient;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
+    }
 
     @Bean
     public CustomAuthenticationProvider customAuthenticationProvider() {
@@ -33,6 +47,28 @@ public class SecurityConfig {
         return new AdminAuthenticationProvider(adminLoginFeignClient);
     }
 
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter();
+    }
+
+    @Bean
+    public LogoutHandler customLogoutHandler() {
+        return (request, response, authentication) -> {
+            Cookie rtCookie = Arrays.stream(request.getCookies())
+                    .filter(c -> "refresh_token".equals(c.getName()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (rtCookie != null) {
+                try {
+                    adminLoginFeignClient.doLogout(rtCookie.getValue());
+                } catch (Exception e) {
+                    log.error("Failed to logout from Auth server", e);
+                }
+            }
+        };
+    }
 
 
     @Bean
@@ -41,6 +77,12 @@ public class SecurityConfig {
         http.securityMatcher("/admin/**");
 
         http.csrf(AbstractHttpConfigurer::disable);
+
+        http.sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
+
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         http.authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
@@ -75,6 +117,13 @@ public class SecurityConfig {
 
         http.csrf(AbstractHttpConfigurer::disable);
 
+        http.sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
+
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+
         http.authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
                         .requestMatchers("/mypage/**").hasRole("USER")
@@ -95,7 +144,8 @@ public class SecurityConfig {
         http.logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
-                .deleteCookies("Authorization")
+                .addLogoutHandler(customLogoutHandler())
+                .deleteCookies("Authorization","refresh_token")
                 .invalidateHttpSession(true)
         );
 

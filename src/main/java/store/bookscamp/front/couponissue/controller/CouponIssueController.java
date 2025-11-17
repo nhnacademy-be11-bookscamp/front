@@ -2,6 +2,8 @@ package store.bookscamp.front.couponissue.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.couponissue.controller.response.CouponIssueResponse;
 import store.bookscamp.front.couponissue.controller.status.CouponFilterStatus;
 import store.bookscamp.front.couponissue.feign.CouponIssueFeignClient;
@@ -23,7 +26,8 @@ public class CouponIssueController {
     public String getMyCoupons(
             Model model,
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(name = "status", required = false, defaultValue = "ALL") CouponFilterStatus status
+            @RequestParam(name = "status", required = false, defaultValue = "ALL") CouponFilterStatus status,
+            @PageableDefault(size = 10, sort = "createdAt,desc") Pageable pageable
             ){
 
         if (userDetails == null) {
@@ -31,9 +35,10 @@ public class CouponIssueController {
             return "redirect:/login";
         }
 
-        ResponseEntity<List<CouponIssueResponse>> coupons = couponIssueFeignClient.getMyCoupons(status);
+        ResponseEntity<RestPageImpl<CouponIssueResponse>> myCoupons = couponIssueFeignClient.getMyCoupons(status, pageable);
+        RestPageImpl<CouponIssueResponse> couponPage = myCoupons.getBody();
 
-        model.addAttribute("coupons",coupons.getBody());
+        model.addAttribute("couponPage", couponPage);
 
         return "couponissue/mycoupon";
     }

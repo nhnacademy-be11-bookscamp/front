@@ -14,8 +14,6 @@ import store.bookscamp.front.coupon.feign.CouponFeignClient;
 @RequiredArgsConstructor
 public class CouponController {
 
-    @Value("${app.api.prefix}")
-    private String apiPrefix;
 
     private final CouponFeignClient couponFeignClient;
 
@@ -25,7 +23,6 @@ public class CouponController {
         List<CouponResponse> couponResponseList = couponFeignClient.listCoupons().getBody();
 
         model.addAttribute("coupons", couponResponseList);
-        model.addAttribute("apiPrefix", apiPrefix);
         return "admin/coupon";
     }
 }

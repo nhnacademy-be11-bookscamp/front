@@ -14,6 +14,7 @@ import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
 import store.bookscamp.front.auth.dto.AccessTokenResponse;
 import store.bookscamp.front.auth.dto.LoginAuthDetails;
 import store.bookscamp.front.auth.user.CustomAdminDetails;
+import store.bookscamp.front.common.exception.ConcurrentLoginException;
 
 @RequiredArgsConstructor
 public class AdminAuthenticationProvider implements AuthenticationProvider {
@@ -50,6 +51,9 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
             return result;
 
         } catch (FeignException e) {
+            if (e.status() == 409) {
+                throw new ConcurrentLoginException("이미 사용중인 ID입니다.");
+            }
             throw new BadCredentialsException("로그인에 실패했습니다. (인증 서버 오류)", e);
         } catch (JWTDecodeException e) {
             throw new BadCredentialsException("토큰 디코딩에 실패했습니다. (토큰 위변조 또는 형식 오류)", e);

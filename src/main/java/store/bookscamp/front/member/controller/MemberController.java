@@ -3,6 +3,7 @@ package store.bookscamp.front.member.controller;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import store.bookscamp.front.member.controller.request.MemberCreateRequest;
@@ -29,15 +32,12 @@ public class MemberController {
     private final MemberFeignClient memberFeignClient;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${app.api.prefix}")
-    private String apiPrefix;
 
     @GetMapping("/signup")
-    public String showPage(Authentication authentication, Model model){
+    public String showPage(Authentication authentication){
         if(authentication !=null && authentication.isAuthenticated()){
             return "redirect:/";
         }
-        model.addAttribute("apiPrefix", apiPrefix);
         return "member/signup";
     }
 
@@ -75,9 +75,21 @@ public class MemberController {
     }
 
     @GetMapping("/members/check-id")
-    public String checkId(){
-        String response = String.valueOf(memberFeignClient.checkIdDuplicate());
-        return response;
+    @ResponseBody
+    public ResponseEntity<String> checkId(@RequestParam("id") String id) {
+        try {
+
+            return memberFeignClient.checkIdDuplicate(id);
+
+        } catch (FeignException e) {
+            return ResponseEntity
+                    .status(e.status())
+                    .body(e.contentUTF8());
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("서버 내부 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     @PostMapping("/members")
@@ -108,7 +120,6 @@ public class MemberController {
             }
 
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
-            redirectAttributes.addFlashAttribute("apiPrefix", apiPrefix);
             return "redirect:/signup";
         }
     }

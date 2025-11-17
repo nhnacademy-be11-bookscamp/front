@@ -1016,8 +1016,9 @@
                                 th:attr="data-type=${coupon.discountType},
                                         data-value=${coupon.discountValue},
                                         data-min=${coupon.minOrderAmount},
-                                        data-max=${coupon.maxDiscountAmount}">
-                            <span th:text="'[' + ${coupon.couponName} + '] '"></span>
+                                        data-max=${coupon.maxDiscountAmount},
+                                        data-expected-discount=${coupon.expectedDiscount}">
+                            <span th:text="${coupon.couponName}"></span>
                         </option>
                     </select>
                 </div>
@@ -1419,7 +1420,7 @@
             console.log('=== calculateTotalAmount 호출 ===');
 
             // 1. 도서 금액
-            let total = orderData.netAmount;
+            const bookAmount = orderData.netAmount;
 
             // 2. 포장비 계산 (사용자가 선택한 포장지 합계)
             let totalPackagingAmount = 0;
@@ -1457,47 +1458,34 @@
                 document.getElementById('packaging-amount-row').style.display = 'none';
             }
 
-            total += totalPackagingAmount;
-
-            // 3. 배송비
-            total += orderData.deliveryFee;
-
-            // 4. 쿠폰 할인 계산 (총 주문 금액에 적용)
+            // 3. 쿠폰 할인 계산 - 백엔드에서 계산된 expectedDiscount 사용
             const couponSelect = document.getElementById('coupon-select');
             let couponDiscount = 0;
             if (couponSelect && couponSelect.value) {
                 const selectedOption = couponSelect.options[couponSelect.selectedIndex];
-                const discountType = selectedOption.dataset.type;
-                const discountValue = parseInt(selectedOption.dataset.value);
-                const minAmount = parseInt(selectedOption.dataset.min);
-                const maxAmount = selectedOption.dataset.max ? parseInt(selectedOption.dataset.max) : null;
-
-                // 최소 주문 금액 확인 (총 주문 금액 기준)
-                if (total >= minAmount) {
-                    if (discountType === 'AMOUNT') {
-                        couponDiscount = discountValue;
-                    } else if (discountType === 'RATE') {
-                        couponDiscount = Math.floor(total * discountValue / 100);
-                        if (maxAmount && couponDiscount > maxAmount) {
-                            couponDiscount = maxAmount;
-                        }
-                    }
-                }
+                // 백엔드에서 이미 정확하게 계산된 할인 금액을 사용
+                const expectedDiscount = parseInt(selectedOption.dataset.expectedDiscount) || 0;
+                couponDiscount = expectedDiscount;
 
                 document.getElementById('coupon-discount-row').style.display = 'flex';
                 document.getElementById('coupon-discount').textContent = '-' + couponDiscount.toLocaleString() + '원';
             } else if (document.getElementById('coupon-discount-row')) {
                 document.getElementById('coupon-discount-row').style.display = 'none';
             }
-            total -= couponDiscount;
 
-            // 5. 포인트 사용
+            // 4. 배송비 계산
+            const deliveryFee = orderData.deliveryFee;
+
+            // 5. 총액 계산 (도서금액 - 쿠폰할인 + 포장비 + 배송비)
+            let total = bookAmount - couponDiscount + totalPackagingAmount + deliveryFee;
+
+            // 6. 포인트 사용
             const pointInput = document.getElementById('point-input');
             let pointDiscount = 0;
             if (pointInput && pointInput.value) {
                 const inputValue = parseInt(pointInput.value) || 0;
                 const maxUsablePoint = Math.min(orderData.availablePoint, total);
-                
+
                 // 입력값이 최대 사용 가능 포인트를 초과하면 자동으로 조정
                 if (inputValue > maxUsablePoint) {
                     pointInput.value = maxUsablePoint;
@@ -1513,7 +1501,7 @@
             }
             total -= pointDiscount;
 
-            // 6. 최종 금액 (0원 미만 방지)
+            // 7. 최종 금액 (0원 미만 방지)
             total = Math.max(0, total);
 
             document.getElementById('final-amount').textContent = total.toLocaleString() + '원';

@@ -183,7 +183,7 @@
                                     <td th:text="${coupon.maxDiscountAmount != null} ? ${#numbers.formatDecimal(coupon.maxDiscountAmount, 0, 'COMMA', 0, 'POINT')} + '원' : '-'">
                                         5,000원
                                     </td>
-                                    S                                    <td th:text="${coupon.validDays != null} ? ${coupon.validDays} + '일' : '-'">30일</td>
+                                    <td th:text="${coupon.validDays != null} ? ${coupon.validDays} + '일' : '-'">30일</td>
                                     <td>
                                         <button class="btn-delete" style="border:none; cursor:pointer;"
                                                 th:onclick="'submitDelete(this, ' + ${coupon.id} + ');'">삭제</button>
@@ -208,9 +208,6 @@
 <div layout:fragment="extra-js">
     <script th:inline="javascript">
         /*<![CDATA[*/
-
-        // API 게이트웨이 또는 서버 주소
-        const pathPrefix = /*[[${apiPrefix}]]*/ '';
 
         // CSRF 토큰 설정
         let csrfToken = null;
@@ -317,7 +314,7 @@
             }
 
             // API 경로 (컨트롤러에 맞게 수정)
-            const apiUrl = pathPrefix + '/api-server/admin/coupons';
+            const apiUrl = '/api-server/admin/coupons';
 
             try {
                 const response = await fetch(apiUrl, {
@@ -352,7 +349,7 @@
             }
 
             // API 경로
-            const apiUrl = pathPrefix + '/api-server/admin/coupons';
+            const apiUrl = '/api-server/admin/coupons';
 
             try {
                 const response = await fetch(`${apiUrl}/${couponId}`, {

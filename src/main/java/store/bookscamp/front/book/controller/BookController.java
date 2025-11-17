@@ -231,7 +231,7 @@ public class BookController {
             return "redirect:/login";
         }
 
-        List<BookWishListResponse> item = bookFeignClient.getWishListBooks().getBody().getContent();
+        RestPageImpl<BookWishListResponse> item = bookFeignClient.getWishListBooks().getBody();
 
         model.addAttribute("wishlistItems", item);
         model.addAttribute("apiPrefix", apiPrefix);

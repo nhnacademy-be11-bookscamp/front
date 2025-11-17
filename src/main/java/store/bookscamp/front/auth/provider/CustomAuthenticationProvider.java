@@ -12,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import store.bookscamp.front.auth.dto.AccessTokenResponse;
 import store.bookscamp.front.auth.dto.LoginAuthDetails;
 import store.bookscamp.front.auth.user.CustomMemberDetails;
+import store.bookscamp.front.common.exception.ConcurrentLoginException;
 import store.bookscamp.front.member.controller.MemberLoginFeignClient;
 import store.bookscamp.front.member.controller.request.MemberLoginRequest;
 
@@ -50,6 +51,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             return result;
 
         } catch (FeignException e) {
+            if (e.status() == 409) {
+                throw new ConcurrentLoginException("이미 사용중인 ID입니다.");
+            }
             throw new BadCredentialsException("로그인에 실패했습니다. (인증 서버 오류)", e);
         } catch (JWTDecodeException e) {
             throw new BadCredentialsException("토큰 디코딩에 실패했습니다. (토큰 위변조 또는 형식 오류)", e);

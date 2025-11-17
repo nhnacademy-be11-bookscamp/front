@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -74,10 +75,19 @@ public class TokenRefreshService {
                 String newRawAccessToken = "Bearer " + newAccessToken;
                 log.info("New Access Token received.");
 
-                Cookie newAtCookie = new Cookie("Authorization", newAccessToken);
-                newAtCookie.setPath("/");
-                newAtCookie.setHttpOnly(true);
-                response.addCookie(newAtCookie);
+                boolean isSecure = request.isSecure();
+                if (request.getHeader("x-forwarded-proto") != null) {
+                    isSecure = request.getHeader("x-forwarded-proto").equals("https");
+                }
+
+                ResponseCookie atCookie = ResponseCookie.from("Authorization", newAccessToken)
+                        .path("/")
+                        .httpOnly(true)
+                        .secure(isSecure)
+                        .sameSite(isSecure ? "None" : "Lax")
+                        .build();
+
+                response.addHeader("Set-Cookie", atCookie.toString());
 
                 String newRtCookieString = reissueResponse.getHeaders().getFirst("Set-Cookie");
                 if (newRtCookieString != null) {

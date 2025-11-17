@@ -1,7 +1,10 @@
 package store.bookscamp.front.book.controller;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +26,7 @@ import store.bookscamp.front.book.controller.response.BookWishListResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
 import store.bookscamp.front.booklike.feign.BookLikeFeignClient;
+import store.bookscamp.front.category.service.dto.CategoryDto;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
@@ -232,7 +236,7 @@ public class BookController {
             return "redirect:/login";
         }
 
-        List<BookWishListResponse> item = bookFeignClient.getWishListBooks().getBody().getContent();
+        RestPageImpl<BookWishListResponse> item = bookFeignClient.getWishListBooks().getBody();
 
         model.addAttribute("wishlistItems", item);
         model.addAttribute("apiPrefix", apiPrefix);

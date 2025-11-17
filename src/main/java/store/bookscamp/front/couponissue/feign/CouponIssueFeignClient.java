@@ -1,6 +1,5 @@
 package store.bookscamp.front.couponissue.feign;
 
-import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Pageable;
@@ -33,4 +32,10 @@ public interface CouponIssueFeignClient {
 
     @DeleteMapping("/api-server/coupon-issue/{couponIssueId}")
     ResponseEntity<Void> deleteCouponIssue(@PathVariable Long couponIssueId);
+
+    @GetMapping("/api-server/coupon-issue/downloadable/{bookId}")
+    ResponseEntity<List<CouponIssueDownloadResponse>> getDownloadableCoupons(@PathVariable Long bookId);
+
+    @PostMapping("/api-server/coupon-issue/issue")
+    ResponseEntity<Long> issueCoupon(@RequestBody CouponIssueRequest couponIssueRequest);
 }

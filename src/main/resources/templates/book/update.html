@@ -143,6 +143,7 @@
             margin-left: 10px;
         }
     </style>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css"/>
 </head>
 
 <body>
@@ -297,13 +298,15 @@
                             <!-- 목차 -->
                             <div class="checkout__input">
                                 <p>목차</p>
-                                <textarea name="content" rows="7" th:text="${book.content}" placeholder="목차를 입력하세요"></textarea>
+                                <div id="tocEditor"></div> <!-- ✅ textarea 대신 div -->
+                                <input type="hidden" name="content" id="contentInput" th:value="${book.content}">
                             </div>
 
                             <!-- 설명 -->
                             <div class="checkout__input">
                                 <p>설명</p>
-                                <textarea name="explanation" rows="8" th:text="${book.explanation}" placeholder="도서 설명을 입력하세요"></textarea>
+                                <div id="explanEditor"></div> <!-- ✅ textarea 대신 div -->
+                                <input type="hidden" name="explanation" id="explanationInput" th:value="${book.explanation}">
                             </div>
 
                             <!-- 버튼 -->
@@ -321,8 +324,34 @@
 
 <!-- JS -->
 <div layout:fragment="extra-js">
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            var tocContent= document.querySelector('#contentInput').value;
+
+            const tocEditor = new toastui.Editor({
+                el: document.querySelector('#tocEditor'),
+                height: '200px',
+                initialEditType: 'wysiwyg',
+                previewStyle: 'vertical',
+                initialValue: tocContent
+            });
+            var explanation = document.querySelector('#explanationInput').value;
+
+            const explanEditor = new toastui.Editor({
+                el: document.querySelector('#explanEditor'),
+                height: '200px',
+                initialEditType: 'wysiwyg',
+                previewStyle: 'vertical',
+                initialValue: explanation
+            });
+
+            document.querySelector('form').addEventListener('submit', function () {
+                document.querySelector('#contentInput').value = tocEditor.getHTML();
+                document.querySelector('#explanationInput').value = explanEditor.getHTML();
+            });
+
+
             const removedUrls = [];
 
             // 기존 이미지 삭제

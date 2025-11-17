@@ -259,7 +259,12 @@
 <div layout:fragment="extra-js">
     <script th:inline="javascript">
         /*<![CDATA[*/
-        const pathPrefix = /*[[${apiPrefix}]]*/ '';
+
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
 
         let csrfToken = null;
         let csrfHeader = null;
@@ -284,7 +289,7 @@
             if (!confirm('위시리스트에서 이 상품을 삭제하시겠습니까?')) {
                 return;
             }
-            const apiUrl = pathPrefix + `/api-server/wishlist/${itemId}`;
+            const apiUrl = `/api-server/wishlist/${itemId}`;
 
             try {
                 const response = await fetch(apiUrl, {
@@ -304,10 +309,27 @@
 
                 alert('위시리스트에서 삭제되었습니다.');
                 const row = document.getElementById('wishlist-item-' + itemId);
-                if (row) {
+
+                const tableBody = row ? row.parentNode : null;
+
+                if (row && tableBody) {
                     row.remove();
+
+                    if (tableBody.children.length === 0) {
+
+                        const noItemsHtml = `
+                            <tr>
+                                <td colspan="2" class="text-center" style="padding: 50px; font-size: 16px; color: #777;">
+                                    위시리스트에 담긴 상품이 없습니다.
+                                </td>
+                            </tr>
+                        `;
+
+                        tableBody.innerHTML = noItemsHtml;
+                    }
+
                 } else {
-                    location.reload(); // Fallback
+                    location.reload();
                 }
 
             } catch (error) {

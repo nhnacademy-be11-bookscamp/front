@@ -4,9 +4,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import store.bookscamp.front.booklike.controller.request.BookLikeRequest;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
 import store.bookscamp.front.common.config.FeignConfig;
@@ -23,10 +20,4 @@ public interface BookLikeFeignClient {
 
     @GetMapping("/api-server/like/status/{bookId}")
     ResponseEntity<BookLikeStatusResponse> getLikeStatus(@PathVariable Long bookId);
-
-    @PutMapping("/api-server/books/like/{bookId}")
-    ResponseEntity<Void> toggleLike(
-            @PathVariable Long bookId,
-            @RequestBody BookLikeRequest request
-    );
 }

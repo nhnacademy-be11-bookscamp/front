@@ -157,7 +157,8 @@
                                 <span>좋아요</span>
                                 <span id="likeCount" th:text="${bookLike.likeCount}">0</span>
                             </button>
-                            <button type="button" class="site-btn" style="flex: 1; padding: 14px; background: #6f6f6f;">
+                            <button type="button" class="site-btn" id="addToCartBtn"
+                                    style="flex: 1; padding: 14px; background: #6f6f6f;">
                                 <i class="fa fa-shopping-cart"></i> 장바구니
                             </button>
                         </div>
@@ -228,7 +229,7 @@
         /* (기존) Swiper 캐러셀 스타일 */
         .product-swiper-container {
             width: 100%;
-            height: 500px; /* 원본 아이콘 박스 높이와 맞춤 */
+            height: 500px;
             border: 1px solid #ebebeb;
             border-radius: 4px;
             background: #f8f8f8;
@@ -242,39 +243,33 @@
         .product-swiper-container .swiper-slide img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* 이미지가 잘리지 않게 'contain' 사용 */
+            object-fit: contain;
         }
         .product-swiper-container .swiper-pagination-bullet-active {
-            background-color: #7fad39; /* 활성 페이징 점 색상 */
+            background-color: #7fad39;
         }
         .product-swiper-container .swiper-button-next,
         .product-swiper-container .swiper-button-prev {
-            color: #7fad39; /* 화살표 색상 */
+            color: #7fad39;
             transform: scale(0.8);
         }
 
-        /* ##### [신규] 텍스트 생략 스타일 ##### */
         .truncatable-content.truncated {
-            /* * line-height: 1.8, font-size: 15px 기준 4줄
-             * (1.8 * 15px * 4 = 108px)
-             */
             max-height: 108px;
             overflow: hidden;
-            /* 텍스트가 잘리는 부분에 그라데이션 마스크 처리 (더 자연스럽게) */
             -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
             mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
         }
 
         .read-more-toggle {
-            display: none; /* JS가 필요시 block으로 변경 */
+            display: none;
             cursor: pointer;
             text-align: right;
             font-weight: 700;
-            color: #7fad39; /* 테마 색상 */
+            color: #7fad39;
             margin-top: 8px;
             padding-right: 5px;
         }
-        /* ##### /텍스트 생략 스타일 ##### */
 
     </style>
 </th:block>
@@ -296,7 +291,6 @@
             explanation.innerHTML = /*[[${book.explanation}]]*/ '도서 설명이 여기에 표시됩니다.';
         }
 
-        // ##### [신규] 도서 목차 주입 #####
         let bookContent = document.querySelector('#book-content');
         if (bookContent) {
             bookContent.innerHTML = /*[[${book.content}]]*/ '도서 목차가 여기에 표시됩니다.';
@@ -312,7 +306,6 @@
             buttonElement.style.opacity = '0.7';
 
             try {
-                // 2. API 경로
                 const apiUrl = '/api-server/coupon-issue/issue';
 
                 const response = await fetch(apiUrl, {
@@ -320,22 +313,20 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ couponId: couponId }), // CouponIssueRequest
-                    credentials: 'include' // X-User-ID 같은 헤더 전송에 필요
+                    body: JSON.stringify({ couponId: couponId }),
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
-                    // 3. 발급 성공
                     const issuedCouponId = await response.json();
                     buttonElement.textContent = '발급 완료';
-                    buttonElement.style.background = '#6f6f6f'; // 색상 변경
+                    buttonElement.style.background = '#6f6f6f';
                     buttonElement.style.borderColor = '#6f6f6f';
                     showMessage(`쿠폰이 발급되었습니다! (ID: ${issuedCouponId})`, 'success');
                 } else {
-                    // 4. 발급 실패 (4xx, 5xx 에러)
                     const errorResponse = await response.json();
-                    const errorMessage = errorResponse.message || '알 수 없는 오류'; // ErrorCode 메시지
-                    buttonElement.textContent = '쿠폰 받기'; // 텍스트 복원
+                    const errorMessage = errorResponse.message || '알 수 없는 오류';
+                    buttonElement.textContent = '쿠폰 받기';
                     buttonElement.disabled = false;
                     buttonElement.style.opacity = '1';
                     showMessage(`발급 실패: ${errorMessage}`, 'error');
@@ -343,40 +334,33 @@
             } catch (error) {
                 // 5. 네트워크 오류
                 console.error('쿠폰 발급 실패:', error);
-                buttonElement.textContent = '쿠폰 받기'; // 텍스트 복원
+                buttonElement.textContent = '쿠폰 받기';
                 buttonElement.disabled = false;
                 buttonElement.style.opacity = '1';
                 showMessage('네트워크 오류로 발급에 실패했습니다.', 'error');
             }
         }
 
-        // ----------------------------------------------------
-        // --- [기존] 쿠폰 메시지 표시 함수 ---
-        // ----------------------------------------------------
         function showMessage(text, type = 'success') {
             const messageArea = document.getElementById('coupon-message-area');
             messageArea.textContent = text;
 
             if(type === 'success') {
-                messageArea.style.color = '#7fad39'; // 사이트 녹색
+                messageArea.style.color = '#7fad39';
                 messageArea.style.background = '#f8fcf3';
                 messageArea.style.border = '1px solid #7fad39';
             } else {
-                messageArea.style.color = '#dc3545'; // 사이트 빨간색
+                messageArea.style.color = '#dc3545';
                 messageArea.style.background = '#fef2f2';
                 messageArea.style.border = '1px solid #dc3545';
             }
             messageArea.style.display = 'block';
 
-            // 4초 후에 메시지 숨김
             setTimeout(() => {
                 messageArea.style.display = 'none';
             }, 4000);
         }
 
-        // ----------------------------------------------------
-        // --- [기존] 다운로드 가능 쿠폰 로드 및 설정 함수 ---
-        // ----------------------------------------------------
         async function loadAndSetupCoupons(bookId) {
             const container = document.getElementById('coupon-section-container');
             const trigger = document.getElementById('coupon-trigger-banner');
@@ -385,22 +369,19 @@
             const toggleIcon = document.getElementById('coupon-toggle-icon');
 
             try {
-                // 1. API 경로 설정 (다운로드 가능 쿠폰 조회)
                 const apiUrl = `/api-server/coupon-issue/downloadable`;
 
                 const response = await fetch(`${apiUrl}/${bookId}`, {
                     method: 'GET',
-                    credentials: 'include' // X-User-ID 헤더 전송
+                    credentials: 'include'
                 });
 
                 if (!response.ok) throw new Error('Server response was not ok');
 
-                const coupons = await response.json(); // [DownloadableCouponResponse]
+                const coupons = await response.json();
 
-                // 2. 쿠폰이 1개 이상 있을 때만 실행
                 if (coupons && coupons.length > 0) {
 
-                    // 3. 쿠폰 목록 (숨겨진 영역) 채우기
                     let html = '';
                     coupons.forEach(coupon => {
                         html += `
@@ -420,33 +401,22 @@
                     });
                     listItems.innerHTML = html;
 
-                    // 4. 배너 클릭 이벤트 설정 (펼치기/접기)
                     trigger.addEventListener('click', () => {
                         const isHidden = collapsible.style.display === 'none';
                         collapsible.style.display = isHidden ? 'block' : 'none';
                         toggleIcon.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
                     });
-
-                    // 5. 전체 쿠폰 섹션 표시
                     container.style.display = 'block';
                 }
-                // (쿠폰이 0개면 container가 display:none을 유지 -> 아무것도 안 보임)
-
             } catch (error) {
                 console.error('다운로드 가능 쿠폰 로드 실패:', error);
-                // (실패 시 조용히 아무것도 표시하지 않음)
             }
         }
 
-
-        // ----------------------------------------------------
-        // --- (기존) 페이지 로드 시 실행 ---
-        // ----------------------------------------------------
         document.addEventListener("DOMContentLoaded", function() {
 
-            // --- 1. (기존) 좋아요 버튼 로직 ---
             const likeButton = document.getElementById('likeButton');
-            const bookId = /*[[${book.id}]]*/ null; // (쿠폰 로직에서도 사용하기 위해 여기서 선언)
+            const bookId = /*[[${book.id}]]*/ null;
 
             if (likeButton) {
                 const likeCountElement = document.getElementById('likeCount');
@@ -502,108 +472,78 @@
                             likeCountElement.innerText = currentLikeCount;
                         });
                 });
-            } // --- 좋아요 버튼 로직 종료 ---
+            }
 
-
-            // --- 2. (기존) 수량 증감 버튼 로직 (수정됨) ---
             const quantityInput = document.getElementById('quantity');
-            // const quantityHiddenInput = document.getElementById('quantityInput'); // [오류 수정] 이 ID는 HTML에 존재하지 않아 제거합니다.
             const decreaseBtn = document.getElementById('decreaseQty');
             const increaseBtn = document.getElementById('increaseQty');
 
             if (quantityInput && decreaseBtn && increaseBtn) {
                 const stock = parseInt(quantityInput.dataset.stock);
 
-                // 수량 감소 버튼
                 decreaseBtn.addEventListener('click', function() {
                     let currentQty = parseInt(quantityInput.value);
                     if (currentQty > 1) {
                         currentQty--;
                         quantityInput.value = currentQty;
-                        // quantityHiddenInput.value = currentQty; // [오류 수정] 제거
                     }
                 });
 
-                // 수량 증가 버튼
                 increaseBtn.addEventListener('click', function() {
                     let currentQty = parseInt(quantityInput.value);
                     if (currentQty < stock) {
                         currentQty++;
                         quantityInput.value = currentQty;
-                        // quantityHiddenInput.value = currentQty; // [오류 수정] 제거
                     } else {
                         alert('재고 수량을 초과할 수 없습니다.');
                     }
                 });
 
-            } // --- 수량 증감 버튼 로직 종료 ---
+            }
 
-
-            // --- 3. [신규] '더보기/접기' 기능 초기화 ---
-
-            /**
-             * 텍스트 영역에 '더보기/접기' 기능을 설정하는 헬퍼 함수
-             * @param {HTMLElement} contentElement - 기능을 적용할 컨텐츠 div
-             */
             function setupTruncation(contentElement) {
                 if (!contentElement) return;
 
-                // 1. 컨텐츠가 비어있거나 플레이스홀더인지 확인
                 const placeholderText = '여기에 표시됩니다.';
-                // innerText.trim()으로 실제 내용이 있는지 확인
                 if (!contentElement.innerText || contentElement.innerText.endsWith(placeholderText) || contentElement.innerText.trim() === "") {
                     contentElement.innerHTML = '<span style="color: #999;">등록된 정보가 없습니다.</span>';
                     return;
                 }
 
-                // 2. 4줄 높이 계산 (line-height: 1.8, font-size: 15px)
-                const FOUR_LINES_HEIGHT = 108; // 1.8 * 15 * 4
+                const FOUR_LINES_HEIGHT = 108;
 
-                // 3. 실제 컨텐츠 높이(scrollHeight)가 4줄(108px)보다 큰지 확인
                 if (contentElement.scrollHeight > FOUR_LINES_HEIGHT) {
 
-                    // 4. 'truncated' 클래스를 추가해 4줄로 접기
                     contentElement.classList.add('truncated');
 
-                    // 5. '더보기' 버튼 생성
                     const toggleButton = document.createElement('div');
                     toggleButton.classList.add('read-more-toggle');
                     toggleButton.innerHTML = '... 더보기';
-                    toggleButton.style.display = 'block'; // 버튼 보이기
+                    toggleButton.style.display = 'block';
 
-                    // 6. contentElement *다음에* (형제로) 버튼 삽입
                     contentElement.parentNode.insertBefore(toggleButton, contentElement.nextSibling);
 
-                    // 7. '더보기' 버튼에 클릭 이벤트 리스너 추가
                     toggleButton.addEventListener('click', function() {
-                        // .truncated 클래스를 토글 (제거/추가)
                         const isNowTruncated = contentElement.classList.toggle('truncated');
 
                         if (isNowTruncated) {
-                            // 'truncated' 클래스가 다시 추가됨 (접힌 상태)
                             toggleButton.innerHTML = '... 더보기';
-                            // (접었을 때 컨텐츠 상단이 보이도록 스크롤)
                             contentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                         } else {
-                            // 'truncated' 클래스가 제거됨 (펼친 상태)
                             toggleButton.innerHTML = '접기';
                         }
                     });
                 }
-            } // --- setupTruncation 함수 종료 ---
+            }
 
-            // 3-2. (신규) 각 섹션에 '더보기' 기능 적용
-            setupTruncation(document.querySelector('#book-content')); // 목차
-            setupTruncation(document.querySelector('#explanation'));   // 도서 소개
-            // --- '더보기/접기' 기능 초기화 종료 ---
+            setupTruncation(document.querySelector('#book-content'));
+            setupTruncation(document.querySelector('#explanation'));
 
-
-            // --- 4. (기존) Swiper 캐러셀 초기화 ---
             const swiper = new Swiper('.product-swiper-container', {
                 loop: true, // 무한 반복
                 autoplay: {
-                    delay: 5000, // 5초마다 자동 넘김
-                    disableOnInteraction: false, // 사용자가 조작한 후에도 자동 재생 유지
+                    delay: 5000,
+                    disableOnInteraction: false,
                 },
                 pagination: { // 하단 점 버튼
                     el: '.swiper-pagination',
@@ -614,34 +554,105 @@
                     prevEl: '.swiper-button-prev',
                 },
             });
-            // --- Swiper 초기화 종료 ---
 
-
-            // --- 5. [기존] 쿠폰 기능 초기화 ---
             if (bookId) {
                 loadAndSetupCoupons(bookId);
             }
-            // --- 쿠폰 기능 초기화 종료 ---
 
-        }); // --- DOMContentLoaded 종료 ---
+        });
+
+        // --- 4. (신규) 장바구니 담기 로직 ---
+        const addToCartBtn = document.getElementById('addToCartBtn');
+
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', async function () {
+
+                const bookId = /*[[${book.id}]]*/ null;
+                const quantity = parseInt(document.getElementById('quantity').value, 10);
+                const stock = parseInt(document.getElementById('quantity').dataset.stock);
+
+                // 재고 0 → 장바구니 불가
+                if (stock === 0) {
+                    alert('재고가 없어 장바구니에 담을 수 없습니다.');
+                    return;
+                }
+
+                // 선택한 수량이 재고 초과
+                if (quantity > stock) {
+                    alert('재고 수량을 초과하여 담을 수 없습니다.');
+                    return;
+                }
+
+                const requestBody = {
+                    bookId: bookId,
+                    quantity: quantity
+                };
+
+                try {
+                    const response = await fetch('/carts', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',   // cartToken 쿠키 전달
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    if (response.ok) {
+                        alert('장바구니에 담았습니다!');
+                        return;
+                    }
+
+                    const errorData = await response.json().catch(() => null);
+                    alert('장바구니 담기 실패: ' + (errorData?.message || '알 수 없는 오류'));
+
+                } catch (e) {
+                    console.error('장바구니 요청 오류:', e);
+                    alert('네트워크 오류가 발생했습니다.');
+                }
+            });
+        }
+
+        // --- 장바구니 로직 종료 ---
 
 
-        /**
-         * [신규] '바로 구매' 버튼 클릭 시 실행되는 함수
-         * HTML의 onclick="directBuy(this)"에서 호출합니다.
-         */
-        function directBuy(button) {
+        // 바로 구매 함수
+        async function directBuy(button) {
             const bookId = button.getAttribute('data-book-id');
             const quantity = document.getElementById('quantity').value;
 
-            if (bookId && quantity > 0) {
-                // '바로 구매'는 보통 주문 페이지로 즉시 이동합니다.
-                // 고라니님의 '단일 상품 주문' 페이지 URL로 변경하세요.
-                const orderUrl = `/order/now?bookId=${bookId}&quantity=${quantity}`;
-                console.log('주문 페이지로 이동:', orderUrl);
-                window.location.href = orderUrl;
-            } else {
-                alert('상품 정보 또는 수량을 가져오는 데 실패했습니다.');
+            // JSON 형식으로 주문 준비 요청
+            const requestData = {
+                items: [
+                    {
+                        bookId: parseInt(bookId),
+                        quantity: parseInt(quantity)
+                    }
+                ]
+            };
+
+            try {
+                const response = await fetch('/orders/prepare', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData),
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    // HTML 응답을 받아서 페이지 이동
+                    const html = await response.text();
+                    document.open();
+                    document.write(html);
+                    document.close();
+                } else {
+                    alert('주문 준비 중 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('주문 준비 오류:', error);
+                alert('주문 준비 중 오류가 발생했습니다.');
             }
         }
 

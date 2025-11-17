@@ -229,13 +229,8 @@
     </script>
 
     <script th:inline="javascript">
+        const pathPrefix = /*[[${apiPrefix}]]*/ '';
         /*<![CDATA[*/
-
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                window.location.reload();
-            }
-        });
 
         let csrfToken = null;
         let csrfHeader = null;
@@ -260,7 +255,7 @@
         async function submitEditForm(form, categoryId) {
             const newName = form.querySelector('input[name="name"]').value;
 
-            const apiUrl = '/api-server/admin/category/update';
+            const apiUrl = pathPrefix + '/api-server/admin/category/update';
             console.log(apiUrl);
 
             try {
@@ -288,7 +283,7 @@
 
             const newName = form.querySelector('input[name="name"]').value;
 
-            const apiUrl = '/api-server/admin/category/create';
+            const apiUrl = pathPrefix + '/api-server/admin/category/create';
 
             try {
                 const response = await fetch(apiUrl, {
@@ -316,7 +311,7 @@
                 return;
             }
 
-            const apiUrl = '/api-server/admin/category/delete';
+            const apiUrl = pathPrefix + '/api-server/admin/category/delete';
 
             try {
                 const response = await fetch(`${apiUrl}/${categoryId}`, {

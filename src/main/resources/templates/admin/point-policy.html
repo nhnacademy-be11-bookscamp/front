@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>포인트 정책 관리 | 북스캠프 관리자</title>
+
+    <!-- ===== CSS ===== -->
+    <th:block layout:fragment="extra-css">
+        <style>
+            /* ===== PAGE WRAPPER ===== */
+            .pp-page-container {
+                background: #ffffff;
+                padding: 30px;
+                border: 1px solid #ebebeb;
+                border-radius: 4px;
+            }
+
+            .pp-page-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+            }
+
+            .pp-page-title {
+                margin: 0;
+                font-weight: 700;
+                font-size: 20px;
+            }
+
+            /* ===== BUTTONS ===== */
+            .pp-btn {
+                display: inline-flex;
+                align-items: center;
+                padding: 6px 12px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+                font-size: 14px;
+                cursor: pointer;
+                background: #f8f9fa;
+            }
+
+            .pp-btn-primary {
+                background: #0064FF;
+                color: white;
+                border-color: #0064FF;
+            }
+
+            .pp-btn-danger {
+                background: #dc3545;
+                color: white;
+                border-color: #dc3545;
+            }
+
+            .pp-btn + .pp-btn {
+                margin-left: 8px;
+            }
+
+            /* ===== TABLE ===== */
+            .pp-table {
+                width: 100%;
+                border-collapse: collapse;
+                background-color: #fff;
+            }
+
+            .pp-table th,
+            .pp-table td {
+                padding: 10px;
+                border: 1px solid #dee2e6;
+                font-size: 14px;
+            }
+
+            .pp-table thead {
+                background-color: #f1f3f5;
+            }
+
+            .pp-text-right {
+                text-align: right;
+            }
+
+            /* ===== MODAL ===== */
+            .pp-modal-backdrop {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 23, 42, 0.45);
+                justify-content: center;
+                align-items: center;
+                z-index: 2000;
+            }
+
+            .pp-modal-backdrop.pp-show {
+                display: flex;
+            }
+
+            .pp-modal {
+                background: #fff;
+                border-radius: 8px;
+                width: 420px;
+                max-width: calc(100% - 20px);
+                padding: 20px 24px;
+                box-shadow: 0 20px 35px rgba(15, 23, 42, 0.35);
+            }
+
+            .pp-modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+            }
+
+            .pp-modal-title {
+                font-size: 18px;
+                font-weight: 600;
+            }
+
+            .pp-modal-body {
+                margin-bottom: 12px;
+            }
+
+            .pp-form-group {
+                margin-bottom: 12px;
+            }
+
+            .pp-form-group label {
+                font-size: 14px;
+                font-weight: 500;
+                margin-bottom: 4px;
+                display: block;
+            }
+
+            .pp-form-group select,
+            .pp-form-group input[type="number"] {
+                width: 100%;
+                padding: 6px 8px;
+                border-radius: 4px;
+                border: 1px solid #ced4da;
+            }
+
+        </style>
+    </th:block>
+</head>
+
+<body>
+<section layout:fragment="hero" class="hero" style="display:none;"></section>
+
+<!-- ============= CONTENT (모달 포함) ============= -->
+<div layout:fragment="content">
+    <section class="product spad">
+        <div class="container">
+            <div class="row">
+
+                <!-- LEFT SIDE - Sidebar -->
+                <div class="col-lg-3">
+                    <div class="hero__categories">
+                        <div class="hero__categories__all">
+                            <i class="fa fa-bars"></i>
+                            <span>관리자 메뉴</span>
+                        </div>
+                        <ul th:replace="~{fragment/admin-sidebar :: sidebar}">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- RIGHT SIDE -->
+                <div class="col-lg-9">
+                    <div class="pp-page-container">
+
+                        <!-- HEADER -->
+                        <div class="pp-page-header">
+                            <h4 class="pp-page-title">
+                                <i class="fa fa-coins" style="color:#0064FF;margin-right:6px;"></i>
+                                포인트 정책 관리
+                            </h4>
+
+                            <button class="pp-btn pp-btn-primary" id="pp-btn-open-create-modal">+ 신규 정책 등록</button>
+                        </div>
+
+                        <!-- TABLE -->
+                        <table class="pp-table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>정책 타입</th>
+                                <th>보상 타입</th>
+                                <th>보상 값</th>
+                                <th class="pp-text-right">관리</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${pointPolicies == null or #lists.isEmpty(pointPolicies)}">
+                                <td colspan="5" class="text-center" style="padding:30px;">
+                                    정책이 없습니다.
+                                </td>
+                            </tr>
+
+                            <tr th:each="p : ${pointPolicies}">
+                                <td th:text="${p.pointPolicyId}"></td>
+                                <td th:text="${p.pointPolicyType}"></td>
+                                <td th:text="${p.rewardType}"></td>
+                                <td th:text="${p.rewardValue}"></td>
+
+                                <td class="pp-text-right">
+                                    <button class="pp-btn pp-btn-primary pp-btn-open-update-modal"
+                                            th:attr="data-id=${p.pointPolicyId},
+                                                     data-type=${p.pointPolicyType},
+                                                     data-reward-type=${p.rewardType},
+                                                     data-reward-value=${p.rewardValue}">
+                                        수정
+                                    </button>
+
+                                    <button class="pp-btn pp-btn-danger pp-btn-delete"
+                                            th:attr="data-id=${p.pointPolicyId}">
+                                        삭제
+                                    </button>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- CREATE MODAL -->
+    <div class="pp-modal-backdrop" id="pp-create-modal">
+        <div class="pp-modal">
+            <div class="pp-modal-header">
+                <div class="pp-modal-title">정책 생성</div>
+                <button class="pp-btn" id="pp-btn-close-create-modal">X</button>
+            </div>
+
+            <div class="pp-modal-body">
+                <form id="pp-create-form">
+                    <div class="pp-form-group">
+                        <label>정책 타입</label>
+                        <select id="pp-create-pointPolicyType" required>
+                            <option value="" disabled selected>선택</option>
+                            <option th:each="t : ${pointPolicyTypes}" th:value="${t}" th:text="${t}"></option>
+                        </select>
+                    </div>
+
+                    <div class="pp-form-group">
+                        <label>보상 타입</label>
+                        <select id="pp-create-rewardType" required>
+                            <option value="" disabled selected>선택</option>
+                            <option th:each="t : ${rewardTypes}" th:value="${t}" th:text="${t}"></option>
+                        </select>
+                    </div>
+
+                    <div class="pp-form-group">
+                        <label>보상 값</label>
+                        <input type="number" id="pp-create-rewardValue" min="0" required>
+                    </div>
+                </form>
+            </div>
+
+            <div class="pp-modal-footer">
+                <button class="pp-btn" id="pp-btn-cancel-create">취소</button>
+                <button class="pp-btn pp-btn-primary" id="pp-btn-submit-create">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPDATE MODAL -->
+    <div class="pp-modal-backdrop" id="pp-update-modal">
+        <div class="pp-modal">
+            <div class="pp-modal-header">
+                <div class="pp-modal-title">정책 수정</div>
+                <button class="pp-btn" id="pp-btn-close-update-modal">X</button>
+            </div>
+
+            <div class="pp-modal-body">
+                <form id="pp-update-form">
+                    <input type="hidden" id="pp-update-id">
+
+                    <div class="pp-form-group">
+                        <label>정책 타입</label>
+                        <select id="pp-update-pointPolicyType" required>
+                            <option value="" disabled>선택</option>
+                            <option th:each="t : ${pointPolicyTypes}" th:value="${t}" th:text="${t}"></option>
+                        </select>
+                    </div>
+
+                    <div class="pp-form-group">
+                        <label>보상 타입</label>
+                        <select id="pp-update-rewardType" required>
+                            <option value="" disabled>선택</option>
+                            <option th:each="t : ${rewardTypes}" th:value="${t}" th:text="${t}"></option>
+                        </select>
+                    </div>
+
+                    <div class="pp-form-group">
+                        <label>보상 값</label>
+                        <input type="number" id="pp-update-rewardValue" min="0" required>
+                    </div>
+                </form>
+            </div>
+
+            <div class="pp-modal-footer">
+                <button class="pp-btn" id="pp-btn-cancel-update">취소</button>
+                <button class="pp-btn pp-btn-primary" id="pp-btn-submit-update">저장</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============= JS ============= -->
+<div layout:fragment="extra-js">
+    <script>
+        (function() {
+
+            /* CSRF */
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+            function headers() {
+                const h = { "Content-Type": "application/json" };
+                if (csrfToken && csrfHeader) h[csrfHeader] = csrfToken;
+                return h;
+            }
+
+            /* === CREATE MODAL === */
+            const createModal = document.getElementById("pp-create-modal");
+
+            document.getElementById("pp-btn-open-create-modal")
+                .addEventListener("click", () => {
+                    document.getElementById("pp-create-form").reset();
+                    createModal.classList.add("pp-show");
+                });
+
+            document.getElementById("pp-btn-close-create-modal")
+                .addEventListener("click", () => createModal.classList.remove("pp-show"));
+
+            document.getElementById("pp-btn-cancel-create")
+                .addEventListener("click", () => createModal.classList.remove("pp-show"));
+
+            document.getElementById("pp-btn-submit-create")
+                .addEventListener("click", () => {
+                    const payload = {
+                        pointPolicyType: document.getElementById("pp-create-pointPolicyType").value,
+                        rewardType: document.getElementById("pp-create-rewardType").value,
+                        rewardValue: Number(document.getElementById("pp-create-rewardValue").value)
+                    };
+
+                    fetch("/admin/point-policies", {
+                        method: "POST",
+                        headers: headers(),
+                        body: JSON.stringify(payload)
+                    }).then(res => {
+                        res.ok ? location.reload() : alert("정책 생성 실패");
+                    });
+                });
+
+            /* === UPDATE MODAL === */
+            const updateModal = document.getElementById("pp-update-modal");
+
+            document.querySelectorAll(".pp-btn-open-update-modal")
+                .forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        document.getElementById("pp-update-id").value = btn.dataset.id;
+                        document.getElementById("pp-update-pointPolicyType").value = btn.dataset.type;
+                        document.getElementById("pp-update-rewardType").value = btn.dataset.rewardType;
+                        document.getElementById("pp-update-rewardValue").value = btn.dataset.rewardValue;
+
+                        updateModal.classList.add("pp-show");
+                    });
+                });
+
+            document.getElementById("pp-btn-close-update-modal")
+                .addEventListener("click", () => updateModal.classList.remove("pp-show"));
+
+            document.getElementById("pp-btn-cancel-update")
+                .addEventListener("click", () => updateModal.classList.remove("pp-show"));
+
+            document.getElementById("pp-btn-submit-update")
+                .addEventListener("click", () => {
+                    const id = document.getElementById("pp-update-id").value;
+
+                    const payload = {
+                        pointPolicyType: document.getElementById("pp-update-pointPolicyType").value,
+                        rewardType: document.getElementById("pp-update-rewardType").value,
+                        rewardValue: Number(document.getElementById("pp-update-rewardValue").value)
+                    };
+
+                    fetch(`/admin/point-policies/${id}`, {
+                        method: "PUT",
+                        headers: headers(),
+                        body: JSON.stringify(payload)
+                    }).then(res => {
+                        res.ok ? location.reload() : alert("정책 수정 실패");
+                    });
+                });
+
+            /* === DELETE === */
+            document.querySelectorAll(".pp-btn-delete")
+                .forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const id = btn.dataset.id;
+                        if (!confirm(`정책 ID ${id} 삭제?`)) return;
+
+                        fetch(`/admin/point-policies/${id}`, {
+                            method: "DELETE",
+                            headers: headers()
+                        }).then(res => {
+                            res.ok ? location.reload() : alert("정책 삭제 실패");
+                        });
+                    });
+                });
+
+        })();
+    </script>
+
+    <!-- ===== Sidebar 동작 스크립트 ===== -->
+    <script>
+        $(document).ready(function() {
+
+            $('.admin-category-header').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                var menuId = $(this).data('admin-menu');
+                var $submenu = $('#admin-menu-' + menuId);
+                var $toggle = $(this).find('.admin-toggle');
+
+                $toggle.toggleClass('active');
+                $submenu.slideToggle(300);
+            });
+
+            $('.admin-toggle').attr('role', 'button');
+            $('.admin-toggle').attr('aria-expanded', 'false');
+            $('.admin-toggle').attr('tabindex', '0');
+
+        });
+    </script>
+</div>
+
+</body>
+</html>

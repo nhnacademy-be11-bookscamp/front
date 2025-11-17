@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
 import store.bookscamp.front.auth.filter.JwtAuthenticationFilter;
+import store.bookscamp.front.auth.handler.CustomAuthenticationFailureHandler;
 import store.bookscamp.front.auth.handler.CustomAuthenticationSuccessHandler;
 import store.bookscamp.front.auth.provider.AdminAuthenticationProvider;
 import store.bookscamp.front.auth.provider.CustomAuthenticationProvider;
@@ -100,6 +101,7 @@ public class SecurityConfig {
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .successHandler(new CustomAuthenticationSuccessHandler("/admin/dashboard"))
+                        .failureHandler(new CustomAuthenticationFailureHandler())
         );
 
         http.httpBasic(AbstractHttpConfigurer::disable);
@@ -140,6 +142,7 @@ public class SecurityConfig {
             .usernameParameter("username")
             .passwordParameter("password")
                 .successHandler(new CustomAuthenticationSuccessHandler("/"))
+                .failureHandler(new CustomAuthenticationFailureHandler())
         );
         http.logout(logout -> logout
                 .logoutUrl("/logout")

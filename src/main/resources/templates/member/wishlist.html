@@ -40,7 +40,6 @@
             }
             .btn-delete:hover { background: #c82333; }
 
-            /* (기존 테이블 스타일...) */
             .wishlist__table {
                 width: 100%;
                 border-collapse: separate;
@@ -59,8 +58,6 @@
                 padding: 20px 25px;
                 vertical-align: middle;
             }
-
-            /* (기존 상품 정보 스타일...) */
             .wishlist__item-info {
                 display: flex;
                 align-items: center;
@@ -125,8 +122,6 @@
                 flex-direction: column;
                 align-items: flex-end;
             }
-
-            /* *** [ 1. 수정 ] 눈에 보이지 않게 숨기는 CSS 클래스 추가 *** */
             .sr-only {
                 position: absolute;
                 width: 1px;
@@ -136,6 +131,19 @@
                 overflow: hidden;
                 clip: rect(0, 0, 0, 0);
                 border: 0;
+            }
+
+            /* 페이지네이션 스타일 */
+            .pagination-container .page-item.active .page-link {
+                background-color: #7fad39;
+                border-color: #7fad39;
+                color: white;
+            }
+            .pagination-container .page-link {
+                color: #7fad39;
+            }
+            .pagination-container .page-item.disabled .page-link {
+                color: #6c757d;
             }
         </style>
     </th:block>
@@ -167,7 +175,8 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr th:each="item : ${wishlistItems}" th:id="'wishlist-item-' + ${item.id}" class="wishlist__item-row"
+
+                                <tr th:each="item : ${wishlistItems.content}" th:id="'wishlist-item-' + ${item.id}" class="wishlist__item-row"
                                     th:with="discountRate=${(item.regularPrice > item.salePrice) ? (100 * (item.regularPrice - item.salePrice) / item.regularPrice) : 0}">
 
                                     <td>
@@ -206,7 +215,7 @@
                                     </td>
                                 </tr>
 
-                                <tr th:if="${wishlistItems == null or #lists.isEmpty(wishlistItems)}">
+                                <tr th:if="${wishlistItems == null or wishlistItems.empty}">
                                     <td colspan="2" class="text-center" style="padding: 50px; font-size: 16px; color: #777;">
                                         위시리스트에 담긴 상품이 없습니다.
                                     </td>
@@ -214,6 +223,32 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <div class="pagination-container" style="margin-top: 30px;"
+                             th:if="${wishlistItems != null and wishlistItems.totalPages > 1}">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+
+                                    <li class="page-item" th:classappend="${wishlistItems.first} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/wishlist(page=${wishlistItems.number - 1}, size=${wishlistItems.size})}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+
+                                    <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, wishlistItems.totalPages - 1)}"
+                                        th:classappend="${pageNumber == wishlistItems.number} ? 'active'">
+                                        <a class="page-link" th:href="@{/wishlist(page=${pageNumber}, size=${wishlistItems.size})}" th:text="${pageNumber + 1}">1</a>
+                                    </li>
+
+                                    <li class="page-item" th:classappend="${wishlistItems.last} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/wishlist(page=${wishlistItems.number + 1}, size=${wishlistItems.size})}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -224,7 +259,12 @@
 <div layout:fragment="extra-js">
     <script th:inline="javascript">
         /*<![CDATA[*/
-        const pathPrefix = /*[[${apiPrefix}]]*/ '';
+
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
 
         let csrfToken = null;
         let csrfHeader = null;
@@ -249,7 +289,7 @@
             if (!confirm('위시리스트에서 이 상품을 삭제하시겠습니까?')) {
                 return;
             }
-            const apiUrl = pathPrefix + `/api-server/wishlist/${itemId}`;
+            const apiUrl = `/api-server/wishlist/${itemId}`;
 
             try {
                 const response = await fetch(apiUrl, {
@@ -269,10 +309,27 @@
 
                 alert('위시리스트에서 삭제되었습니다.');
                 const row = document.getElementById('wishlist-item-' + itemId);
-                if (row) {
+
+                const tableBody = row ? row.parentNode : null;
+
+                if (row && tableBody) {
                     row.remove();
+
+                    if (tableBody.children.length === 0) {
+
+                        const noItemsHtml = `
+                            <tr>
+                                <td colspan="2" class="text-center" style="padding: 50px; font-size: 16px; color: #777;">
+                                    위시리스트에 담긴 상품이 없습니다.
+                                </td>
+                            </tr>
+                        `;
+
+                        tableBody.innerHTML = noItemsHtml;
+                    }
+
                 } else {
-                    location.reload(); // Fallback
+                    location.reload();
                 }
 
             } catch (error) {

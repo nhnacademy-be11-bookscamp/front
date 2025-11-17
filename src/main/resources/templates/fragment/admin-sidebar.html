@@ -98,6 +98,26 @@
                 </ul>
             </div>
         </li>
+
+        <!-- 포인트 정책 관리 -->
+        <li class="category-item admin-category-item has-children">
+            <div class="category-content admin-category-header" data-admin-menu="point-policy">
+                <span class="category-link" style="pointer-events: none;">포인트 정책</span>
+                <span class="admin-toggle" data-admin-target="point-policy">
+            <i class="fa fa-angle-down"></i>
+        </span>
+            </div>
+
+            <div id="admin-menu-point-policy" class="category-children admin-submenu" style="display: none;">
+                <ul class="category-list category-sublist">
+                    <li class="category-item">
+                        <div class="category-content">
+                            <a th:href="@{/admin/point-policies}" class="category-link">포인트 정책 관리</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </li>
     </ul>
 </body>
 </html>

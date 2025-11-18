@@ -44,7 +44,7 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           payco:
-            authorization-uri: https://id.payco.com/oauth2.0/authorizehttps://www.bookscamp.store/login/oauth2/code/payco
+            authorization-uri: https://id.payco.com/oauth2.0/authorize?serviceProviderCode=FRIENDS&userLocale=ko_KR
             token-uri: https://id.payco.com/oauth2.0/token
             user-info-uri: https://apis-payco.krp.toastoven.net/payco/friends/find_member_v2.json
             user-name-attribute: idNo

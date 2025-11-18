@@ -1,75 +1,15 @@
 spring:
   application:
     name: front
-  servlet:
-    multipart:
-      max-file-size: 20MB
-      max-request-size: 20MB
   profiles:
     active: prod
-  session:
-    redis:
-      flush-mode: on_save
-  cache:
-    type: redis
-    redis:
-      time-to-live: 600000
+
+  config:
+    import: "optional:configserver:"
+
   cloud:
-    openfeign:
-      client:
-        config:
-          default:
-            logger-level: FULL
-  mvc:
-    hiddenmethod:
-      filter:
-        enabled=true:
-  security:
-    oauth2:
-      client:
-        registration:
-          payco:
-            client-id: ${PAYCO_CLIENT_ID}
-            client-secret: ${PAYCO_CLIENT_SECRET}
-            client-name: Payco
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            provider: payco
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            scope:
-              - profile
-              - email
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-        provider:
-          payco:
-            authorization-uri: https://id.payco.com/oauth2.0/authorize?serviceProviderCode=FRIENDS&userLocale=ko_KR
-            token-uri: https://id.payco.com/oauth2.0/token
-            user-info-uri: https://apis-payco.krp.toastoven.net/payco/friends/find_member_v2.json
-            user-name-attribute: idNo
-logging:
-  level:
-    feign.Logger: DEBUG
-    store.bookscamp.front.book.feign: DEBUG
-    org.springframework.cloud.openfeign: DEBUG
-
-minio:
-  # 내부 통신용 (SDK)
-  url: http://storage.java21.net:8000
-  # 브라우저 노출용 (이미지 URL 반환용)
-  public-url: https://bookscamp.store
-  access-key: EvJ2FP8gy27lDYolEWGQ
-  secret-key: h9uzw85pZPDchOTHzslEOUlNd5cDPFLQnJCofZfH
-  bucket:
-    book: bookscamp-book-image
-    review: bookscamp-review-image
-    package: bookscamp-package-image
-
-feign:
-  client:
     config:
-      default:
-        connectTimeout: 3000
-        readTimeout: 5000
-        loggerLevel: BASIC
+      uri: http://localhost:10355
+      profile: ${spring.profiles.active}
+      label: main
+      fail-fast: true

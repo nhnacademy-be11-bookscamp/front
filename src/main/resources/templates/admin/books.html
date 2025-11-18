@@ -4,6 +4,347 @@
       layout:decorate="~{layout/default}">
 <head>
     <title>도서 조회 | 북스캠프 관리자</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .admin-books-container {
+                background: #ffffff;
+                padding: 30px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            }
+
+            .admin-books-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid #f0f0f0;
+            }
+
+            .admin-books-title {
+                font-size: 24px;
+                font-weight: 700;
+                color: #2c3e50;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .admin-books-title i {
+                color: #0064FF;
+                font-size: 22px;
+            }
+
+            .search-form {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                margin-bottom: 25px;
+            }
+
+            .form-label {
+                font-size: 13px;
+                font-weight: 600;
+                color: #495057;
+                margin-bottom: 6px;
+                display: block;
+            }
+
+            .form-control, .form-select {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                font-size: 14px;
+                transition: all 0.2s;
+            }
+
+            .form-control:focus, .form-select:focus {
+                outline: none;
+                border-color: #0064FF;
+                box-shadow: 0 0 0 3px rgba(0, 100, 255, 0.1);
+            }
+
+            .search-btn {
+                background: linear-gradient(135deg, #0064FF 0%, #0052CC 100%);
+                color: white;
+                border: none;
+                padding: 10px 30px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 14px;
+                cursor: pointer;
+                transition: all 0.3s;
+                box-shadow: 0 2px 4px rgba(0, 100, 255, 0.2);
+            }
+
+            .search-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 100, 255, 0.3);
+            }
+
+            .books-list {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                margin-bottom: 20px;
+            }
+
+            .book-card {
+                background: white;
+                border: 1px solid #e9ecef;
+                border-radius: 12px;
+                padding: 20px;
+                transition: all 0.3s;
+                display: flex;
+                gap: 20px;
+                align-items: center;
+            }
+
+            .book-card:hover {
+                transform: translateX(4px);
+                box-shadow: 0 4px 12px rgba(0, 100, 255, 0.12);
+                border-color: #0064FF;
+            }
+
+            .book-info-section {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .book-title-link {
+                color: #2c3e50;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 16px;
+                display: block;
+                margin-bottom: 8px;
+                line-height: 1.4;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                transition: color 0.2s;
+            }
+
+            .book-title-link:hover {
+                color: #0064FF;
+            }
+
+            .book-meta {
+                display: flex;
+                gap: 16px;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+
+            .book-meta-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                color: #6c757d;
+                font-size: 13px;
+            }
+
+            .book-meta-item i {
+                color: #adb5bd;
+                font-size: 12px;
+            }
+
+            .book-stats {
+                display: flex;
+                gap: 20px;
+                align-items: center;
+                padding-right: 20px;
+                border-right: 1px solid #e9ecef;
+                width: 160px;
+                flex-shrink: 0;
+            }
+
+            .stat-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                width: 60px;
+                flex-shrink: 0;
+            }
+
+            .stat-label {
+                font-size: 11px;
+                color: #adb5bd;
+                font-weight: 500;
+            }
+
+            .stat-value {
+                font-size: 16px;
+                font-weight: 700;
+                color: #495057;
+            }
+
+            .book-price-section {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 4px;
+                width: 150px;
+                flex-shrink: 0;
+                padding-right: 20px;
+                border-right: 1px solid #e9ecef;
+            }
+
+            .price-original {
+                text-decoration: line-through;
+                color: #adb5bd;
+                font-size: 13px;
+            }
+
+            .price-sale-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .price-sale {
+                font-weight: 700;
+                color: #0064FF;
+                font-size: 20px;
+            }
+
+            .discount-badge {
+                background: #ff4757;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 700;
+            }
+
+            .book-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                width: 80px;
+                flex-shrink: 0;
+            }
+
+            .btn-edit, .btn-delete {
+                padding: 8px 0;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: none;
+                text-align: center;
+                border: none;
+                cursor: pointer;
+                transition: all 0.2s;
+                width: 100%;
+                display: block;
+            }
+
+            .btn-edit {
+                background: #0064FF;
+                color: white;
+            }
+
+            .btn-edit:hover {
+                background: #0052CC;
+                transform: translateY(-1px);
+            }
+
+            .btn-delete {
+                background: #ff4757;
+                color: white;
+            }
+
+            .btn-delete:hover {
+                background: #ee2f3a;
+                transform: translateY(-1px);
+            }
+
+            .badge {
+                display: inline-block;
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: 600;
+            }
+
+            .badge-success {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .badge-secondary {
+                background: #e9ecef;
+                color: #6c757d;
+            }
+
+            .pagination-container {
+                margin-top: 30px;
+                text-align: center;
+                padding-top: 20px;
+                border-top: 1px solid #f0f0f0;
+            }
+
+            .pagination-info {
+                font-size: 14px;
+                color: #6c757d;
+                margin-bottom: 15px;
+                font-weight: 500;
+            }
+
+            .pagination-buttons {
+                display: inline-flex;
+                gap: 10px;
+            }
+
+            .page-btn {
+                padding: 8px 20px;
+                border-radius: 6px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 14px;
+                transition: all 0.2s;
+                border: 1px solid #dee2e6;
+            }
+
+            .page-btn-primary {
+                background: #0064FF;
+                color: white;
+                border-color: #0064FF;
+            }
+
+            .page-btn-primary:hover {
+                background: #0052CC;
+                border-color: #0052CC;
+                transform: translateY(-1px);
+            }
+
+            .page-btn-secondary {
+                background: white;
+                color: #6c757d;
+            }
+
+            .page-btn-secondary:hover {
+                background: #f8f9fa;
+                color: #495057;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 60px 20px;
+                color: #adb5bd;
+            }
+
+            .empty-state i {
+                font-size: 48px;
+                color: #dee2e6;
+                margin-bottom: 15px;
+                display: block;
+            }
+        </style>
+    </th:block>
 </head>
 
 <body>
@@ -27,127 +368,133 @@
                 </div>
 
                 <div class="col-lg-9">
-                    <div style="background: #ffffff; padding: 30px; border: 1px solid #ebebeb; border-radius: 4px;">
-                        <h4 style="margin-bottom: 20px; font-weight: 700;">
-                            <i class="fa fa-book" style="margin-right: 10px; color: #0064FF;"></i>
-                            도서 목록
-                        </h4>
+                    <div class="admin-books-container">
+                        <div class="admin-books-header">
+                            <h4 class="admin-books-title">
+                                <i class="fa fa-book"></i>
+                                도서 목록
+                            </h4>
+                        </div>
 
-                        <form th:action="@{/admin/books}" method="get" style="margin-bottom: 25px;">
-                            <div class="row">
+                        <form th:action="@{/admin/books}" method="get" class="search-form">
+                            <div class="row g-3">
                                 <div class="col-lg-4">
-                                    <div style="margin-bottom: 15px;">
-                                        <label style="font-size: 14px; font-weight: 600; margin-bottom: 5px; display: block;">카테고리 ID</label>
-                                        <input type="text"
-                                               name="categoryId"
-                                               th:value="${categoryId}"
-                                               placeholder="카테고리 ID"
-                                               style="width: 100%; padding: 10px; border: 1px solid #ebebeb; border-radius: 4px;">
-                                    </div>
+                                    <label class="form-label">카테고리 ID</label>
+                                    <input type="text"
+                                           name="categoryId"
+                                           th:value="${categoryId}"
+                                           placeholder="카테고리 ID 입력"
+                                           class="form-control">
                                 </div>
                                 <div class="col-lg-4">
-                                    <div style="margin-bottom: 15px;">
-                                        <label style="font-size: 14px; font-weight: 600; margin-bottom: 5px; display: block;">검색어</label>
-                                        <input type="text"
-                                               name="keyWord"
-                                               th:value="${keyWord}"
-                                               placeholder="도서 제목"
-                                               style="width: 100%; padding: 10px; border: 1px solid #ebebeb; border-radius: 4px;">
-                                    </div>
+                                    <label class="form-label">검색어</label>
+                                    <input type="text"
+                                           name="keyWord"
+                                           th:value="${keyWord}"
+                                           placeholder="도서 제목으로 검색"
+                                           class="form-control">
                                 </div>
                                 <div class="col-lg-4">
-                                    <div style="margin-bottom: 15px;">
-                                        <label style="font-size: 14px; font-weight: 600; margin-bottom: 5px; display: block;">정렬</label>
-                                        <select name="sortType"
-                                                style="width: 100%; padding: 10px; border: 1px solid #ebebeb; border-radius: 4px;">
-                                            <option value="id" th:selected="${sortType == 'id'}">기본</option>
-                                            <option value="title" th:selected="${sortType == 'title'}">제목순</option>
-                                            <option value="low-price" th:selected="${sortType == 'low-price'}">낮은가격순</option>
-                                            <option value="high-price" th:selected="${sortType == 'high-price'}">높은가격순</option>
-                                            <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
-                                            <option value="bookLike" th:selected="${sortType == 'bookLike'}">좋아요순</option>
-                                        </select>
-                                    </div>
+                                    <label class="form-label">정렬</label>
+                                    <select name="sortType" class="form-select">
+                                        <option value="id" th:selected="${sortType == 'id'}">기본</option>
+                                        <option value="title" th:selected="${sortType == 'title'}">제목순</option>
+                                        <option value="low-price" th:selected="${sortType == 'low-price'}">낮은가격순</option>
+                                        <option value="high-price" th:selected="${sortType == 'high-price'}">높은가격순</option>
+                                        <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
+                                        <option value="bookLike" th:selected="${sortType == 'bookLike'}">좋아요순</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div class="text-center">
-                                <button type="submit" class="site-btn" style="width: 150px; padding: 10px;">
-                                    <i class="fa fa-search" style="margin-right: 5px;"></i>검색
+                            <div class="text-center" style="margin-top: 20px;">
+                                <button type="submit" class="search-btn">
+                                    <i class="fa fa-search" style="margin-right: 6px;"></i>검색하기
                                 </button>
                             </div>
                         </form>
 
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                                <thead style="background-color: #f8f8f8; border-bottom: 2px solid #ebebeb;">
-                                <tr>
-                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">ID</th>
-                                    <th style="padding: 12px 8px; text-align: left; font-weight: 600; color: #333;">제목</th>
-                                    <th style="padding: 12px 8px; text-align: left; font-weight: 600; color: #333;">설명</th>
-                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">출판사</th>
-                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">출판일</th>
-                                    <th style="padding: 12px 8px; text-align: right; font-weight: 600; color: #333;">정가</th>
-                                    <th style="padding: 12px 8px; text-align: right; font-weight: 600; color: #333;">판매가</th>
-                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">재고</th>
-                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">조회수</th>
-                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">포장</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="book : ${booksPage != null ? booksPage.content : T(java.util.Collections).emptyList()}"
-                                    style="border-bottom: 1px solid #ebebeb; transition: background 0.2s;"
-                                    onmouseover="this.style.backgroundColor='#f8f8f8'"
-                                    onmouseout="this.style.backgroundColor='#fff'">
-                                    <td style="padding: 12px 8px; text-align: center;" th:text="${book.id}">1</td>
-                                    <td style="padding: 12px 8px;">
-                                        <a th:href="@{/books/{id}(id=${book.id})}"
-                                           th:text="${book.title}"
-                                           style="color: #0064FF; text-decoration: none; font-weight: 500;">도서 제목</a>
-                                    </td>
-                                    <td style="padding: 12px 8px; text-align: center;" th:text="${book.publisher}">출판사</td>
-                                    <td style="padding: 12px 8px; text-align: center;" th:text="${book.publishDate}">2025-01-01</td>
-                                    <td style="padding: 12px 8px; text-align: right; text-decoration: line-through; color: #999;"
-                                        th:text="${book.regularPrice != null ? #numbers.formatInteger(book.regularPrice, 0, 'COMMA') + '원' : '-'}">15,000원</td>
-                                    <td style="padding: 12px 8px; text-align: right; font-weight: 600; color: #0064FF;"
-                                        th:text="${book.salePrice != null ? #numbers.formatInteger(book.salePrice, 0, 'COMMA') + '원' : '-'}">12,000원</td>
-                                    <td style="padding: 12px 8px; text-align: center;" th:text="${book.stock}">10</td>
-                                    <td style="padding: 12px 8px; text-align: center; color: #6f6f6f;" th:text="${book.viewCount}">200</td>
-                                    <td style="padding: 12px 8px; text-align: center;">
-                                        <span th:if="${book.packable}"
-                                              style="color: #7fad39; font-weight: 600;">가능</span>
-                                        <span th:unless="${book.packable}"
-                                              style="color: #999;">불가능</span>
-                                    </td>
-                                </tr>
-                                <tr th:if="${booksPage == null or #lists.isEmpty(booksPage.content)}">
-                                    <td colspan="10" style="text-align: center; padding: 60px; color: #6f6f6f;">
-                                        <i class="fa fa-inbox" style="font-size: 48px; color: #ebebeb; margin-bottom: 10px; display: block;"></i>
-                                        조회된 도서가 없습니다.
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+                        <div class="books-list" th:if="${booksPage != null and !booksPage.content.isEmpty()}">
+                            <div class="book-card" th:each="book : ${booksPage.content}">
+                                <!-- 도서 정보 -->
+                                <div class="book-info-section">
+                                    <a th:href="@{/books/{id}(id=${book.id})}"
+                                       th:text="${book.title}"
+                                       class="book-title-link">도서 제목</a>
+                                    <div class="book-meta">
+                                        <div class="book-meta-item">
+                                            <i class="fa fa-building-o"></i>
+                                            <span th:text="${book.publisher}">출판사</span>
+                                        </div>
+                                        <div class="book-meta-item">
+                                            <i class="fa fa-calendar-o"></i>
+                                            <span th:text="${book.publishDate}">2025-01-01</span>
+                                        </div>
+                                        <div class="book-meta-item">
+                                            <span th:if="${book.packable}" class="badge badge-success">
+                                                <i class="fa fa-gift"></i> 포장가능
+                                            </span>
+                                            <span th:unless="${book.packable}" class="badge badge-secondary">
+                                                <i class="fa fa-ban"></i> 포장불가
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 통계 -->
+                                <div class="book-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-label">재고</span>
+                                        <span class="stat-value" th:text="${book.stock}">10</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label">조회수</span>
+                                        <span class="stat-value" th:text="${book.viewCount}">200</span>
+                                    </div>
+                                </div>
+
+                                <!-- 가격 -->
+                                <div class="book-price-section">
+                                    <span class="price-original"
+                                          th:text="${book.regularPrice != null ? #numbers.formatInteger(book.regularPrice, 0, 'COMMA') + '원' : '-'}">15,000원</span>
+                                    <span class="price-sale"
+                                          th:text="${book.salePrice != null ? #numbers.formatInteger(book.salePrice, 0, 'COMMA') + '원' : '-'}">12,000원</span>
+                                </div>
+
+                                <!-- 액션 버튼 -->
+                                <div class="book-actions">
+                                    <a th:href="@{/admin/books/{id}/update(id=${book.id})}" class="btn-edit">
+                                        수정
+                                    </a>
+                                    <form th:action="@{/admin/books}" method="post"
+                                          onsubmit="return confirm('정말 삭제하시겠습니까?');"
+                                          style="margin: 0;">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="hidden" name="id" th:value="${book.id}">
+                                        <button type="submit" class="btn-delete">삭제</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
 
-                        <div th:if="${booksPage != null and booksPage.totalPages > 1}"
-                             style="margin-top: 30px; text-align: center;">
-                            <div style="margin-bottom: 15px;">
-                                <span style="font-size: 14px; color: #333; font-weight: 500;"
-                                      th:text="'현재 페이지: ' + (${booksPage.number + 1}) + ' / ' + ${booksPage.totalPages}"></span>
-                            </div>
+                        <div th:if="${booksPage == null or booksPage.content.isEmpty()}" class="empty-state">
+                            <i class="fa fa-inbox"></i>
+                            조회된 도서가 없습니다.
+                        </div>
 
-                            <div style="display: inline-flex; gap: 10px;">
+                        <div th:if="${booksPage != null and booksPage.totalPages > 1}" class="pagination-container">
+                            <div class="pagination-info">
+                                <span th:text="'페이지 ' + (${booksPage.number + 1}) + ' / ' + ${booksPage.totalPages}">페이지 1 / 10</span>
+                            </div>
+                            <div class="pagination-buttons">
                                 <a th:if="${!booksPage.first}"
                                    th:href="@{/admin/books(page=${booksPage.number - 1}, size=${booksPage.size}, categoryId=${categoryId}, keyWord=${keyWord}, sortType=${sortType})}"
-                                   class="site-btn"
-                                   style="padding: 8px 20px; text-decoration: none; background: #6f6f6f;">
-                                    이전
+                                   class="page-btn page-btn-secondary">
+                                    <i class="fa fa-chevron-left" style="margin-right: 6px;"></i>이전
                                 </a>
                                 <a th:if="${!booksPage.last}"
                                    th:href="@{/admin/books(page=${booksPage.number + 1}, size=${booksPage.size}, categoryId=${categoryId}, keyWord=${keyWord}, sortType=${sortType})}"
-                                   class="site-btn"
-                                   style="padding: 8px 20px; text-decoration: none;">
-                                    다음
+                                   class="page-btn page-btn-primary">
+                                    다음<i class="fa fa-chevron-right" style="margin-left: 6px;"></i>
                                 </a>
                             </div>
                         </div>

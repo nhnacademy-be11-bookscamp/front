@@ -2,7 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default}">
-
 <head>
     <meta charset="UTF-8">
     <title>장바구니</title>
@@ -151,10 +150,12 @@
         </thead>
 
         <tbody>
-        <tr th:each="item : ${items}" th:id="'row-' + ${item.cartItemId}">
+        <tr th:each="item : ${items}"
+            th:id="'row-' + ${item.cartItemId}"
+            th:attr="data-book-id=${item.bookId}">
             <td>
                 <div class="cart-item-info">
-                    <img th:src="${item.thumbnailImageUrl}" class="cart-thumb">
+                    <img th:src="${item.thumbnailImageUrl}" class="cart-thumb" alt="도서 이미지">
                     <a th:href="@{/books/{id}(id=${item.bookId})}"
                        class="cart-book-title"
                        th:text="${item.bookTitle}"></a>
@@ -203,7 +204,7 @@
         <div class="cart-actions">
             <button class="cart-btn cart-btn-secondary" onclick="clearCart()">장바구니 비우기</button>
             <a class="cart-btn cart-btn-secondary" th:href="@{/books}">쇼핑 계속하기</a>
-            <button class="cart-btn cart-btn-primary">주문하기</button>
+            <button class="cart-btn cart-btn-primary" onclick="proceedToOrder()">주문하기</button>
         </div>
     </div>
 
@@ -309,8 +310,61 @@
             });
         }
 
+        // -----------------------------
+        // 주문하기
+        // -----------------------------
+        async function proceedToOrder() {
+            // 장바구니의 모든 아이템을 수집
+            const items = [];
+            document.querySelectorAll("tr[id^='row-']").forEach(row => {
+                const qtyInput = row.querySelector(".qty-input");
+                const bookId = row.getAttribute("data-book-id");
+
+                if (qtyInput && bookId) {
+                    const quantity = parseInt(qtyInput.value);
+
+                    items.push({
+                        bookId: parseInt(bookId),
+                        quantity: quantity
+                    });
+                }
+            });
+
+            if (items.length === 0) {
+                alert("장바구니가 비어 있습니다.");
+                return;
+            }
+
+            // 주문 준비 요청
+            try {
+                const response = await fetch("/orders/prepare", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({ items: items })
+                });
+
+                if (response.ok) {
+                    // HTML 응답을 받아서 페이지 전환
+                    const html = await response.text();
+                    document.open();
+                    document.write(html);
+                    document.close();
+                } else {
+                    alert("주문 준비 중 오류가 발생했습니다.");
+                }
+            } catch (error) {
+                console.error("주문 준비 오류:", error);
+                alert("주문 준비 중 오류가 발생했습니다.");
+            }
+        }
+
     </script>
 </th:block>
 
 </body>
 </html>
+
+

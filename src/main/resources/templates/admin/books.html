@@ -115,6 +115,31 @@
                                         <span th:unless="${book.packable}"
                                               style="color: #999;">불가능</span>
                                     </td>
+
+                                    <td style="padding: 12px 8px; text-align: center; white-space: nowrap;">
+
+                                        <!-- 수정 버튼 -->
+                                        <a th:href="@{/admin/books/{id}/update(id=${book.id})}"
+                                           style="padding: 6px 12px; background: #0064FF; color: white;
+                                                  border-radius: 4px; font-size: 12px; text-decoration: none; margin-right: 6px;">
+                                            수정
+                                        </a>
+
+                                        <!-- 삭제 버튼 -->
+                                    <form th:action="@{/admin/books}" method="post"
+                                          onsubmit="return confirm('정말 삭제하시겠습니까?');"
+                                          style="display:inline;">
+
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="hidden" name="id" th:value="${book.id}">
+
+                                        <button type="submit"
+                                                style="padding: 6px 12px; background: #ff4d4d; color: white;
+                           border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                                            삭제
+                                        </button>
+                                    </form>
+                                    </td>
                                 </tr>
                                 <tr th:if="${booksPage == null or #lists.isEmpty(booksPage.content)}">
                                     <td colspan="10" style="text-align: center; padding: 60px; color: #6f6f6f;">

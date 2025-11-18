@@ -3,6 +3,7 @@ package store.bookscamp.front.auth.provider;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,7 +11,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import store.bookscamp.front.admin.controller.request.AdminLoginRequest;
 import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
+import store.bookscamp.front.auth.dto.AccessTokenResponse;
+import store.bookscamp.front.auth.dto.LoginAuthDetails;
 import store.bookscamp.front.auth.user.CustomAdminDetails;
+import store.bookscamp.front.common.exception.ConcurrentLoginException;
 
 @RequiredArgsConstructor
 public class AdminAuthenticationProvider implements AuthenticationProvider {
@@ -24,22 +28,32 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
 
         try {
             AdminLoginRequest request = new AdminLoginRequest(username, password);
-            var authResponse = adminLoginFeignClient.doLogin(request);
 
-            String rawJwtToken = authResponse.getHeaders().getFirst("Authorization");
+            ResponseEntity<AccessTokenResponse> authResponse = adminLoginFeignClient.doLogin(request);
 
-            if (rawJwtToken == null || !rawJwtToken.startsWith("Bearer ")) {
-                throw new BadCredentialsException("토큰을 찾을 수 없거나 형식이 잘못되었습니다.");
+            AccessTokenResponse body = authResponse.getBody();
+            if (body == null || body.getAccessToken() == null) {
+                throw new BadCredentialsException("Access Token을 받지 못했습니다.");
+            }
+            String rawJwtToken = "Bearer " + body.getAccessToken();
+            String name = body.getName();
+
+            String rtCookieString = authResponse.getHeaders().getFirst("Set-Cookie");
+            if (rtCookieString == null) {
+                throw new BadCredentialsException("Refresh Token 쿠키를 받지 못했습니다.");
             }
 
             CustomAdminDetails tempDetails = new CustomAdminDetails("ROLE_ADMIN", rawJwtToken);
-
             UsernamePasswordAuthenticationToken result =
                     new UsernamePasswordAuthenticationToken(tempDetails, null, tempDetails.getAuthorities());
-            result.setDetails(rawJwtToken);
+
+            result.setDetails(new LoginAuthDetails(rawJwtToken, rtCookieString,name));
             return result;
 
         } catch (FeignException e) {
+            if (e.status() == 409) {
+                throw new ConcurrentLoginException("이미 사용중인 ID입니다.");
+            }
             throw new BadCredentialsException("로그인에 실패했습니다. (인증 서버 오류)", e);
         } catch (JWTDecodeException e) {
             throw new BadCredentialsException("토큰 디코딩에 실패했습니다. (토큰 위변조 또는 형식 오류)", e);

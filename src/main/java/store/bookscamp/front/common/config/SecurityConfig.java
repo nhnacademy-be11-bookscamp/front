@@ -1,30 +1,48 @@
 package store.bookscamp.front.common.config;
 
-
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.Cookie;
+import java.util.Arrays;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.RequestCacheConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SecurityContextConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
 import store.bookscamp.front.auth.filter.JwtAuthenticationFilter;
+import store.bookscamp.front.auth.handler.CustomAuthenticationFailureHandler;
 import store.bookscamp.front.auth.handler.CustomAuthenticationSuccessHandler;
+import store.bookscamp.front.auth.handler.CustomOAuthSuccessHandler;
 import store.bookscamp.front.auth.provider.AdminAuthenticationProvider;
 import store.bookscamp.front.auth.provider.CustomAuthenticationProvider;
+import store.bookscamp.front.auth.service.CustomOAuth2UserService;
 import store.bookscamp.front.common.exception.CustomAccessDeniedHandler;
 import store.bookscamp.front.member.controller.MemberLoginFeignClient;
 
+@Slf4j
 @Configuration
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final MemberLoginFeignClient memberLoginFeignClient;
     private final AdminLoginFeignClient adminLoginFeignClient;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+
+
+    public SecurityConfig(@Lazy MemberLoginFeignClient memberLoginFeignClient,
+                          @Lazy AdminLoginFeignClient adminLoginFeignClient,
+                          CustomAccessDeniedHandler customAccessDeniedHandler) {
+        this.memberLoginFeignClient = memberLoginFeignClient;
+        this.adminLoginFeignClient = adminLoginFeignClient;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
+    }
 
     @Bean
     public CustomAuthenticationProvider customAuthenticationProvider() {
@@ -41,6 +59,38 @@ public class SecurityConfig {
         return new JwtAuthenticationFilter();
     }
 
+    @Bean
+    public LogoutHandler customLogoutHandler() {
+        return (request, response, authentication) -> {
+            Cookie rtCookie = Arrays.stream(request.getCookies())
+                    .filter(c -> "refresh_token".equals(c.getName()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (rtCookie != null) {
+                try {
+                    adminLoginFeignClient.doLogout(rtCookie.getValue());
+                } catch (Exception e) {
+                    log.error("Failed to logout from Auth server", e);
+                }
+            }
+        };
+    }
+
+    @Bean
+    @Order(0)
+    public SecurityFilterChain staticResourceFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatchers(matchers -> matchers
+                        .requestMatchers("/js/**", "/css/**", "/img/**", "/favicon.ico") // 이 경로들은
+                )
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // 모두 허용
+                .requestCache(RequestCacheConfigurer::disable)
+                .securityContext(SecurityContextConfigurer::disable)
+                .sessionManagement(SessionManagementConfigurer::disable);
+
+        return http.build();
+    }
 
 
     @Bean
@@ -72,6 +122,7 @@ public class SecurityConfig {
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .successHandler(new CustomAuthenticationSuccessHandler("/admin/dashboard"))
+                        .failureHandler(new CustomAuthenticationFailureHandler())
         );
 
         http.httpBasic(AbstractHttpConfigurer::disable);
@@ -85,7 +136,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable);
 
@@ -112,12 +163,21 @@ public class SecurityConfig {
             .usernameParameter("username")
             .passwordParameter("password")
                 .successHandler(new CustomAuthenticationSuccessHandler("/"))
+                .failureHandler(new CustomAuthenticationFailureHandler())
         );
         http.logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
-                .deleteCookies("Authorization")
+                .addLogoutHandler(customLogoutHandler())
+                .deleteCookies("Authorization","refresh_token")
                 .invalidateHttpSession(true)
+        );
+        http.oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .successHandler(new CustomOAuthSuccessHandler("/"))
+                .userInfoEndpoint(userInfo -> userInfo
+                        .userService(customOAuth2UserService)
+                )
         );
 
         http.httpBasic(AbstractHttpConfigurer::disable);

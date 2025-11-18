@@ -1,11 +1,9 @@
 package store.bookscamp.front.book.controller;
 
-
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +19,7 @@ import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookDetailResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
-import store.bookscamp.front.book.service.BookService;
+import store.bookscamp.front.book.controller.response.BookWishListResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeCountResponse;
 import store.bookscamp.front.booklike.controller.response.BookLikeStatusResponse;
 import store.bookscamp.front.booklike.feign.BookLikeFeignClient;
@@ -76,7 +74,7 @@ public class BookController {
     @GetMapping("/admin/books/new")
     public String showCreatePage(Model model) {
 
-        List<TagGetResponse> tags = tagFeignClient.getAll();
+        List<TagGetResponse> tags = tagFeignClient.getAll(0, 1000).getContent();
 
         model.addAttribute("tags", tags);
 
@@ -110,7 +108,7 @@ public class BookController {
     public String showAladinCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
-        List<TagGetResponse> tags = tagFeignClient.getAll();
+        List<TagGetResponse> tags = tagFeignClient.getAll(0, 1000).getContent();
 
         model.addAttribute("aladinBook", detail);
         model.addAttribute("tags", tags);
@@ -132,7 +130,8 @@ public class BookController {
     public String showUpdatePage(@PathVariable Long id, Model model) {
 
         BookInfoResponse book = bookFeignClient.getBookDetail(id);
-        List<TagGetResponse> tags = tagFeignClient.getAll();
+
+        List<TagGetResponse> tags = tagFeignClient.getAll(0, 1000).getContent();
 
         model.addAttribute("book", book);
         model.addAttribute("tags", tags);
@@ -168,6 +167,13 @@ public class BookController {
         return "redirect:/books/" + id;
     }
 
+    // 도서 삭제
+    @DeleteMapping("/admin/books")
+    public String deleteBook(@RequestParam Long id) {
+        bookFeignClient.deleteBook(id);
+        return "redirect:/admin/books";
+    }
+
     // 도서 목록 조회, 상세페이지
 
     @GetMapping("/books")
@@ -186,6 +192,7 @@ public class BookController {
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
+        System.out.println(response.getBody().getContent());
 
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
@@ -222,5 +229,22 @@ public class BookController {
         model.addAttribute("apiPrefix", apiPrefix);
 
         return "book/detail";
+    }
+
+    @GetMapping("/wishlist")
+    public String wishList(
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model
+    ){
+        if (userDetails == null){
+            return "redirect:/login";
+        }
+
+        RestPageImpl<BookWishListResponse> item = bookFeignClient.getWishListBooks().getBody();
+
+        model.addAttribute("wishlistItems", item);
+        model.addAttribute("apiPrefix", apiPrefix);
+
+        return "member/wishlist";
     }
 }

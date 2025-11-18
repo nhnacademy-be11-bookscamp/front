@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/no-sidebar}">
+<head>
+    <meta charset="UTF-8">
+    <title>소셜 회원 가입 | 북스캠프</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <section class="checkout spad">
+        <div class="container">
+            <div th:if="${errorMessage}" style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border: 1px solid #dc3545; border-radius: 4px;">
+                <p th:text="${errorMessage}" style="color: #dc3545; margin: 0; font-weight: 600;">
+                    <i class="fa fa-exclamation-circle"></i> [컨트롤러에서 온 에러 메시지]
+                </p>
+            </div>
+            <form id="memberCreateForm" th:action="@{/members/social}" method="post" accept-charset="UTF-8">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="checkout__input">
+                            <p>아이디</p>
+                            <input type="text"
+                                   id="username"
+                                   name="username"
+                                   th:value="${session.oauth_username}"
+                                   readonly> </div>
+                    </div>
+
+                    <div class="col-lg-12">
+                        <div class="checkout__input">
+                            <p>이름<span>*</span></p>
+                            <input type="text"
+                                   id="name"
+                                   name="name"
+                                   th:value="${session.oauth_name}"
+                                   required
+                                   placeholder="이름을 입력하세요"
+                                   th:readonly="${session.oauth_name != null and session.oauth_name != ''}">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12">
+                        <div class="checkout__input">
+                            <p>이메일<span>*</span></p>
+                            <input type="email"
+                                   id="email"
+                                   name="email"
+                                   th:value="${session.oauth_email}"
+                                   required
+                                   placeholder="example@email.com"
+                                   th:readonly="${session.oauth_email != null and session.oauth_email != ''}">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12">
+                        <div class="checkout__input">
+                            <p>전화번호<span>*</span></p>
+                            <input type="text"
+                                   id="phone"
+                                   name="phone"
+                                   th:value="${session.oauth_mobile}"
+                                   required
+                                   placeholder="010-1234-5678"
+                                   th:readonly="${session.oauth_mobile != null and session.oauth_mobile != ''}">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12">
+                        <div class="checkout__input">
+                            <p>생년월일<span>*</span></p>
+                            <input type="date"
+                                   id="birthDate"
+                                   name="birthDate"
+                                   required>
+                            <p style="margin-top: 8px; font-size: 14px; color: #6f6f6f;">
+                                <i class="fa fa-info-circle"></i> 회원가입 완료를 위해 생년월일을 입력해주세요.
+                            </p>
+                        </div>
+                    </div>
+
+                    <input type="hidden"
+                           name="password"
+                           th:value="${session.oauth_password_hash}">
+
+
+                    <div class="col-lg-12" style="margin-top: 20px; text-align: center;">
+                        <button type="submit" ...>
+                            <i class="fa fa-user-plus"></i> 회원 가입 완료
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

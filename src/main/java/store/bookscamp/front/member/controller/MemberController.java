@@ -1,11 +1,10 @@
 package store.bookscamp.front.member.controller;
 
 import feign.FeignException;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Cookie;
-import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,10 +17,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import store.bookscamp.front.member.controller.request.MemberCreateRequest;
-import store.bookscamp.front.member.controller.request.MemberLoginRequest;
 import store.bookscamp.front.member.controller.request.MemberPasswordUpdateRequest;
 import store.bookscamp.front.member.controller.request.MemberUpdateRequest;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
@@ -32,15 +32,19 @@ public class MemberController {
 
     private final MemberFeignClient memberFeignClient;
     private final PasswordEncoder passwordEncoder;
-    private final MemberLoginFeignClient memberLoginFeignClient;
 
-    @Value("${app.api.prefix}")
-    private String apiPrefix;
 
     @GetMapping("/signup")
-    public String showPage(Model model){
-        model.addAttribute("apiPrefix", apiPrefix);
+    public String showPage(Authentication authentication){
+        if(authentication !=null && authentication.isAuthenticated()){
+            return "redirect:/";
+        }
         return "member/signup";
+    }
+
+    @GetMapping("/signup/social")
+    public String showSocialSignupForm() {
+        return "member/signup-social";
     }
 
     @GetMapping("/login")
@@ -50,21 +54,6 @@ public class MemberController {
             return "redirect:/";
         }
         return "member/login";
-    }
-
-    @PostMapping("/login")
-    public String doLogin(@Valid MemberLoginRequest memberLoginRequest, HttpServletResponse response) {
-        try {
-            ResponseEntity<Void> responseEntity = memberLoginFeignClient.doLogin(memberLoginRequest);
-
-            String jwtToken = responseEntity.getHeaders().getFirst("X-Auth-Token");
-            Cookie cookie = new Cookie("Authorization", jwtToken);
-            response.addCookie(cookie);
-            return "redirect:/";
-
-        } catch (FeignException e) {
-            return "redirect:/login?error";
-        }
     }
 
     @GetMapping("/mypage/edit-info")
@@ -92,9 +81,21 @@ public class MemberController {
     }
 
     @GetMapping("/members/check-id")
-    public String checkId(){
-        String response = String.valueOf(memberFeignClient.checkIdDuplicate());
-        return response;
+    @ResponseBody
+    public ResponseEntity<String> checkId(@RequestParam("id") String id) {
+        try {
+
+            return memberFeignClient.checkIdDuplicate(id);
+
+        } catch (FeignException e) {
+            return ResponseEntity
+                    .status(e.status())
+                    .body(e.contentUTF8());
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("서버 내부 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     @PostMapping("/members")
@@ -125,8 +126,36 @@ public class MemberController {
             }
 
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
-            redirectAttributes.addFlashAttribute("apiPrefix", apiPrefix);
             return "redirect:/signup";
+        }
+    }
+
+    @PostMapping("/members/social")
+    public String createSocialMember(@ModelAttribute MemberCreateRequest partialRequest,
+                                     HttpSession session,
+                                     RedirectAttributes redirectAttributes) {
+
+        String username = (String) session.getAttribute("oauth_username");
+
+        MemberCreateRequest finalRequest = new MemberCreateRequest(
+                username, "OAUTH_DUMMY_PASSWORD",
+                partialRequest.name(),
+                partialRequest.email(),
+                partialRequest.phone(),
+                partialRequest.birthDate()
+        );
+        try {
+            memberFeignClient.createMember(finalRequest);
+            session.invalidate();
+            redirectAttributes.addFlashAttribute("message", "회원가입이 완료되었습니다. 로그인해 주세요.");
+            return "redirect:/login";
+        } catch (FeignException e) {
+            if (e.status() == 409) {
+                redirectAttributes.addFlashAttribute("errorMessage", "이미 가입된 이메일 또는 전화번호입니다.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "회원가입 중 오류 발생");
+            }
+            return "redirect:/signup/social";
         }
     }
 

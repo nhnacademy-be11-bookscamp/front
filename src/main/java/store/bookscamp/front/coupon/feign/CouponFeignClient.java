@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import store.bookscamp.front.common.config.FeignConfig;
+import store.bookscamp.front.coupon.controller.request.CouponCreateRequest;
 import store.bookscamp.front.coupon.controller.response.CouponResponse;
 
 @FeignClient(
@@ -17,12 +19,12 @@ import store.bookscamp.front.coupon.controller.response.CouponResponse;
 )
 public interface CouponFeignClient {
 
-    @PostMapping("/api-server/coupons")
-    ResponseEntity<Void> createCoupon();
-
     @GetMapping("/api-server/coupons")
     ResponseEntity<List<CouponResponse>> listCoupons();
 
-    @DeleteMapping("/api-server/coupons/{couponId}")
+    @PostMapping("/api-server/admin/coupons")
+    ResponseEntity<Void> createCoupon(@RequestBody CouponCreateRequest request);
+
+    @DeleteMapping("/api-server/admin/coupons/{couponId}")
     ResponseEntity<Void> deleteCoupon(@PathVariable Long couponId);
 }

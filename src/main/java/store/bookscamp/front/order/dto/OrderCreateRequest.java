@@ -5,7 +5,7 @@ import java.util.List;
 public record OrderCreateRequest(
         List<OrderItemRequest> items,
         DeliveryInfo deliveryInfo,
-        Long couponId,
+        Long couponIssueId,
         Integer usedPoint,
         NonMemberInfo nonMemberInfo
 ) {

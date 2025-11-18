@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import store.bookscamp.front.member.controller.request.MemberCreateRequest;
 import store.bookscamp.front.member.controller.request.MemberPasswordUpdateRequest;
 import store.bookscamp.front.member.controller.request.MemberUpdateRequest;
@@ -22,7 +23,7 @@ public interface MemberFeignClient {
     MemberGetResponse getMember();
 
     @GetMapping("/api-server/member/check-id")
-    ResponseEntity<String> checkIdDuplicate();
+    ResponseEntity<String> checkIdDuplicate(@RequestParam("id") String id);
 
     @PostMapping("/api-server/member/sign-up")
     ResponseEntity<Void> createMember(@RequestBody MemberCreateRequest memberCreateRequest);

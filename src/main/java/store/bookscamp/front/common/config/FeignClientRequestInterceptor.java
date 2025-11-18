@@ -4,17 +4,23 @@ import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-import store.bookscamp.front.auth.user.CustomMemberDetails; // CustomMemberDetails import 필요
 import store.bookscamp.front.auth.user.TokenDetails;
 
-@Component
 public class FeignClientRequestInterceptor implements RequestInterceptor {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
     @Override
     public void apply(RequestTemplate template) {
+
+        String requestPath = template.path();
+
+        if (requestPath.contains("/auth-server/admin/login") ||
+                requestPath.contains("/auth-server/login") ||
+                requestPath.contains("/auth-server/reissue")) {
+            return;
+        }
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -23,14 +29,11 @@ public class FeignClientRequestInterceptor implements RequestInterceptor {
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof TokenDetails tokenDetails) {
-
             String rawJwtToken = tokenDetails.getRawJwtToken();
-
             if (rawJwtToken != null && !rawJwtToken.isEmpty()) {
+                template.header(AUTHORIZATION_HEADER);
+                template.header(AUTHORIZATION_HEADER, rawJwtToken);
 
-                String finalToken = rawJwtToken;
-
-                template.header(AUTHORIZATION_HEADER, finalToken);
             }
         }
     }

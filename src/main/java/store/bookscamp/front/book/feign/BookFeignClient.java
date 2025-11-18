@@ -1,9 +1,10 @@
 package store.bookscamp.front.book.feign;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookIndexResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
+import store.bookscamp.front.book.controller.response.BookWishListResponse;
 import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.common.config.FeignConfig;
 
@@ -27,6 +29,9 @@ import java.time.LocalDate;
         configuration = FeignConfig.class
 )
 public interface BookFeignClient {
+
+    @DeleteMapping("/api-server/admin/books/{id}")
+    void deleteBook(@PathVariable Long id);
 
     @PutMapping(value = "/api-server/admin/books/{id}/update", produces = "application/json")
     void updateBook(
@@ -58,4 +63,10 @@ public interface BookFeignClient {
 
     @GetMapping("/api-server/books/indexBooks")
     ResponseEntity<List<BookIndexResponse>> getRecommendBooks();
+
+    @GetMapping("/api-server/wishlist")
+    ResponseEntity<RestPageImpl<BookWishListResponse>> getWishListBooks();
+
+    @DeleteMapping("/api-server/wishlist/{itemId}")
+    ResponseEntity<Void> deleteWishList(@PathVariable Long itemId);
 }

@@ -39,6 +39,7 @@ public class CouponIssueController {
         RestPageImpl<CouponIssueResponse> couponPage = myCoupons.getBody();
 
         model.addAttribute("couponPage", couponPage);
+        model.addAttribute("currentStatus",status);
 
         return "couponissue/mycoupon";
     }

@@ -3,6 +3,7 @@ package store.bookscamp.front.book.controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +74,7 @@ public class BookController {
     @GetMapping("/admin/books/new")
     public String showCreatePage(Model model) {
 
-        List<TagGetResponse> tags = tagFeignClient.getAll();
+        Page<TagGetResponse> tags = tagFeignClient.getAll(0, 1000);
 
         model.addAttribute("tags", tags);
 
@@ -107,7 +108,7 @@ public class BookController {
     public String showAladinCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
-        List<TagGetResponse> tags = tagFeignClient.getAll();
+        Page<TagGetResponse> tags = tagFeignClient.getAll(0, 1000);
 
         model.addAttribute("aladinBook", detail);
         model.addAttribute("tags", tags);
@@ -129,7 +130,7 @@ public class BookController {
     public String showUpdatePage(@PathVariable Long id, Model model) {
 
         BookInfoResponse book = bookFeignClient.getBookDetail(id);
-        List<TagGetResponse> tags = tagFeignClient.getAll();
+        Page<TagGetResponse> tags = tagFeignClient.getAll(0, 1000);
 
         model.addAttribute("book", book);
         model.addAttribute("tags", tags);

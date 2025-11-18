@@ -81,9 +81,7 @@
                             <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                                 <thead style="background-color: #f8f8f8; border-bottom: 2px solid #ebebeb;">
                                 <tr>
-                                    <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">ID</th>
                                     <th style="padding: 12px 8px; text-align: left; font-weight: 600; color: #333;">제목</th>
-                                    <th style="padding: 12px 8px; text-align: left; font-weight: 600; color: #333;">설명</th>
                                     <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">출판사</th>
                                     <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #333;">출판일</th>
                                     <th style="padding: 12px 8px; text-align: right; font-weight: 600; color: #333;">정가</th>
@@ -98,7 +96,6 @@
                                     style="border-bottom: 1px solid #ebebeb; transition: background 0.2s;"
                                     onmouseover="this.style.backgroundColor='#f8f8f8'"
                                     onmouseout="this.style.backgroundColor='#fff'">
-                                    <td style="padding: 12px 8px; text-align: center;" th:text="${book.id}">1</td>
                                     <td style="padding: 12px 8px;">
                                         <a th:href="@{/books/{id}(id=${book.id})}"
                                            th:text="${book.title}"

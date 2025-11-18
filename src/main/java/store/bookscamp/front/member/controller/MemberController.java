@@ -1,6 +1,7 @@
 package store.bookscamp.front.member.controller;
 
 import feign.FeignException;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,11 @@ public class MemberController {
             return "redirect:/";
         }
         return "member/signup";
+    }
+
+    @GetMapping("/signup/social")
+    public String showSocialSignupForm() {
+        return "member/signup-social";
     }
 
     @GetMapping("/login")
@@ -121,6 +127,35 @@ public class MemberController {
 
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             return "redirect:/signup";
+        }
+    }
+
+    @PostMapping("/members/social")
+    public String createSocialMember(@ModelAttribute MemberCreateRequest partialRequest,
+                                     HttpSession session,
+                                     RedirectAttributes redirectAttributes) {
+
+        String username = (String) session.getAttribute("oauth_username");
+
+        MemberCreateRequest finalRequest = new MemberCreateRequest(
+                username, "OAUTH_DUMMY_PASSWORD",
+                partialRequest.name(),
+                partialRequest.email(),
+                partialRequest.phone(),
+                partialRequest.birthDate()
+        );
+        try {
+            memberFeignClient.createMember(finalRequest);
+            session.invalidate();
+            redirectAttributes.addFlashAttribute("message", "회원가입이 완료되었습니다. 로그인해 주세요.");
+            return "redirect:/login";
+        } catch (FeignException e) {
+            if (e.status() == 409) {
+                redirectAttributes.addFlashAttribute("errorMessage", "이미 가입된 이메일 또는 전화번호입니다.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "회원가입 중 오류 발생");
+            }
+            return "redirect:/signup/social";
         }
     }
 

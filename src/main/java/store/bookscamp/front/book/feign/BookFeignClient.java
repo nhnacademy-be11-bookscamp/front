@@ -30,6 +30,9 @@ import java.time.LocalDate;
 )
 public interface BookFeignClient {
 
+    @DeleteMapping("/api-server/admin/books/{id}")
+    void deleteBook(@PathVariable Long id);
+
     @PutMapping(value = "/api-server/admin/books/{id}/update", produces = "application/json")
     void updateBook(
             @PathVariable Long id,

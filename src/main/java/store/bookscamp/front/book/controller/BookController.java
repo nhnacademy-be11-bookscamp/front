@@ -165,6 +165,13 @@ public class BookController {
         return "redirect:/books/" + id;
     }
 
+    // 도서 삭제
+    @DeleteMapping("/admin/books")
+    public String deleteBook(@RequestParam Long id) {
+        bookFeignClient.deleteBook(id);
+        return "redirect:/admin/books";
+    }
+
     // 도서 목록 조회, 상세페이지
 
     @GetMapping("/books")

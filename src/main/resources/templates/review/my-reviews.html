@@ -54,7 +54,7 @@
 
                                     <!-- 이미지들 -->
                                     <div style="display:flex; gap:10px; flex-wrap:wrap;"
-                                         th:if="${review.imageUrls}">
+                                         th:if="${review.imageUrls != null and !review.imageUrls.isEmpty()}">
                                         <img th:each="img : ${review.imageUrls}"
                                              th:src="${img}"
                                              style="width:70px; height:70px; border-radius:4px; object-fit:cover; border:1px solid #ddd;">

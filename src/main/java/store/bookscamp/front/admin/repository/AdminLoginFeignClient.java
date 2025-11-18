@@ -17,7 +17,7 @@ public interface AdminLoginFeignClient {
     @PostMapping("/auth-server/admin/login")
     public ResponseEntity<AccessTokenResponse> doLogin(@Valid @RequestBody AdminLoginRequest adminLoginRequest);
 
-    @PostMapping("auth-server/oauth/login")
+    @PostMapping("/auth-server/oauth/login")
     ResponseEntity<AccessTokenResponse> oauthLogin(@RequestBody OauthLoginRequest request);
 
     @PostMapping("/auth-server/reissue")

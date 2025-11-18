@@ -7,6 +7,10 @@ spring:
     redis:
       host: localhost
       port: 6379
+  session:
+    store-type: redis
+    redis:
+      namespace: "spring:session:bookscamp-front"
 
 server:
   forward-headers-strategy: framework

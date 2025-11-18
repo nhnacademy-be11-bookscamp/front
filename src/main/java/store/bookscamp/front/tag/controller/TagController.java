@@ -2,6 +2,7 @@ package store.bookscamp.front.tag.controller;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,11 +27,19 @@ public class TagController {
 
     // 태그 전체 목록 보여줌
     @GetMapping("/tags")
-    public ModelAndView showTagPage() {
-        List<TagGetResponse> tags = tagFeignClient.getAll();
-        ModelAndView modelAndView = new ModelAndView("tags/tag");
-        modelAndView.addObject("tags", tags);
-        return modelAndView;
+    public ModelAndView showTagPage(@RequestParam(name = "page", defaultValue = "0") int page) {
+        int size = 5;
+
+        Page<TagGetResponse> tagPage = tagFeignClient.getAll(page, size);
+
+        ModelAndView mv = new ModelAndView("tags/tag");
+        mv.addObject("tags", tagPage.getContent());
+        mv.addObject("currentPage", tagPage.getNumber());
+        mv.addObject("totalPages", tagPage.getTotalPages());
+        mv.addObject("hasNext", tagPage.hasNext());
+        mv.addObject("hasPrevious", tagPage.hasPrevious());
+
+        return mv;
     }
 
     // 태그 생성
@@ -44,14 +53,6 @@ public class TagController {
         }
          return "redirect:/admin/tags";
     }
-
-    // 단일 태그 조회
-//    @GetMapping("/tags/{id}")
-//    public String getTag(@PathVariable("id") Long id) {
-//        TagGetResponse tag = tagFeignClient.getTag(id);
-//        ModelAndView modelAndView = new ModelAndView("/tags/tag-detail");
-//        return "redirect:/tags/{id}";
-//    }
 
     @PostMapping("/tags/{id}")
     public String updateTag(@PathVariable Long id,

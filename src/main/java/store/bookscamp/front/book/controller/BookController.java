@@ -74,7 +74,7 @@ public class BookController {
     @GetMapping("/admin/books/new")
     public String showCreatePage(Model model) {
 
-        Page<TagGetResponse> tags = tagFeignClient.getAll(0, 1000);
+        List<TagGetResponse> tags = tagFeignClient.getAll(0, 1000).getContent();
 
         model.addAttribute("tags", tags);
 
@@ -108,7 +108,7 @@ public class BookController {
     public String showAladinCreatePage(@RequestParam(value = "isbn",required = false) String isbn, Model model) {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
-        Page<TagGetResponse> tags = tagFeignClient.getAll(0, 1000);
+        List<TagGetResponse> tags = tagFeignClient.getAll(0, 1000).getContent();
 
         model.addAttribute("aladinBook", detail);
         model.addAttribute("tags", tags);
@@ -130,7 +130,8 @@ public class BookController {
     public String showUpdatePage(@PathVariable Long id, Model model) {
 
         BookInfoResponse book = bookFeignClient.getBookDetail(id);
-        Page<TagGetResponse> tags = tagFeignClient.getAll(0, 1000);
+
+        List<TagGetResponse> tags = tagFeignClient.getAll(0, 1000).getContent();
 
         model.addAttribute("book", book);
         model.addAttribute("tags", tags);

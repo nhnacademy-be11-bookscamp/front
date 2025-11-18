@@ -1,51 +1,15 @@
 spring:
   application:
     name: front
-  servlet:
-    multipart:
-      max-file-size: 20MB
-      max-request-size: 20MB
   profiles:
     active: prod
-  session:
-    redis:
-      flush-mode: on_save
-  cache:
-    type: redis
-    redis:
-      time-to-live: 600000
+
+  config:
+    import: "optional:configserver:"
+
   cloud:
-    openfeign:
-      client:
-        config:
-          default:
-            logger-level: FULL
-  mvc:
-    hiddenmethod:
-      filter:
-        enabled=true:
-logging:
-  level:
-    feign.Logger: DEBUG
-    store.bookscamp.front.book.feign: DEBUG
-    org.springframework.cloud.openfeign: DEBUG
-
-minio:
-  # 내부 통신용 (SDK)
-  url: http://storage.java21.net:8000
-  # 브라우저 노출용 (이미지 URL 반환용)
-  public-url: https://bookscamp.store
-  access-key: EvJ2FP8gy27lDYolEWGQ
-  secret-key: h9uzw85pZPDchOTHzslEOUlNd5cDPFLQnJCofZfH
-  bucket:
-    book: bookscamp-book-image
-    review: bookscamp-review-image
-    package: bookscamp-package-image
-
-feign:
-  client:
     config:
-      default:
-        connectTimeout: 3000
-        readTimeout: 5000
-        loggerLevel: BASIC
+      uri: http://localhost:10355
+      profile: ${spring.profiles.active}
+      label: main
+      fail-fast: true

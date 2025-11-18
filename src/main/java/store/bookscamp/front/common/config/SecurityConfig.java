@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.RequestCacheConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SecurityContextConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -73,6 +76,21 @@ public class SecurityConfig {
                 }
             }
         };
+    }
+
+    @Bean
+    @Order(0)
+    public SecurityFilterChain staticResourceFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatchers(matchers -> matchers
+                        .requestMatchers("/js/**", "/css/**", "/img/**", "/favicon.ico") // 이 경로들은
+                )
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // 모두 허용
+                .requestCache(RequestCacheConfigurer::disable)
+                .securityContext(SecurityContextConfigurer::disable)
+                .sessionManagement(SessionManagementConfigurer::disable);
+
+        return http.build();
     }
 
 

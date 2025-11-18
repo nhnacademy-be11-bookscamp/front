@@ -17,8 +17,10 @@ import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
 import store.bookscamp.front.auth.filter.JwtAuthenticationFilter;
 import store.bookscamp.front.auth.handler.CustomAuthenticationFailureHandler;
 import store.bookscamp.front.auth.handler.CustomAuthenticationSuccessHandler;
+import store.bookscamp.front.auth.handler.CustomOAuthSuccessHandler;
 import store.bookscamp.front.auth.provider.AdminAuthenticationProvider;
 import store.bookscamp.front.auth.provider.CustomAuthenticationProvider;
+import store.bookscamp.front.auth.service.CustomOAuth2UserService;
 import store.bookscamp.front.common.exception.CustomAccessDeniedHandler;
 import store.bookscamp.front.member.controller.MemberLoginFeignClient;
 
@@ -29,6 +31,7 @@ public class SecurityConfig {
     private final MemberLoginFeignClient memberLoginFeignClient;
     private final AdminLoginFeignClient adminLoginFeignClient;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+
 
     public SecurityConfig(@Lazy MemberLoginFeignClient memberLoginFeignClient,
                           @Lazy AdminLoginFeignClient adminLoginFeignClient,
@@ -115,7 +118,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable);
 
@@ -150,6 +153,13 @@ public class SecurityConfig {
                 .addLogoutHandler(customLogoutHandler())
                 .deleteCookies("Authorization","refresh_token")
                 .invalidateHttpSession(true)
+        );
+        http.oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .successHandler(new CustomOAuthSuccessHandler("/"))
+                .userInfoEndpoint(userInfo -> userInfo
+                        .userService(customOAuth2UserService)
+                )
         );
 
         http.httpBasic(AbstractHttpConfigurer::disable);

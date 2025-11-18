@@ -12,7 +12,7 @@ public record MemberCreateRequest(
         @Size(min=4, max = 20)
         String username,
         @NotNull
-        @Size(min = 8, max = 20)
+        @Size(min = 8)
         String password,
         @NotBlank
         String name,

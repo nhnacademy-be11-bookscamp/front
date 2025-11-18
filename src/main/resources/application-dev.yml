@@ -9,6 +9,7 @@ spring:
       port: 6379
 
 server:
+  forward-headers-strategy: framework
   port: 8082
 
 # front는 eureka 미사용, gateway로만 호출

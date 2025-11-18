@@ -19,7 +19,7 @@
                     <div style="background: #ffffff; padding: 40px; border: 1px solid #ebebeb; border-radius: 4px;">
                         <h4 style="margin-bottom: 15px; font-weight: 700; text-align: center;">
                             <i class="fa fa-sign-in-alt" style="margin-right: 10px; color: #7fad39;"></i>
-                            로그인
+                            관리자 로그인
                         </h4>
                         <p style="text-align: center; color: #6f6f6f; margin-bottom: 30px;">북스캠프에 오신 것을 환영합니다.</p>
 
@@ -27,6 +27,12 @@
                         <div th:if="${param.error}" style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border: 1px solid #dc3545; border-radius: 4px;">
                             <p style="color: #dc3545; margin: 0; font-weight: 600;">
                                 <i class="fa fa-exclamation-circle"></i> 아이디 또는 비밀번호가 올바르지 않습니다.
+                            </p>
+                        </div>
+
+                        <div th:if="${param.concurrent}" style="margin-bottom: 20px; padding: 15px; background: #ffeeba; border: 1px solid #ffc107; border-radius: 4px;">
+                            <p style="color: #856404; margin: 0; font-weight: 600;">
+                                <i class="fa fa-exclamation-triangle"></i> 이미 다른 기기에서 로그인된 계정입니다.
                             </p>
                         </div>
 

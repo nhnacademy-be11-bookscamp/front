@@ -26,21 +26,15 @@ public class ReviewController {
     private final ReviewFeignClient reviewFeignClient;
     private final MinioService minioService;
 
-    // 작성 가능한 리뷰
-    @GetMapping("/mypage/reviewable")
-    public String getReviewableItems(Model model) {
-
-        List<ReviewableItemResponse> items = reviewFeignClient.getReviewableItems().getBody();
-        model.addAttribute("items", items);
-        return "review/reviewable";
-    }
-
-    // 작성된 리뷰
     @GetMapping("/mypage/reviews")
-    public String getMyReviews(Model model) {
+    public String getAllReviewPages(Model model) {
 
-        List<MyReviewResponse> reviews = reviewFeignClient.getMyReviews().getBody();
-        model.addAttribute("reviews", reviews);
+        List<ReviewableItemResponse> reviewable = reviewFeignClient.getReviewableItems().getBody();
+        List<MyReviewResponse> written = reviewFeignClient.getMyReviews().getBody();
+
+        model.addAttribute("reviewable", reviewable);
+        model.addAttribute("written", written);
+
         return "review/my-reviews";
     }
 

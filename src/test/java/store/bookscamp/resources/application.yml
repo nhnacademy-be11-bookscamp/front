@@ -1,15 +1,26 @@
 spring:
   application:
-    name: front
-  profiles:
-    active: test   # ✅ 테스트는 test 프로필로 고정
+    name: front-test
 
-  # 테스트에서는 config-server 아예 안 타는 게 안전
   cloud:
     config:
-      enabled: false          # ✅ config-server 비활성화
+      enabled: false
       import-check:
         enabled: false
 
   config:
-    import: "optional:configserver:"  # 있어도 되고, 아예 빼도 됨 (enabled=false라 무시됨)
+    import: ""    # configserver import 완전 무력화
+
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+logging:
+  level:
+    root: WARN
+
+app:
+  api:
+    prefix: http://localhost:8080   # 테스트용 더미 URL (실제 호출 없음)

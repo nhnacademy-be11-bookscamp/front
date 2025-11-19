@@ -1,13 +1,17 @@
 package store.bookscamp.front.member.controller;
 
 import feign.FeignException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -178,8 +182,15 @@ public class MemberController {
     }
 
     @DeleteMapping("/member")
-    public String deleteMember(){
+    public ResponseEntity<Void> deleteMember(HttpServletRequest request,
+                                             HttpServletResponse response){
         memberFeignClient.deleteMember();
-        return "member/login";
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+
+        return ResponseEntity.ok().build();
     }
 }

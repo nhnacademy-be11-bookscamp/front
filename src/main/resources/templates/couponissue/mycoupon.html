@@ -14,7 +14,6 @@
                 padding: 25px;
                 margin-bottom: 20px;
                 display: flex;
-                justify-content: space-between; /* 양쪽 정렬 */
                 align-items: center;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             }
@@ -68,11 +67,24 @@
                 color: #6c757d;
             }
 
+            /* ▼▼▼ [수정됨] h2 대신 부모인 .breadcrumb__text에 적용 ▼▼▼ */
+            .breadcrumb__text {
+                user-select: none; /* 표준 */
+                -webkit-user-select: none; /* Safari, Chrome */
+                -moz-user-select: none;    /* Firefox */
+                -ms-user-select: none;     /* IE, Edge */
+            }
+            /* ▲▲▲ 수정 완료 ▲▲▲ */
+
         </style>
     </th:block>
 </head>
 
 <body>
+
+<section layout:fragment="hero" class="hero" style="display: none;">
+</section>
+
 
 <div layout:fragment="content">
 
@@ -80,8 +92,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
-                    <div class="breadcrumb__text">
-                        <h2>마이페이지</h2>
+                    <div class="breadcrumb__text"> <h2>마이페이지</h2>
                         <div class="breadcrumb__option">
                             <a th:href="@{/}">Home</a>
                             <span>내 쿠폰함</span>
@@ -92,7 +103,7 @@
         </div>
     </section>
 
-    <section class="checkout spad">
+    <section class="checkout spad" style="padding-top: 40px;">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
@@ -135,7 +146,6 @@
                     <div th:unless="${couponPage == null || couponPage.empty}">
 
                         <div th:each="coupon : ${couponPage.content}" class="coupon-card">
-
                             <div class="coupon-details">
                                 <h4 th:text="${coupon.name}">[웰컴 쿠폰] 15% 할인</h4>
 
@@ -157,14 +167,6 @@
                                 <p class="expiry">
                                     유효기간: <span th:text="${#temporals.format(coupon.expiredAt, 'yyyy-MM-dd')}"></span> 까지
                                 </p>
-                            </div>
-
-                            <div class="coupon-action">
-                                <form th:action="@{/my-coupons/delete}" method="post" onsubmit="return confirm('이 쿠폰을 목록에서 삭제하시겠습니까?');">
-                                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                    <input type="hidden" name="couponIssueId" th:value="${coupon.couponIssueId}" />
-
-                                </form>
                             </div>
                         </div>
                     </div>

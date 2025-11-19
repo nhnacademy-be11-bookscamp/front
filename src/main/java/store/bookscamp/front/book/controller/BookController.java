@@ -48,7 +48,7 @@ public class BookController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String keyWord,
             @RequestParam(defaultValue = "id") String sortType,
-            @PageableDefault(size = 20, page = 0) Pageable pageable,
+            @PageableDefault(size = 10, page = 0) Pageable pageable,
             Model model
     ) {
         ResponseEntity<RestPageImpl<BookSortResponse>> response = bookFeignClient.getBooks(
@@ -56,12 +56,12 @@ public class BookController {
                 keyWord,
                 sortType,
                 pageable.getPageNumber(),
-                pageable.getPageSize()
+                pageable.getPageSize(),
+                "admin"
         );
 
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
-
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("keyWord", keyWord);
         model.addAttribute("sortType", sortType);
@@ -109,7 +109,7 @@ public class BookController {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
         List<TagGetResponse> tags = tagFeignClient.getAll(0, 1000).getContent();
-
+        detail.setCover(detail.getCover().replaceAll("sum","500"));
         model.addAttribute("aladinBook", detail);
         model.addAttribute("tags", tags);
 
@@ -190,7 +190,8 @@ public class BookController {
                 keyWord,
                 sortType,
                 pageable.getPageNumber(),
-                pageable.getPageSize()
+                pageable.getPageSize(),
+                "user"
         );
         System.out.println(response.getBody().getContent());
 

@@ -14,13 +14,17 @@
 </head>
 
 <body>
-<!-- Hero 영역 교체(간단한 타이틀/크럼브) -->
+<!-- Hero 영역 -->
 <section class="hero" layout:fragment="hero">
     <div class="container py-3">
         <div class="row align-items-center">
             <div class="col">
                 <h3 class="mb-1">배송비 정책 관리</h3>
-                <div class="text-muted">현재 정책 확인 및 수정</div>
+                <!-- 최초 등록 / 수정 모드에 따라 문구 변경 -->
+                <div class="text-muted"
+                     th:text="${isNew} ? '최초 배송비 정책을 등록하세요.' : '현재 정책 확인 및 수정'">
+                    현재 정책 확인 및 수정
+                </div>
             </div>
             <div class="col-auto">
                 <nav aria-label="breadcrumb">
@@ -42,8 +46,8 @@
         <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
-        <!-- 현재 정책 카드 -->
-        <div class="card shadow-sm">
+        <!-- 현재 배송비 정책 카드: 정책이 있을 때만 표시 -->
+        <div class="card shadow-sm" th:if="${policy != null}">
             <div class="card-header bg-white">
                 <strong>현재 배송비 정책</strong>
             </div>
@@ -71,22 +75,33 @@
             </div>
         </div>
 
-        <!-- 수정 폼 -->
+        <!-- 등록된 정책이 없을 때 안내 -->
+        <div class="alert alert-warning mt-3" th:if="${policy == null}">
+            아직 등록된 배송비 정책이 없습니다. 아래 폼을 통해 <strong>최초 배송비 정책</strong>을 등록해 주세요.
+        </div>
+
+        <!-- 등록/수정 폼 -->
         <div class="card shadow-sm mt-4">
             <div class="card-header bg-white">
-                <strong>정책 수정</strong>
+                <!-- 헤더 문구: 등록 / 수정 구분 -->
+                <strong th:text="${isNew} ? '정책 등록' : '정책 수정'">정책 수정</strong>
             </div>
             <div class="card-body">
-                <!-- 프론트 컨트롤러로 POST 전송 (컨트롤러에서 Feign PUT 호출) -->
-                <form th:action="@{/admin/delivery-policy}" method="post"
-                      th:object="${form}" class="needs-validation">
+                <!-- 항상 POST /admin/delivery-policy 로 전송 -->
+                <!-- 컨트롤러에서 form 은 DeliveryPolicyCreateRequest 또는 UpdateRequest -->
+                <form th:action="@{/admin/delivery-policy}"
+                      method="post"
+                      th:object="${form}"
+                      class="needs-validation">
 
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="freeDeliveryThreshold" class="form-label">무료배송 기준(원)</label>
-                            <input type="number" class="form-control" id="freeDeliveryThreshold"
-                                   th:field="*{freeDeliveryThreshold}" min="0" step="100">
-                            <div class="help-text mt-1">0 이상, 100원 단위 권장</div>
+                            <input type="number"
+                                   class="form-control"
+                                   id="freeDeliveryThreshold"
+                                   th:field="*{freeDeliveryThreshold}"
+                                   min="0" step="100">
                             <div class="text-danger mt-1"
                                  th:if="${#fields.hasErrors('freeDeliveryThreshold')}"
                                  th:errors="*{freeDeliveryThreshold}">
@@ -96,9 +111,11 @@
 
                         <div class="col-md-6">
                             <label for="baseDeliveryFee" class="form-label">기본 배송비(원)</label>
-                            <input type="number" class="form-control" id="baseDeliveryFee"
-                                   th:field="*{baseDeliveryFee}" min="0" step="100">
-                            <div class="help-text mt-1">0 이상, 100원 단위 권장</div>
+                            <input type="number"
+                                   class="form-control"
+                                   id="baseDeliveryFee"
+                                   th:field="*{baseDeliveryFee}"
+                                   min="0" step="100">
                             <div class="text-danger mt-1"
                                  th:if="${#fields.hasErrors('baseDeliveryFee')}"
                                  th:errors="*{baseDeliveryFee}">
@@ -108,7 +125,11 @@
                     </div>
 
                     <div class="d-flex gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary">변경 사항 저장</button>
+                        <!-- 버튼 문구: 최초 등록 / 수정 구분 -->
+                        <button type="submit" class="btn btn-primary"
+                                th:text="${isNew} ? '배송비 정책 등록' : '변경 사항 저장'">
+                            변경 사항 저장
+                        </button>
                         <a href="/admin/delivery-policy" class="btn btn-outline-secondary">초기값으로 되돌리기</a>
                     </div>
                 </form>
@@ -116,9 +137,13 @@
             </div>
         </div>
 
-        <!-- 유의사항 -->
-        <div class="alert alert-info mt-4">
-            값 입력을 비워서 제출하면 해당 필드는 변경되지 않습니다.
+        <!-- 유의사항: 모드별 안내 -->
+        <div class="alert alert-info mt-4" th:if="${isNew}">
+            최초로 등록한 배송비 정책은 이후 수정만 가능하며, 새로운 정책을 추가로 생성할 수는 없습니다.
+        </div>
+
+        <div class="alert alert-info mt-4" th:if="${!isNew}">
+            입력한 값이 그대로 현재 배송비 정책에 반영됩니다.
         </div>
     </div>
 </div>

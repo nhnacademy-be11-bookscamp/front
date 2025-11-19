@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: front
+  profiles:
+    active: test
+
+  cloud:
+    config:
+      enabled: false
+      import-check:
+        enabled: false
+app:
+  api:
+    prefix: http://localhost:8080
+
+gateway:
+  base-url: http://localhost:8080
+
+auth:
+  base-url: http://localhost:8083
+
+# ===== MinIO 설정 =====
+minio:
+  # 내부 통신용 (SDK)
+  url: http://storage.java21.net:8000
+  # 브라우저 노출용 (이미지 URL 반환용)
+  public-url: https://bookscamp.store
+  access-key: EvJ2FP8gy27lDYolEWGQ
+  secret-key: h9uzw85pZPDchOTHzslEOUlNd5cDPFLQnJCofZfH
+  bucket:
+    book: bookscamp-book-image
+    review: bookscamp-review-image
+    package: bookscamp-package-image
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 3000
+        readTimeout: 5000
+        loggerLevel: BASIC
+

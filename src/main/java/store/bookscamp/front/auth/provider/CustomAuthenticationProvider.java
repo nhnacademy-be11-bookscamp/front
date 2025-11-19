@@ -30,14 +30,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         try {
             MemberLoginRequest request = new MemberLoginRequest(username, password);
 
-
-
             ResponseEntity<AccessTokenResponse> authResponse = authFeignClient.doLogin(request);
-
-            if (authResponse.getStatusCode().value() == 401) {
-                // 이 시점에서는 body가 비어있어도 상태 코드 401은 휴면 계정으로 간주합니다.
-                throw new DisabledException("DORMANT_MEMBER");
-            }
 
             AccessTokenResponse body = authResponse.getBody();
             if (body == null || body.getAccessToken() == null) {

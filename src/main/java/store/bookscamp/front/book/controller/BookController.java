@@ -27,6 +27,9 @@ import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
 import store.bookscamp.front.common.service.MinioService;
+import store.bookscamp.front.pointhistory.controller.response.PageResponse;
+import store.bookscamp.front.review.controller.response.BookReviewResponse;
+import store.bookscamp.front.review.feign.ReviewFeignClient;
 import store.bookscamp.front.tag.TagFeignClient;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
 
@@ -42,6 +45,7 @@ public class BookController {
     private final BookFeignClient bookFeignClient;
     private final TagFeignClient tagFeignClient;
     private final BookLikeFeignClient bookLikeFeignClient;
+    private final ReviewFeignClient reviewFeignClient;
 
     @GetMapping("/admin/books")
     public String adminBooksHome(
@@ -207,6 +211,7 @@ public class BookController {
     public String bookDetail(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable("id") Long id,
+            @RequestParam(defaultValue = "0") int page,
             Model model
     ){
 
@@ -227,6 +232,13 @@ public class BookController {
         model.addAttribute("isLikedByCurrentUser", likeStatus);
 
         model.addAttribute("apiPrefix", apiPrefix);
+
+        PageResponse<BookReviewResponse> reviews = reviewFeignClient.getBookReviews(id, page, 3).getBody();
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("reviewCount", reviews.getTotalElements());
+
+        Double avgScore = reviewFeignClient.getBookAverageScore(id).getBody();
+        model.addAttribute("avgScore", avgScore);
 
         return "book/detail";
     }

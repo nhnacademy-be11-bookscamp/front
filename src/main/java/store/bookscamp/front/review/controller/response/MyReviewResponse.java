@@ -1,5 +1,6 @@
 package store.bookscamp.front.review.controller.response;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record MyReviewResponse(
@@ -7,9 +8,9 @@ public record MyReviewResponse(
         Long bookId,
         String bookTitle,
         String thumbnailUrl,
-        int score,
+        Integer score,
         String content,
         List<String> imageUrls,
-        String createdAt,
-        String updatedAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {}

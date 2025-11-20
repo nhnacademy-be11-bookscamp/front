@@ -8,11 +8,15 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.common.service.MinioService;
+import store.bookscamp.front.pointhistory.controller.response.PageResponse;
 import store.bookscamp.front.review.controller.request.ReviewCreateRequest;
 import store.bookscamp.front.review.controller.request.ReviewUpdateRequest;
+import store.bookscamp.front.review.controller.response.BookReviewResponse;
 import store.bookscamp.front.review.controller.response.MyReviewResponse;
 import store.bookscamp.front.review.controller.response.ReviewableItemResponse;
 import store.bookscamp.front.review.feign.ReviewFeignClient;
@@ -26,21 +30,15 @@ public class ReviewController {
     private final ReviewFeignClient reviewFeignClient;
     private final MinioService minioService;
 
-    // 작성 가능한 리뷰
-    @GetMapping("/mypage/reviewable")
-    public String getReviewableItems(Model model) {
-
-        List<ReviewableItemResponse> items = reviewFeignClient.getReviewableItems().getBody();
-        model.addAttribute("items", items);
-        return "review/reviewable";
-    }
-
-    // 작성된 리뷰
     @GetMapping("/mypage/reviews")
-    public String getMyReviews(Model model) {
+    public String getAllReviewPages(Model model) {
 
-        List<MyReviewResponse> reviews = reviewFeignClient.getMyReviews().getBody();
-        model.addAttribute("reviews", reviews);
+        List<ReviewableItemResponse> reviewable = reviewFeignClient.getReviewableItems().getBody();
+        List<MyReviewResponse> written = reviewFeignClient.getMyReviews().getBody();
+
+        model.addAttribute("reviewable", reviewable);
+        model.addAttribute("written", written);
+
         return "review/my-reviews";
     }
 

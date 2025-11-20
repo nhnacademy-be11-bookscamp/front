@@ -10,7 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import store.bookscamp.front.admin.controller.request.AdminLoginRequest;
-import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
+import store.bookscamp.front.auth.repository.AuthFeignClient;
 import store.bookscamp.front.auth.dto.AccessTokenResponse;
 import store.bookscamp.front.auth.dto.LoginAuthDetails;
 import store.bookscamp.front.auth.user.CustomAdminDetails;
@@ -19,7 +19,7 @@ import store.bookscamp.front.common.exception.ConcurrentLoginException;
 @RequiredArgsConstructor
 public class AdminAuthenticationProvider implements AuthenticationProvider {
 
-    private final AdminLoginFeignClient adminLoginFeignClient;
+    private final AuthFeignClient authFeignClient;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -29,7 +29,7 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
         try {
             AdminLoginRequest request = new AdminLoginRequest(username, password);
 
-            ResponseEntity<AccessTokenResponse> authResponse = adminLoginFeignClient.doLogin(request);
+            ResponseEntity<AccessTokenResponse> authResponse = authFeignClient.doLogin(request);
 
             AccessTokenResponse body = authResponse.getBody();
             if (body == null || body.getAccessToken() == null) {

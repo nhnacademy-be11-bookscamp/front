@@ -3,10 +3,15 @@ package store.bookscamp.front.common.config;
 import feign.Response;
 import feign.RetryableException;
 import feign.codec.ErrorDecoder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.DisabledException; // [추가]
+import org.springframework.util.StreamUtils; // [추가] Spring 유틸 사용
 import store.bookscamp.front.auth.service.TokenRefreshService;
 
 @Slf4j
@@ -18,18 +23,17 @@ public class FeignErrorDecoder implements ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {
-
         if (response.status() == 401) {
-            log.warn("Received 401 Unauthorized for methodKey: {}", methodKey);
-
             String requestUrl = response.request().url();
+
             if (requestUrl.contains("/auth-server/admin/login") ||
                     requestUrl.contains("/auth-server/login") ||
                     requestUrl.contains("/auth-server/reissue")) {
 
-                log.error("401 on authentication request. Won't retry. MethodKey: {}", methodKey);
                 return defaultDecoder.decode(methodKey, response);
             }
+
+            log.warn("Received 401 Unauthorized for methodKey: {}", methodKey);
 
             String failedAccessToken = null;
             Collection<String> authHeaders = response.request().headers().get("Authorization");

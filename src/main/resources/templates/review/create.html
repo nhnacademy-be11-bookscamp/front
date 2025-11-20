@@ -83,7 +83,7 @@
                             <i class="fa fa-star star" data-value="4"></i>
                             <i class="fa fa-star star" data-value="5"></i>
                         </div>
-                        <input type="hidden" name="score" id="scoreInput" value="0">
+                        <input type="hidden" name="score" id="scoreInput" value="5">
                     </div>
 
                     <!-- 내용 -->
@@ -121,6 +121,15 @@
             /* ⭐ 별점 선택 */
             const stars = document.querySelectorAll(".star");
             const scoreInput = document.getElementById("scoreInput");
+
+            let currentScore = 5;
+
+            // 기본 5개 칠하기
+            stars.forEach(s => {
+                if (s.dataset.value <= currentScore) {
+                    s.classList.add("selected");
+                }
+            });
 
             stars.forEach(star => {
                 star.addEventListener("click", function () {

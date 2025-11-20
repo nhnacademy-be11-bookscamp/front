@@ -29,12 +29,15 @@ import store.bookscamp.front.member.controller.request.MemberCreateRequest;
 import store.bookscamp.front.member.controller.request.MemberPasswordUpdateRequest;
 import store.bookscamp.front.member.controller.request.MemberUpdateRequest;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
+import store.bookscamp.front.rank.controller.request.RankGetRequest;
+import store.bookscamp.front.rank.feign.RankFeignClient;
 
 @Controller
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberFeignClient memberFeignClient;
+    private final RankFeignClient rankFeignClient;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -79,8 +82,11 @@ public class MemberController {
     @GetMapping("/mypage")
     public ModelAndView getMember(){
         MemberGetResponse memberInfo = memberFeignClient.getMember();
+        RankGetRequest rank = rankFeignClient.getRank().getBody();
         ModelAndView modelAndView = new ModelAndView("member/mypage");
         modelAndView.addObject("memberInfo",memberInfo);
+        modelAndView.addObject("rank",rank);
+
         return modelAndView;
     }
 

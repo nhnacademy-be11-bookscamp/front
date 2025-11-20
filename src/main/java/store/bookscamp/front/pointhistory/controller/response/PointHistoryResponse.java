@@ -9,5 +9,6 @@ public record PointHistoryResponse(
         Long orderId,
         PointType pointType,
         Integer pointAmount,
+        String description,
         LocalDateTime createdAt
 ) {}

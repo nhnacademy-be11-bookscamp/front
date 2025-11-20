@@ -6,20 +6,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import store.bookscamp.front.auth.repository.AuthFeignClient;
 import store.bookscamp.front.auth.dto.AccessTokenResponse;
 import store.bookscamp.front.auth.dto.LoginAuthDetails;
 import store.bookscamp.front.auth.user.CustomMemberDetails;
 import store.bookscamp.front.common.exception.ConcurrentLoginException;
-import store.bookscamp.front.member.controller.MemberLoginFeignClient;
 import store.bookscamp.front.member.controller.request.MemberLoginRequest;
 
 @RequiredArgsConstructor
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-    private final MemberLoginFeignClient memberLoginFeignClient;
+    private final AuthFeignClient authFeignClient;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -29,7 +30,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         try {
             MemberLoginRequest request = new MemberLoginRequest(username, password);
 
-            ResponseEntity<AccessTokenResponse> authResponse = memberLoginFeignClient.doLogin(request);
+            ResponseEntity<AccessTokenResponse> authResponse = authFeignClient.doLogin(request);
 
             AccessTokenResponse body = authResponse.getBody();
             if (body == null || body.getAccessToken() == null) {
@@ -51,6 +52,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             return result;
 
         } catch (FeignException e) {
+            if (e.status() == 401 && e.responseHeaders() != null) {
+                boolean isDormant = e.responseHeaders().entrySet().stream()
+                        .anyMatch(entry -> entry.getKey().equalsIgnoreCase("x-auth-error-code")
+                                && entry.getValue().contains("DORMANT_MEMBER"));
+
+                if (isDormant) {
+                    throw new DisabledException("DORMANT_MEMBER");
+                }
+            }
             if (e.status() == 409) {
                 throw new ConcurrentLoginException("이미 사용중인 ID입니다.");
             }

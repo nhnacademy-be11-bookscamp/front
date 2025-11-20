@@ -55,7 +55,8 @@ public interface BookFeignClient {
             @RequestParam(required = false) String keyWord,
             @RequestParam(value = "sortType", required = false) String sortType,
             @RequestParam(value = "page", required = false) Integer page,
-            @RequestParam(value = "size", required = false) Integer size
+            @RequestParam(value = "size", required = false) Integer size,
+            @RequestParam(value = "role", required = false) String role
     );
 
     @GetMapping("/api-server/bookDetail/{id}")

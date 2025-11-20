@@ -4,10 +4,48 @@
       layout:decorate="~{layout/default}">
 <head>
     <meta charset="UTF-8">
-    <title>내 리뷰 | 북스캠프</title>
-</head>
-<body>
+    <title>리뷰 관리 | 북스캠프</title>
 
+    <style>
+        .tab-container {
+            margin-top: 30px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #ebebeb;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 20px;
+            border-bottom: 2px solid #ebebeb;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 0;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .tab.active {
+            color: #7fad39;
+            border-bottom: 3px solid #7fad39;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
 <section layout:fragment="hero" class="hero" style="display:none;"></section>
 
 <div layout:fragment="content">
@@ -16,56 +54,83 @@
             <div class="row">
                 <div class="col-lg-10 offset-lg-1">
 
-                    <div style="background:#fff; padding:40px; border:1px solid #ebebeb; border-radius:4px;">
+                    <div class="tab-container">
 
-                        <!-- 헤더 -->
-                        <div style="margin-bottom:30px; border-bottom:2px solid #ebebeb; padding-bottom:20px;">
-                            <h4 style="font-weight:700;">
-                                <i class="fa fa-comments" style="margin-right:10px; color:#7fad39;"></i>
-                                내가 작성한 리뷰
-                            </h4>
-                            <p style="color:#6f6f6f;">작성하신 리뷰 목록입니다.</p>
+                        <!-- ⭐ 탭 메뉴 -->
+                        <div class="tabs">
+                            <div class="tab active" data-target="tab-reviewable">리뷰 작성 가능</div>
+                            <div class="tab" data-target="tab-written">내가 작성한 리뷰</div>
                         </div>
 
-                        <!-- 빈 값 -->
-                        <div th:if="${#lists.isEmpty(reviews)}" style="text-align:center; padding:40px 0; color:#6f6f6f;">
-                            작성된 리뷰가 없습니다.
-                        </div>
+                        <!-- ⭐ 탭 내용: 작성 가능한 리뷰 -->
+                        <div id="tab-reviewable" class="tab-content active">
+                            <div th:if="${#lists.isEmpty(reviewable)}" style="text-align:center; padding:40px 0;">
+                                작성 가능한 리뷰가 없습니다.
+                            </div>
 
-                        <!-- 리뷰 카드 -->
-                        <div th:each="review : ${reviews}" style="border-bottom:1px solid #efefef; padding:20px 0;">
-                            <div style="display:flex; gap:20px;">
-                                <!-- 썸네일 -->
-                                <div style="width:90px; height:120px; border-radius:4px; background:#f8f8f8; overflow:hidden;">
-                                    <img th:src="${review.thumbnailUrl}" style="width:100%; height:100%; object-fit:cover;">
+                            <div th:each="item : ${reviewable}"
+                                 style="border-bottom:1px solid #efefef; padding:20px 0; display:flex; gap:20px;">
+
+                                <div style="width:90px; height:120px; overflow:hidden;">
+                                    <img th:src="${item.thumbnailUrl}" style="width:100%; height:100%; object-fit:cover;">
                                 </div>
 
-                                <!-- 본문 -->
                                 <div style="flex:1;">
-                                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                                        <h5 style="margin:0; font-weight:600;" th:text="${review.bookTitle}"></h5>
-                                        <span style="font-size:12px; color:#999;"
-                                              th:text="${#temporals.format(review.createdAt,'yyyy.MM.dd')}"></span>
-                                    </div>
+                                    <h5 style="margin:0; font-weight:600;" th:text="${item.title}"></h5>
+                                    <p style="font-size:13px; color:#999; margin-top:5px;">
+                                        주문번호: <span th:text="${item.orderItemId}"></span>
+                                    </p>
+                                </div>
 
-                                    <div style="color:#ffb400; margin:5px 0;" th:text="'★ ' + ${review.score} + ' / 5'"></div>
-
-                                    <p style="font-size:14px; margin:10px 0;" th:text="${review.content}"></p>
-
-                                    <!-- 이미지들 -->
-                                    <div style="display:flex; gap:10px; flex-wrap:wrap;"
-                                         th:if="${review.imageUrls != null and !review.imageUrls.isEmpty()}">
-                                        <img th:each="img : ${review.imageUrls}"
-                                             th:src="${img}"
-                                             style="width:70px; height:70px; border-radius:4px; object-fit:cover; border:1px solid #ddd;">
-                                    </div>
-
-                                    <!-- 수정 버튼 -->
-                                    <a th:href="@{'/mypage/reviews/' + ${review.reviewId}}"
-                                       class="site-btn"
-                                       style="margin-top:12px; padding:8px 16px;">
-                                        수정하기
+                                <div style="display:flex; align-items:center;">
+                                    <a th:href="@{'/mypage/reviews/new/' + ${item.orderItemId}}"
+                                       class="site-btn" style="padding:10px 18px;">
+                                        리뷰 작성
                                     </a>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- ⭐ 탭 내용: 내가 작성한 리뷰 -->
+                        <div id="tab-written" class="tab-content">
+                            <div th:if="${#lists.isEmpty(written)}" style="text-align:center; padding:40px 0;">
+                                작성한 리뷰가 없습니다.
+                            </div>
+
+                            <div th:each="review : ${written}"
+                                 style="border-bottom:1px solid #efefef; padding:20px 0;">
+                                <div style="display:flex; gap:20px;">
+
+                                    <div style="width:90px; height:120px; overflow:hidden;">
+                                        <img th:src="${review.thumbnailUrl}" style="width:100%; height:100%; object-fit:cover;">
+                                    </div>
+
+                                    <div style="flex:1;">
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <h5 th:text="${review.bookTitle}" style="margin:0; font-weight:600;"></h5>
+                                            <span style="font-size:12px; color:#999;"
+                                                  th:text="${#temporals.format(review.createdAt, 'yyyy.MM.dd')}"></span>
+                                        </div>
+
+                                        <div style="color:#ffb400; margin:5px 0;"
+                                             th:text="'★ ' + ${review.score} + ' / 5'"></div>
+
+                                        <p style="margin:10px 0;" th:text="${review.content}"></p>
+
+                                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                            <img th:each="img : ${review.imageUrls}"
+                                                 th:src="${img}"
+                                                 style="width:70px; height:70px; object-fit:cover;
+                                                 border-radius:4px; border:1px solid #ddd;">
+                                        </div>
+
+                                        <a th:href="@{'/mypage/reviews/' + ${review.reviewId}}"
+                                           class="site-btn"
+                                           style="margin-top:12px; padding:8px 16px;">
+                                            수정하기
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -77,6 +142,29 @@
         </div>
     </section>
 </div>
+
+<!-- ⭐ 탭 스크립트 -->
+<th:block layout:fragment="extra-js">
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tabs = document.querySelectorAll(".tab");
+            const contents = document.querySelectorAll(".tab-content");
+
+            tabs.forEach(tab => {
+                tab.addEventListener("click", function () {
+
+                    tabs.forEach(t => t.classList.remove("active"));
+                    this.classList.add("active");
+
+                    const target = this.dataset.target;
+
+                    contents.forEach(c => c.classList.remove("active"));
+                    document.getElementById(target).classList.add("active");
+                });
+            });
+        });
+    </script>
+</th:block>
 
 </body>
 </html>

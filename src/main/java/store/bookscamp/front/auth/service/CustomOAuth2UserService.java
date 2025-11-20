@@ -3,18 +3,14 @@ package store.bookscamp.front.auth.service;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -24,11 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate; // [수정] Import
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
+import store.bookscamp.front.auth.repository.AuthFeignClient;
 import store.bookscamp.front.auth.dto.AccessTokenResponse;
-import store.bookscamp.front.auth.dto.LoginAuthDetails;
 import store.bookscamp.front.auth.dto.OauthLoginRequest;
-import store.bookscamp.front.auth.user.CustomMemberDetails;
 import store.bookscamp.front.member.controller.MemberFeignClient;
 
 import java.util.UUID;
@@ -42,7 +36,7 @@ import java.util.HashMap; // [수정] Import
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MemberFeignClient memberFeignClient;
-    private final AdminLoginFeignClient adminLoginFeignClient;
+    private final AuthFeignClient authFeignClient;
     private final RestTemplate restTemplate;
 
     @Override
@@ -179,7 +173,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         ResponseEntity<AccessTokenResponse> authResponse;
 
         try {
-            authResponse = adminLoginFeignClient.oauthLogin(loginRequest);
+            authResponse = authFeignClient.oauthLogin(loginRequest);
         } catch (Exception e) {
             log.error("OAuth2 기존 회원 로그인(토큰 발급) 실패", e);
             throw new OAuth2AuthenticationException("서버 오류로 토큰 발급에 실패했습니다.");

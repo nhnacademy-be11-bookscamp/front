@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,7 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
+import store.bookscamp.front.auth.repository.AuthFeignClient;
 import store.bookscamp.front.auth.filter.JwtAuthenticationFilter;
 import store.bookscamp.front.auth.handler.CustomAuthenticationFailureHandler;
 import store.bookscamp.front.auth.handler.CustomAuthenticationSuccessHandler;
@@ -25,33 +26,30 @@ import store.bookscamp.front.auth.provider.AdminAuthenticationProvider;
 import store.bookscamp.front.auth.provider.CustomAuthenticationProvider;
 import store.bookscamp.front.auth.service.CustomOAuth2UserService;
 import store.bookscamp.front.common.exception.CustomAccessDeniedHandler;
-import store.bookscamp.front.member.controller.MemberLoginFeignClient;
 
 @Slf4j
 @Configuration
 public class SecurityConfig {
 
-    private final MemberLoginFeignClient memberLoginFeignClient;
-    private final AdminLoginFeignClient adminLoginFeignClient;
+    private final AuthFeignClient authFeignClient;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 
-    public SecurityConfig(@Lazy MemberLoginFeignClient memberLoginFeignClient,
-                          @Lazy AdminLoginFeignClient adminLoginFeignClient,
+    public SecurityConfig(
+                          @Lazy AuthFeignClient authFeignClient,
                           CustomAccessDeniedHandler customAccessDeniedHandler) {
-        this.memberLoginFeignClient = memberLoginFeignClient;
-        this.adminLoginFeignClient = adminLoginFeignClient;
+        this.authFeignClient = authFeignClient;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     @Bean
     public CustomAuthenticationProvider customAuthenticationProvider() {
-        return new CustomAuthenticationProvider(memberLoginFeignClient);
+        return new CustomAuthenticationProvider(authFeignClient);
     }
 
     @Bean
     public AdminAuthenticationProvider adminAuthenticationProvider() {
-        return new AdminAuthenticationProvider(adminLoginFeignClient);
+        return new AdminAuthenticationProvider(authFeignClient);
     }
 
     @Bean
@@ -69,7 +67,7 @@ public class SecurityConfig {
 
             if (rtCookie != null) {
                 try {
-                    adminLoginFeignClient.doLogout(rtCookie.getValue());
+                    authFeignClient.doLogout(rtCookie.getValue());
                 } catch (Exception e) {
                     log.error("Failed to logout from Auth server", e);
                 }
@@ -122,7 +120,7 @@ public class SecurityConfig {
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .successHandler(new CustomAuthenticationSuccessHandler("/admin/dashboard"))
-                        .failureHandler(new CustomAuthenticationFailureHandler())
+                        .failureHandler(new CustomAuthenticationFailureHandler(authFeignClient))
         );
 
         http.httpBasic(AbstractHttpConfigurer::disable);
@@ -133,7 +131,7 @@ public class SecurityConfig {
 
         return http.build();
     }
-
+    @Profile("!test")
     @Bean
     @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
@@ -163,7 +161,7 @@ public class SecurityConfig {
             .usernameParameter("username")
             .passwordParameter("password")
                 .successHandler(new CustomAuthenticationSuccessHandler("/"))
-                .failureHandler(new CustomAuthenticationFailureHandler())
+                .failureHandler(new CustomAuthenticationFailureHandler(authFeignClient))
         );
         http.logout(logout -> logout
                 .logoutUrl("/logout")

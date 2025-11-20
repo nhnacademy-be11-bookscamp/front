@@ -7,6 +7,7 @@ import java.io.Closeable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.context.refresh.ConfigDataContextRefresher;
 import org.springframework.context.EnvironmentAware;
@@ -25,6 +26,9 @@ public class CustomConfigClientWatch implements Closeable, EnvironmentAware {
 
     private Environment environment;
 
+    @Value("${config.watch.enabled:true}")
+    private boolean enabled;
+
     public CustomConfigClientWatch(ConfigDataContextRefresher refresher,
                                    ConfigServicePropertySourceLocator locator) {
         this.refresher = refresher;
@@ -38,13 +42,20 @@ public class CustomConfigClientWatch implements Closeable, EnvironmentAware {
 
     @PostConstruct
     public void start() {
+        if (!enabled) {
+            log.info("[Config Watch] disabled by config.watch.enabled=false");
+            return;
+        }
         running.compareAndSet(false, true);
-        log.info("[Config Watch] started");
+        log.info("[Config Watch] started (initialDelay={}ms, delay={}ms)",
+                environment.getProperty("config.watch.initialDelay", "10000"),
+                environment.getProperty("config.watch.delay", "20000"));
+
     }
 
     @Scheduled(
-            initialDelayString = "${spring.cloud.config.watch.git.initialDelay:10000}",
-            fixedDelayString = "${spring.cloud.config.watch.git.delay:20000}"
+            initialDelayString = "${config.watch.initialDelay:10000}",
+            fixedDelayString = "${config.watch.delay:20000}"
     )
     public void watchConfigServer() {
         if (!running.get()) {
@@ -64,7 +75,14 @@ public class CustomConfigClientWatch implements Closeable, EnvironmentAware {
             // refresh() = /actuator/refresh 와 동일한 동작
             refresher.refresh();
 
+            String initialDelay = environment.getProperty("config.watch.initialDelay", "10000");
+            String fixedDelay = environment.getProperty("config.watch.delay", "20000");
+
             log.info("[Config Watch] Context refreshed successfully!");
+            log.info("[Config Watch] new scheduled values: initialDelay={}ms, delay={}ms",
+                    initialDelay,
+                    fixedDelay
+            );
         }
     }
 

@@ -61,7 +61,7 @@
         }
 
         .book-list-item.rank-3 {
-            border: 2px solid #2ecc71;   /* 초록 */
+            border: 2px solid #3498db;   /* 초록 */
             border-radius: 8px;
         }
     </style>
@@ -79,7 +79,7 @@
             </div>
         </div>
 
-        <!-- ✅ 검색 + 정렬 폼 (수정됨) -->
+        <!--  검색 + 정렬 폼 (수정됨) -->
         <form th:action="@{/books}" method="get" style="margin-bottom: 1.5rem;">
             <div class="row">
 
@@ -108,7 +108,7 @@
                     <label>정렬:
                         <select name="sortType">
                             <option value="id" th:selected="${sortType == 'id'}">기본</option>
-                            <option value="bookLike" th:selected="${sortType == 'title'}">제목순</option>
+                            <option value="title" th:selected="${sortType == 'title'}">제목순</option>
                             <option value="bookLike" th:selected="${sortType == 'bookLike'}">인기도순</option>
                             <option value="publishDate" th:selected="${sortType == 'publishDate'}">출판일순</option>
                             <option value="low-price" th:selected="${sortType == 'low-price'}">낮은가격순</option>
@@ -121,12 +121,12 @@
 
             </div>
         </form>
-        <!-- ✅ 폼 끝 -->
+        <!--  폼 끝 -->
 
         <!-- 도서 목록 -->
         <div class="book-list-container">
 
-            <div class="book-list-item" th:each="book : ${booksPage.content}" th:classappend="|rank-${book.aiRank()}|">
+            <div class="book-list-item" th:each="book : ${booksPage.content}" th:classappend="${book.aiRecommand != ''} ? 'rank-' + ${book.aiRank()} : ''">
                 <div class="book-list-item__thumb">
                     <a th:href="@{/books/{id}(id=${book.id})}">
                         <img th:src="${book.thumbnailUrl}" th:alt="${book.title}">

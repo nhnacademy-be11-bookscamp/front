@@ -5,9 +5,150 @@
 <head>
     <meta charset="UTF-8">
     <title>로그인 | 북스캠프</title>
+
+    <style>
+        /* 모달 배경 (오버레이) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); /* 배경 조금 더 어둡게 */
+            backdrop-filter: blur(4px); /* 배경 블러 효과 */
+            z-index: 9999;
+            display: none;
+            justify-content: center; align-items: center;
+            opacity: 0; /* 애니메이션용 초기 투명도 */
+            transition: opacity 0.3s ease;
+        }
+
+        /* 모달이 활성화될 때 붙을 클래스 (JS에서 display 조작 시 함께 처리 필요, 여기서는 기본 display flex시 애니메이션 적용을 위해 keyframes 사용) */
+        .modal-overlay.active {
+            opacity: 1;
+        }
+
+        /* 모달 컨텐츠 박스 */
+        .modal-content {
+            background: #ffffff;
+            padding: 40px 30px 60px 30px; /* 하단 패딩(60px)을 늘려 버튼 공간 확보 */
+            border-radius: 16px;
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            position: relative; /* 버튼 절대 위치 기준점 */
+            border: 1px solid #f0f0f0;
+            animation: slideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        }
+
+        /* 모달 등장 애니메이션 */
+        @keyframes slideUp {
+            0% { transform: translateY(50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 제목 스타일 */
+        .modal-content h4 {
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        /* 아이콘 스타일 (제목 위) */
+        .modal-icon {
+            font-size: 40px;
+            color: #7fad39;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        /* 설명 텍스트 */
+        .modal-content p {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            word-break: keep-all;
+        }
+
+        /* 타겟 아이디 텍스트 */
+        #target-username {
+            background: #f4f9ed;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            width: 100%;
+            font-size: 15px;
+        }
+
+        /* 입력창 스타일 */
+        .modal-content input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 20px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .modal-content input:focus {
+            border-color: #7fad39;
+            box-shadow: 0 0 0 4px rgba(127, 173, 57, 0.15);
+        }
+
+        /* 인증/해제 버튼 (Primary) */
+        .btn-auth {
+            width: 100%;
+            padding: 14px;
+            background: #7fad39;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(127, 173, 57, 0.3);
+        }
+
+        .btn-auth:hover {
+            background: #6d9631;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(127, 173, 57, 0.4);
+        }
+
+        /* 닫기 버튼 (Secondary) */
+        .btn-close {
+            position: absolute; /* 모달 하단에 고정 */
+            bottom: 20px;       /* 아래에서 20px 띄움 */
+            left: 50%;          /* 좌우 중앙 정렬 시작 */
+            transform: translateX(-50%); /* 정확한 중앙 정렬 */
+
+            background: transparent;
+            color: #999;
+            border: none;
+            padding: 8px 20px; /* 클릭 영역 확보 */
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: underline; /* 밑줄 추가로 버튼임을 강조 */
+            transition: all 0.3s;
+            white-space: nowrap; /* 글자 줄바꿈 방지 */
+        }
+
+        .btn-close:hover {
+            color: #555; /* 호버 시 더 진하게 */
+            background-color: #f5f5f5; /* 호버 시 연한 배경 추가 */
+            border-radius: 20px;
+            text-decoration: none; /* 호버 시 밑줄 제거 */
+        }
+
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
-<!-- Hero 섹션 숨김 -->
 <section layout:fragment="hero" class="hero" style="display: none;">
 </section>
 
@@ -23,10 +164,15 @@
                         </h4>
                         <p style="text-align: center; color: #6f6f6f; margin-bottom: 30px;">북스캠프에 오신 것을 환영합니다.</p>
 
-                        <!-- 에러 메시지 -->
-                        <div th:if="${param.error}" style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border: 1px solid #dc3545; border-radius: 4px;">
+                        <div th:if="${param.error != null and param.error[0] == 'true'}" style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border: 1px solid #dc3545; border-radius: 4px;">
                             <p style="color: #dc3545; margin: 0; font-weight: 600;">
                                 <i class="fa fa-exclamation-circle"></i> 아이디 또는 비밀번호가 올바르지 않습니다.
+                            </p>
+                        </div>
+
+                        <div th:if="${param.error != null and param.error[0] == 'dormant'}" style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+                            <p style="color: #856404; margin: 0; font-weight: 600;">
+                                <i class="fa fa-lock"></i> 휴면 계정입니다. 본인 인증을 진행해주세요.
                             </p>
                         </div>
 
@@ -36,7 +182,6 @@
                             </p>
                         </div>
 
-                        <!-- 로그아웃 메시지 -->
                         <div th:if="${param.logout}" style="margin-bottom: 20px; padding: 15px; background: #d4edda; border: 1px solid #7fad39; border-radius: 4px;">
                             <p style="color: #155724; margin: 0; font-weight: 600;">
                                 <i class="fa fa-check-circle"></i> 로그아웃되었습니다.
@@ -45,7 +190,6 @@
 
                         <form action="/login" method="post">
                             <div class="row">
-                                <!-- 사용자명 -->
                                 <div class="col-lg-12">
                                     <div class="checkout__input">
                                         <p>아이디<span>*</span></p>
@@ -58,7 +202,6 @@
                                     </div>
                                 </div>
 
-                                <!-- 비밀번호 -->
                                 <div class="col-lg-12">
                                     <div class="checkout__input">
                                         <p>비밀번호<span>*</span></p>
@@ -70,7 +213,6 @@
                                     </div>
                                 </div>
 
-                                <!-- 로그인 버튼 -->
                                 <div class="col-lg-12" style="margin-top: 20px; text-align: center;">
                                     <button type="submit"
                                             class="site-btn"
@@ -93,7 +235,6 @@
                                     </a>
                                 </div>
 
-                                <!-- 회원가입 링크 -->
                                 <div class="col-lg-12" style="margin-top: 15px; text-align: center;">
                                     <p style="color: #6f6f6f; font-size: 14px;">
                                         아직 계정이 없으신가요?
@@ -106,7 +247,135 @@
                 </div>
             </div>
         </div>
+
+        <div id="dormantModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-icon">
+                    <i class="fa fa-user-lock"></i> </div>
+                <h4>휴면 계정 해제</h4>
+                <p>
+                    장기간 미접속으로 인해 계정이 휴면 상태입니다.<br>
+                    안전한 이용을 위해 <strong>본인 인증</strong>이 필요합니다.
+                </p>
+
+                <div id="step-send">
+                    <p id="target-username" style="font-weight: bold; color: #7fad39; margin-bottom: 20px;">
+                    </p>
+                    <button onclick="sendDormantCode()" class="btn-auth">
+                        <i class="fa fa-paper-plane" style="margin-right: 5px;"></i> 인증번호 발송
+                    </button>
+                </div>
+
+                <div id="step-verify" class="hidden">
+                    <input type="text" id="verificationCode" placeholder="인증번호 6자리" maxlength="6">
+                    <button onclick="verifyDormantCode()" class="btn-auth">
+                        <i class="fa fa-check-circle" style="margin-right: 5px;"></i> 해제하기
+                    </button>
+                </div>
+
+                <button onclick="closeDormantModal()" class="btn-close" style="width: auto;">다음에 하기</button>
+            </div>
+        </div>
     </section>
+
+    <script th:inline="javascript">
+        /* 타임리프를 통해 URL 파라미터 값을 JS 변수에 주입 */
+        let currentDormantUsername = [[${param.username}]];
+        let errorCode = [[${param.error}]];
+
+        // 페이지 로드 시 실행
+        window.onload = function() {
+            // URL에 error=dormant 가 있고 username이 있으면 모달을 띄움
+            if (errorCode && errorCode[0] === 'dormant' && currentDormantUsername) {
+                // 타임리프가 배열로 반환할 경우 첫 번째 값 사용
+                if(Array.isArray(currentDormantUsername)) {
+                    currentDormantUsername = currentDormantUsername[0];
+                }
+
+                openDormantModal(); // 모달 오픈!
+            }
+        };
+
+        // 모달 열기 함수
+        function openDormantModal() {
+            const modal = document.getElementById('dormantModal');
+            document.getElementById('target-username').innerText = `아이디: ${currentDormantUsername}`;
+
+            modal.style.display = 'flex';
+            // 브라우저가 display:flex를 인식한 후 opacity를 변경해야 트랜지션이 먹힘
+            setTimeout(() => {
+                modal.style.opacity = '1';
+            }, 10);
+
+            document.getElementById('step-send').style.display = 'block';
+            document.getElementById('step-verify').style.display = 'none';
+            document.getElementById('verificationCode').value = '';
+        }
+
+        // 모달 닫기 함수
+        function closeDormantModal() {
+            const modal = document.getElementById('dormantModal');
+            modal.style.opacity = '0';
+
+            // 트랜지션 시간(0.3s) 후 display:none 처리
+            setTimeout(() => {
+                modal.style.display = 'none';
+                window.history.replaceState({}, document.title, "/login");
+            }, 300);
+        }
+
+        // [1단계] 인증번호 발송 요청 (AJAX)
+        function sendDormantCode() {
+            // (버튼 로딩 처리 추가하면 더 좋음)
+            const btn = document.querySelector('#step-send .btn-auth');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 발송 중...';
+            btn.disabled = true;
+
+            fetch('/dormant/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentDormantUsername })
+            }).then(async res => {
+                const data = await res.json();
+                if(res.ok) {
+                    // alert 대신 부드러운 UI 전환이 좋지만 일단 alert 유지
+                    alert('인증번호가 두레이 메신저로 발송되었습니다.');
+                    document.getElementById('step-send').style.display = 'none';
+                    document.getElementById('step-verify').style.display = 'block';
+                } else {
+                    alert(data.message || '발송 실패');
+                }
+            }).catch(err => alert('발송 중 오류 발생'))
+                .finally(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+        }
+
+        // [2단계] 인증번호 검증 요청 (AJAX)
+        function verifyDormantCode() {
+            const code = document.getElementById('verificationCode').value;
+            if(!code) { alert('인증번호를 입력하세요.'); return; }
+
+            fetch('/dormant/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentDormantUsername, code: code })
+            }).then(async res => {
+                const data = await res.json();
+                if(res.ok) {
+                    alert('휴면 상태가 해제되었습니다. 다시 로그인해주세요.');
+                    closeDormantModal();
+                    // 비밀번호 입력창으로 포커스 이동
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                } else {
+                    alert(data.message || '인증 실패');
+                }
+            }).catch(err => alert('인증 확인 중 오류 발생'));
+        }
+    </script>
 </div>
 </body>
 </html>

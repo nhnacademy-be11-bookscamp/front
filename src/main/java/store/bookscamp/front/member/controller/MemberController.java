@@ -1,13 +1,17 @@
 package store.bookscamp.front.member.controller;
 
 import feign.FeignException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,12 +29,15 @@ import store.bookscamp.front.member.controller.request.MemberCreateRequest;
 import store.bookscamp.front.member.controller.request.MemberPasswordUpdateRequest;
 import store.bookscamp.front.member.controller.request.MemberUpdateRequest;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
+import store.bookscamp.front.rank.controller.request.RankGetRequest;
+import store.bookscamp.front.rank.feign.RankFeignClient;
 
 @Controller
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberFeignClient memberFeignClient;
+    private final RankFeignClient rankFeignClient;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -75,8 +82,11 @@ public class MemberController {
     @GetMapping("/mypage")
     public ModelAndView getMember(){
         MemberGetResponse memberInfo = memberFeignClient.getMember();
+        RankGetRequest rank = rankFeignClient.getRank().getBody();
         ModelAndView modelAndView = new ModelAndView("member/mypage");
         modelAndView.addObject("memberInfo",memberInfo);
+        modelAndView.addObject("rank",rank);
+
         return modelAndView;
     }
 
@@ -178,8 +188,15 @@ public class MemberController {
     }
 
     @DeleteMapping("/member")
-    public String deleteMember(){
+    public ResponseEntity<Void> deleteMember(HttpServletRequest request,
+                                             HttpServletResponse response){
         memberFeignClient.deleteMember();
-        return "member/login";
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+
+        return ResponseEntity.ok().build();
     }
 }

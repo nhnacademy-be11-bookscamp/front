@@ -16,7 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
+import store.bookscamp.front.auth.repository.AuthFeignClient;
 import store.bookscamp.front.auth.dto.AccessTokenResponse;
 import store.bookscamp.front.auth.user.CustomAdminDetails;
 import store.bookscamp.front.auth.user.CustomMemberDetails;
@@ -30,9 +30,10 @@ import store.bookscamp.front.auth.user.TokenDetails;
 @Service
 public class TokenRefreshService {
 
-    private final AdminLoginFeignClient adminLoginFeignClient;
-    public TokenRefreshService(@Lazy AdminLoginFeignClient adminLoginFeignClient) {
-        this.adminLoginFeignClient = adminLoginFeignClient;
+    private final AuthFeignClient authFeignClient;
+
+    public TokenRefreshService(@Lazy AuthFeignClient authFeignClient) {
+        this.authFeignClient = authFeignClient;
     }
 
     private final Object refreshLock = new Object();
@@ -69,7 +70,7 @@ public class TokenRefreshService {
             try {
                 log.info("Attempting to refresh token...");
                 ResponseEntity<AccessTokenResponse> reissueResponse =
-                        adminLoginFeignClient.reissue(rtCookie.getValue());
+                        authFeignClient.reissue(rtCookie.getValue());
 
                 String newAccessToken = reissueResponse.getBody().getAccessToken();
                 String newRawAccessToken = "Bearer " + newAccessToken;

@@ -27,6 +27,9 @@ import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
 import store.bookscamp.front.common.service.MinioService;
+import store.bookscamp.front.pointhistory.controller.response.PageResponse;
+import store.bookscamp.front.review.controller.response.BookReviewResponse;
+import store.bookscamp.front.review.feign.ReviewFeignClient;
 import store.bookscamp.front.tag.TagFeignClient;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
 
@@ -42,13 +45,14 @@ public class BookController {
     private final BookFeignClient bookFeignClient;
     private final TagFeignClient tagFeignClient;
     private final BookLikeFeignClient bookLikeFeignClient;
+    private final ReviewFeignClient reviewFeignClient;
 
     @GetMapping("/admin/books")
     public String adminBooksHome(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String keyWord,
             @RequestParam(defaultValue = "id") String sortType,
-            @PageableDefault(size = 20, page = 0) Pageable pageable,
+            @PageableDefault(size = 10, page = 0) Pageable pageable,
             Model model
     ) {
         ResponseEntity<RestPageImpl<BookSortResponse>> response = bookFeignClient.getBooks(
@@ -56,12 +60,12 @@ public class BookController {
                 keyWord,
                 sortType,
                 pageable.getPageNumber(),
-                pageable.getPageSize()
+                pageable.getPageSize(),
+                "admin"
         );
 
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
-
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("keyWord", keyWord);
         model.addAttribute("sortType", sortType);
@@ -109,7 +113,7 @@ public class BookController {
 
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
         List<TagGetResponse> tags = tagFeignClient.getAll(0, 1000).getContent();
-
+        detail.setCover(detail.getCover().replaceAll("sum","500"));
         model.addAttribute("aladinBook", detail);
         model.addAttribute("tags", tags);
 
@@ -190,7 +194,8 @@ public class BookController {
                 keyWord,
                 sortType,
                 pageable.getPageNumber(),
-                pageable.getPageSize()
+                pageable.getPageSize(),
+                "user"
         );
         System.out.println(response.getBody().getContent());
 
@@ -207,6 +212,7 @@ public class BookController {
     public String bookDetail(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable("id") Long id,
+            @RequestParam(defaultValue = "0") int page,
             Model model
     ){
 
@@ -227,6 +233,13 @@ public class BookController {
         model.addAttribute("isLikedByCurrentUser", likeStatus);
 
         model.addAttribute("apiPrefix", apiPrefix);
+
+        PageResponse<BookReviewResponse> reviews = reviewFeignClient.getBookReviews(id, page, 3).getBody();
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("reviewCount", reviews.getTotalElements());
+
+        Double avgScore = reviewFeignClient.getBookAverageScore(id).getBody();
+        model.addAttribute("avgScore", avgScore);
 
         return "book/detail";
     }

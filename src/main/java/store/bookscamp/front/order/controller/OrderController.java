@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import store.bookscamp.front.member.controller.MemberFeignClient;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
 import store.bookscamp.front.order.dto.OrderCreateRequest;
 import store.bookscamp.front.order.dto.OrderCreateResponse;
+import store.bookscamp.front.order.dto.OrderDetailResponse;
 import store.bookscamp.front.order.dto.OrderListResponse;
 import store.bookscamp.front.order.dto.OrderPrepareRequest;
 import store.bookscamp.front.order.dto.OrderPrepareResponse;
@@ -121,5 +123,15 @@ public class OrderController {
         model.addAttribute("pageSize", size);
 
         return "order/order-list";
+    }
+
+    /**
+     * 각각의 주문 내역 상세 조회
+     */
+    @GetMapping("/{orderId}")
+    public String getOrderDetail(@PathVariable Long orderId, Model model) {
+        ResponseEntity<OrderDetailResponse> response = orderFeignClient.getOrderDetail(orderId);
+        model.addAttribute("order", response.getBody());
+        return "order/order-detail";
     }
 }

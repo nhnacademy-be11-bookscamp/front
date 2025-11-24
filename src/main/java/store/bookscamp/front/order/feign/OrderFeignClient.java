@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import store.bookscamp.front.common.config.FeignConfig;
 import store.bookscamp.front.order.dto.OrderCreateRequest;
@@ -15,6 +16,7 @@ import store.bookscamp.front.order.dto.OrderDetailResponse;
 import store.bookscamp.front.order.dto.OrderListResponse;
 import store.bookscamp.front.order.dto.OrderPrepareRequest;
 import store.bookscamp.front.order.dto.OrderPrepareResponse;
+import store.bookscamp.front.order.dto.PageResponse;
 
 @FeignClient(
         name = "api-through-gateway-order",
@@ -33,7 +35,7 @@ public interface OrderFeignClient {
      * 주문 내역 조회
      */
     @GetMapping(value = "/api-server/orders/list", produces = "application/json")
-    ResponseEntity<Page<OrderListResponse>> getOrderList(
+    ResponseEntity<PageResponse<OrderListResponse>> getOrderList(
             @RequestParam("page") int page,
             @RequestParam("size") int size
     );
@@ -42,6 +44,7 @@ public interface OrderFeignClient {
      * 각가의 주문 내역 상세 조회
      */
     @GetMapping("/api-server/orders/{orderId}")
-    ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable Long orderId);
+    ResponseEntity<OrderDetailResponse> getOrderDetail(
+            @PathVariable Long orderId);
 
 }

@@ -24,6 +24,7 @@ import store.bookscamp.front.order.dto.OrderDetailResponse;
 import store.bookscamp.front.order.dto.OrderListResponse;
 import store.bookscamp.front.order.dto.OrderPrepareRequest;
 import store.bookscamp.front.order.dto.OrderPrepareResponse;
+import store.bookscamp.front.order.dto.PageResponse;
 import store.bookscamp.front.order.feign.OrderFeignClient;
 
 import java.util.Arrays;
@@ -109,13 +110,13 @@ public class OrderController {
             @RequestParam(defaultValue = "5") int size,
             Model model
     ) {
-        ResponseEntity<Page<OrderListResponse>> response =
+        ResponseEntity<PageResponse<OrderListResponse>> response =
                 orderFeignClient.getOrderList(page, size);
 
-        Page<OrderListResponse> orderPage = response.getBody();
+        PageResponse<OrderListResponse> orderPage = response.getBody();
 
         List<OrderListResponse> orders =
-                (orderPage != null) ? orderPage.getContent() : List.of();
+                (orderPage != null) ? orderPage.content() : List.of();
 
         model.addAttribute("orderPage", orderPage); // 페이징 정보 전체
         model.addAttribute("orders", orders);       // 실제 주문 리스트

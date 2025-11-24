@@ -82,7 +82,20 @@ public class OrderController {
 
     @PostMapping
     @ResponseBody
-    public ResponseEntity<OrderCreateResponse> createOrder(@RequestBody OrderCreateRequest request) {
+    public ResponseEntity<OrderCreateResponse> createOrder(
+            @RequestBody OrderCreateRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        boolean isMember = isAuthenticatedMember(httpRequest);
+
+        if (!isMember && request.nonMemberInfo() == null) {
+            throw new IllegalArgumentException("비회원 정보는 필수입니다.");
+        }
+
+        if (isMember && request.nonMemberInfo() != null) {
+            throw new IllegalArgumentException("회원은 비회원 정보를 입력할 수 없습니다.");
+        }
+
         return orderFeignClient.createOrder(request);
     }
 

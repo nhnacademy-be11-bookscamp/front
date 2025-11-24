@@ -28,8 +28,7 @@ public record OrderPrepareResponse(
     ) {}
 
     public record PackagingInfo(
-            @JsonProperty("id")
-            Long packagingId,
+            Long id,
             String name,
             Integer price
     ) {}

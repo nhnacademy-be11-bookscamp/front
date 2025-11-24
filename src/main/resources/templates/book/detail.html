@@ -513,7 +513,7 @@
                     likeCountElement.innerText = currentLikeCount;
 
                     fetch(`${apiUrl}/${bookId}`, {
-                        method: 'PUT',
+                        method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ liked: isLiked }),
                         credentials: 'include'

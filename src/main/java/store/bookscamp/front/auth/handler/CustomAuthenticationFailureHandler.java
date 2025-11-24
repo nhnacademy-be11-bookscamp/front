@@ -6,24 +6,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
-import store.bookscamp.front.auth.repository.AuthFeignClient;
 import store.bookscamp.front.common.exception.ConcurrentLoginException;
 
 @Slf4j
 @Component
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
-
-    private final AuthFeignClient authFeignClient;
-
-    public CustomAuthenticationFailureHandler(AuthFeignClient authFeignClient) {
-        this.authFeignClient = authFeignClient;
-    }
 
     private boolean isDisabledException(Throwable exception) {
         Throwable cause = exception;
@@ -54,14 +46,10 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             String encodedUsername = "";
             if (username != null) {
                 encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
-
-                try {
-                } catch (Exception e) {
-                    log.error("Failed to request dormant auth code to Auth Server for user: {}", username, e);
-                }
             }
 
-            response.sendRedirect(defaultUrl + "?error=dormant&username=" + encodedUsername);
+            log.info("휴면 계정 로그인 시도 감지: {}, 해제 페이지로 리다이렉트", username);
+            response.sendRedirect("/dormant?username=" + encodedUsername);
 
         } else {
             response.sendRedirect(defaultUrl + "?error=true");

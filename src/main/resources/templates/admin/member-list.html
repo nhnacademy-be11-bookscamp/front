@@ -328,7 +328,7 @@
                     const status = document.getElementById("modal-member-status").value;
 
                     fetch(`/admin/members/${id}/status`, {
-                        method: "PUT",
+                        method: "POST",
                         headers: headers(),
                         body: JSON.stringify({ status: status })
                     })

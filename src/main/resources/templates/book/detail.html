@@ -493,7 +493,7 @@
             if (likeButton) {
                 const likeCountElement = document.getElementById('likeCount');
                 const isAlreadyLiked = /*[[${isLikedByCurrentUser}]]*/ false;
-                const apiUrl = '/api-server/books/like';
+                const apiUrl = '/api-server/books/joa';
 
                 let currentLikeCount = parseInt(likeCountElement.innerText, 10);
 
@@ -513,14 +513,14 @@
                     likeCountElement.innerText = currentLikeCount;
 
                     fetch(`${apiUrl}/${bookId}`, {
-                        method: 'PUT',
+                        method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ liked: isLiked }),
                         credentials: 'include'
                     })
                         .then(res => {
                             if (!res.ok) {
-                                throw new Error('Server response was not ok');F
+                                throw new Error('Server response was not ok');
                             }
                             return res.text();
                         })
@@ -627,10 +627,10 @@
                 },
             });
 
-            if (bookId) {
+            console.log("bookId: " + bookId);
+            if (bookId != null) {
                 loadAndSetupCoupons(bookId);
             }
-
         });
 
         // --- 4. (신규) 장바구니 담기 로직 ---

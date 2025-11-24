@@ -55,7 +55,7 @@ public class CartController {
         return ResponseEntity.status(response.getStatusCode()).build();
     }
 
-    @PutMapping("/{cartItemId}/update")
+    @PostMapping("/{cartItemId}/update")
     public ResponseEntity<Void> updateCartItem(
             @PathVariable Long cartItemId,
             @Valid @RequestBody CartItemUpdateRequest request

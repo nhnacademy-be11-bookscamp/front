@@ -25,7 +25,7 @@
             background: #fff;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
         }
 
         .cart-table th {
@@ -100,9 +100,20 @@
             cursor: pointer;
         }
 
-        .cart-btn-danger { background: #dc3545; color: white; }
-        .cart-btn-secondary { background: #656d76; color: white; }
-        .cart-btn-primary { background: #4A90E2; color: white; }
+        .cart-btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .cart-btn-secondary {
+            background: #656d76;
+            color: white;
+        }
+
+        .cart-btn-primary {
+            background: #4A90E2;
+            color: white;
+        }
 
         .cart-summary {
             margin-top: 30px;
@@ -258,17 +269,16 @@
                 return;
             }
 
-            const response = fetch("/carts/" + cartItemId + "/update", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ quantity: newQty }),
+            const response = await fetch("/carts/" + cartItemId + "/update", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({quantity: newQty}),
                 credentials: "include"
-            }).then(response => {
-                if (!response.ok) {
-                    alert("수량 변경 실패");
-                    return;
-                }
             })
+            if (!response.ok) {
+                alert("수량 변경 실패");
+                return;
+            }
 
             // 개별 합계 갱신
             document.getElementById("total-" + cartItemId).innerText =
@@ -343,7 +353,7 @@
                         "Content-Type": "application/json"
                     },
                     credentials: "include",
-                    body: JSON.stringify({ items: items })
+                    body: JSON.stringify({items: items})
                 });
 
                 if (response.ok) {

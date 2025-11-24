@@ -15,7 +15,7 @@ public class BookLikeRestController {
 
     private final BookLikeFeignClient bookLikeFeignClient;
 
-    @PutMapping("/api-server/books/like/{bookId}")
+    @PutMapping("/api-server/books/joa/{bookId}")
     public void toggleLike(
             @PathVariable Long bookId,
             @RequestBody BookLikeRequest request

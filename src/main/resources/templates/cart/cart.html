@@ -258,17 +258,16 @@
                 return;
             }
 
-            const response = await fetch("/carts/" + cartItemId, {
+            const response = fetch("/carts/" + cartItemId + "/update", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ quantity: newQty }),
                 credentials: "include"
-            });
-
-            if (!response.ok) {
-                alert("수량 변경 실패");
-                return;
-            }
+            }).then(response => {
+                if (!response.ok) {
+                    alert("수량 변경 실패");
+                    return;
+                }
 
             // 개별 합계 갱신
             document.getElementById("total-" + cartItemId).innerText =
@@ -282,8 +281,8 @@
         // 삭제
         // -----------------------------
         async function deleteCartItem(cartItemId) {
-            const res = await fetch("/carts/" + cartItemId, {
-                method: "DELETE",
+            const res = await fetch("/carts/" + cartItemId + "/delete", {
+                method: "POST",
                 credentials: "include"
             });
 
@@ -301,8 +300,8 @@
         function clearCart() {
             if (!confirm("장바구니를 모두 비우시겠습니까?")) return;
 
-            fetch("/carts", {
-                method: "DELETE",
+            fetch("/carts/clear", {
+                method: "POST",
                 credentials: "include"
             }).then(res => {
                 if (res.ok) location.reload();

@@ -120,7 +120,7 @@ public class SecurityConfig {
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .successHandler(new CustomAuthenticationSuccessHandler("/admin/dashboard"))
-                        .failureHandler(new CustomAuthenticationFailureHandler(authFeignClient))
+                        .failureHandler(new CustomAuthenticationFailureHandler())
         );
 
         http.httpBasic(AbstractHttpConfigurer::disable);
@@ -161,7 +161,7 @@ public class SecurityConfig {
             .usernameParameter("username")
             .passwordParameter("password")
                 .successHandler(new CustomAuthenticationSuccessHandler("/"))
-                .failureHandler(new CustomAuthenticationFailureHandler(authFeignClient))
+                .failureHandler(new CustomAuthenticationFailureHandler())
         );
         http.logout(logout -> logout
                 .logoutUrl("/logout")

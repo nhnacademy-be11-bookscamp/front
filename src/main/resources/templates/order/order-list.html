@@ -75,19 +75,50 @@
                             <th scope="col" class="text-end">결제금액</th>
                         </tr>
                         </thead>
+<!--                        <tbody>-->
+<!--                        <tr th:each="order : ${orders}">-->
+<!--                            &lt;!&ndash; 주문일 &ndash;&gt;-->
+<!--                            <td th:text="${#temporals.format(order.orderDate(), 'yyyy-MM-dd')}"></td>-->
+
+<!--                            &lt;!&ndash; 주문번호 &ndash;&gt;-->
+<!--                            <td th:text="${order.orderId()}"></td>-->
+
+<!--                            &lt;!&ndash; 주문상품: 대표도서명 + (외 N권) &ndash;&gt;-->
+<!--                            <td>-->
+<!--                                <span th:text="${order.representativeBookTitle()}"></span>-->
+<!--                                <span th:if="${order.totalQuantity() > 1}"-->
+<!--                                      th:text="${' 외 ' + (order.totalQuantity() - 1) + '권'}"></span>-->
+
+<!--                            </td>-->
+
+<!--                            &lt;!&ndash; 결제금액 &ndash;&gt;-->
+<!--                            <td class="text-end"-->
+<!--                                th:text="${#numbers.formatInteger(order.finalPaymentAmount(), 3, 'COMMA')} + '원'">-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!--                        </tbody>-->
+
                         <tbody>
                         <tr th:each="order : ${orders}">
                             <!-- 주문일 -->
                             <td th:text="${#temporals.format(order.orderDate(), 'yyyy-MM-dd')}"></td>
 
-                            <!-- 주문번호 -->
-                            <td th:text="${order.orderId()}"></td>
-
-                            <!-- 주문상품: 대표도서명 + (외 N권) -->
+                            <!-- 주문번호: 클릭 시 /orders/{orderId} 이동 -->
                             <td>
-                                <span th:text="${order.representativeBookTitle()}"></span>
-                                <span th:if="${order.totalQuantity() > 1}"
-                                      th:text="' 외 ' + (order.totalQuantity() - 1) + '권'"></span>
+                                <a th:href="@{/orders/{orderId}(orderId=${order.orderId()})}"
+                                   class="text-decoration-none text-dark"
+                                   th:text="${order.orderId()}">
+                                </a>
+                            </td>
+
+                            <!-- 주문상품: 클릭 시 /orders/{orderId} 이동 -->
+                            <td>
+                                <a th:href="@{/orders/{orderId}(orderId=${order.orderId()})}"
+                                   class="text-decoration-none text-dark">
+                                    <span th:text="${order.representativeBookTitle()}"></span>
+                                    <span th:if="${order.totalQuantity() > 1}"
+                                          th:text="${' 외 ' + (order.totalQuantity() - 1) + '권'}"></span>
+                                </a>
                             </td>
 
                             <!-- 결제금액 -->
@@ -96,6 +127,7 @@
                             </td>
                         </tr>
                         </tbody>
+
                     </table>
                 </div>
 
@@ -106,7 +138,7 @@
                         <!-- 이전 페이지 -->
                         <li class="page-item" th:classappend="${orderPage.first} ? 'disabled'">
                             <a class="page-link"
-                               th:href="@{/orders(page=${currentPage - 1}, size=${pageSize})}"
+                               th:href="@{/orders/list(page=${currentPage - 1}, size=${pageSize})}"
                                aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
@@ -115,17 +147,18 @@
                         <!-- 페이지 번호 -->
                         <li class="page-item"
                             th:each="p : ${#numbers.sequence(0, orderPage.totalPages - 1)}"
-                            th:classappend="${p} == ${currentPage} ? 'active'">
-                            <a class="page-link"
+                            th:classappend="${p == currentPage} ? 'active'">
+
+                        <a class="page-link"
                                th:text="${p + 1}"
-                               th:href="@{/orders(page=${p}, size=${pageSize})}">
+                               th:href="@{/orders/list(page=${p}, size=${pageSize})}">
                             </a>
                         </li>
 
                         <!-- 다음 페이지 -->
                         <li class="page-item" th:classappend="${orderPage.last} ? 'disabled'">
                             <a class="page-link"
-                               th:href="@{/orders(page=${currentPage + 1}, size=${pageSize})}"
+                               th:href="@{/orders/list(page=${currentPage + 1}, size=${pageSize})}"
                                aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
@@ -133,6 +166,8 @@
 
                     </ul>
                 </nav>
+
+
             </div>
         </div>
     </div>

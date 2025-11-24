@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +20,11 @@ import store.bookscamp.front.member.controller.MemberFeignClient;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
 import store.bookscamp.front.order.dto.OrderCreateRequest;
 import store.bookscamp.front.order.dto.OrderCreateResponse;
+import store.bookscamp.front.order.dto.OrderDetailResponse;
 import store.bookscamp.front.order.dto.OrderListResponse;
 import store.bookscamp.front.order.dto.OrderPrepareRequest;
 import store.bookscamp.front.order.dto.OrderPrepareResponse;
+import store.bookscamp.front.order.dto.PageResponse;
 import store.bookscamp.front.order.feign.OrderFeignClient;
 
 import java.util.Arrays;
@@ -120,13 +123,13 @@ public class OrderController {
             @RequestParam(defaultValue = "5") int size,
             Model model
     ) {
-        ResponseEntity<Page<OrderListResponse>> response =
+        ResponseEntity<PageResponse<OrderListResponse>> response =
                 orderFeignClient.getOrderList(page, size);
 
-        Page<OrderListResponse> orderPage = response.getBody();
+        PageResponse<OrderListResponse> orderPage = response.getBody();
 
         List<OrderListResponse> orders =
-                (orderPage != null) ? orderPage.getContent() : List.of();
+                (orderPage != null) ? orderPage.content() : List.of();
 
         model.addAttribute("orderPage", orderPage); // 페이징 정보 전체
         model.addAttribute("orders", orders);       // 실제 주문 리스트
@@ -134,5 +137,15 @@ public class OrderController {
         model.addAttribute("pageSize", size);
 
         return "order/order-list";
+    }
+
+    /**
+     * 각각의 주문 내역 상세 조회
+     */
+    @GetMapping("/{orderId}")
+    public String getOrderDetail(@PathVariable Long orderId, Model model) {
+        ResponseEntity<OrderDetailResponse> response = orderFeignClient.getOrderDetail(orderId);
+        model.addAttribute("order", response.getBody());
+        return "order/order-detail";
     }
 }

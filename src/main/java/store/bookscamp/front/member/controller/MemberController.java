@@ -211,7 +211,7 @@ public class MemberController {
         return "admin/member-list";
     }
 
-    @PutMapping("/admin/members/{memberId}/status")
+    @PostMapping("/admin/members/{memberId}/status")
     @ResponseBody
     public ResponseEntity<Void> updateMemberStatus(@PathVariable Long memberId, @RequestBody Map<String, String> body) {
         String newStatus = body.get("status");

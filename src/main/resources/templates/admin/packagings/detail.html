@@ -109,7 +109,7 @@
                 const id = btn.getAttribute('data-id');
                 try {
                     const res = await fetch(`/admin/packagings/${id}/delete`, {
-                        method: 'DELETE',
+                        method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include' // ✅ 쿠키 포함
                     });

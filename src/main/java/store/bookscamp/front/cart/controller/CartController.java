@@ -55,7 +55,7 @@ public class CartController {
         return ResponseEntity.status(response.getStatusCode()).build();
     }
 
-    @PutMapping("/{cartItemId}")
+    @PostMapping("/{cartItemId}/update")
     public ResponseEntity<Void> updateCartItem(
             @PathVariable Long cartItemId,
             @Valid @RequestBody CartItemUpdateRequest request
@@ -64,13 +64,13 @@ public class CartController {
         return ResponseEntity.status(response.getStatusCode()).build();
     }
 
-    @DeleteMapping("/{cartItemId}")
+    @PostMapping("/{cartItemId}/delete")
     public ResponseEntity<Void> deleteCartItem(@PathVariable Long cartItemId) {
         ResponseEntity<Void> response = cartFeignClient.deleteCartItem(cartItemId);
         return ResponseEntity.status(response.getStatusCode()).build();
     }
 
-    @DeleteMapping
+    @PostMapping("/clear")
     public ResponseEntity<Void> clearCart() {
         ResponseEntity<Void> response = cartFeignClient.clearCart();
         return ResponseEntity.status(response.getStatusCode()).build();

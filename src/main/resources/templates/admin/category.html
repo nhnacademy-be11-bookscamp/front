@@ -265,7 +265,7 @@
 
             try {
                 const response = await fetch(`${apiUrl}/${categoryId}`, {
-                    method: 'PUT',
+                    method: 'POST',
                     headers: headers,
                     body: JSON.stringify({ name: newName }),
 
@@ -320,7 +320,7 @@
 
             try {
                 const response = await fetch(`${apiUrl}/${categoryId}`, {
-                    method: 'DELETE',
+                    method: 'POST',
                     headers: headers,
 
                     credentials: 'include'

@@ -4,7 +4,11 @@ import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,19 +28,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.member.controller.request.MemberCreateRequest;
 import store.bookscamp.front.member.controller.request.MemberPasswordUpdateRequest;
+import store.bookscamp.front.member.controller.request.MemberStatusUpdateRequest;
 import store.bookscamp.front.member.controller.request.MemberUpdateRequest;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
-import store.bookscamp.front.rank.controller.request.RankGetRequest;
-import store.bookscamp.front.rank.feign.RankFeignClient;
+import store.bookscamp.front.member.controller.response.MemberPageResponse;
 
 @Controller
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberFeignClient memberFeignClient;
-    private final RankFeignClient rankFeignClient;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -80,11 +85,8 @@ public class MemberController {
     @GetMapping("/mypage")
     public ModelAndView getMember(){
         MemberGetResponse memberInfo = memberFeignClient.getMember();
-        RankGetRequest rank = rankFeignClient.getRank().getBody();
         ModelAndView modelAndView = new ModelAndView("member/mypage");
         modelAndView.addObject("memberInfo",memberInfo);
-        modelAndView.addObject("rank",rank);
-
         return modelAndView;
     }
 
@@ -185,7 +187,7 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/member")
+    @DeleteMapping("/members")
     public ResponseEntity<Void> deleteMember(HttpServletRequest request,
                                              HttpServletResponse response){
         memberFeignClient.deleteMember();
@@ -194,6 +196,27 @@ public class MemberController {
         if (auth != null) {
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/admin/members")
+    public String getMemberList( @PageableDefault(size = 10, page = 0) Pageable pageable,Model model){
+        ResponseEntity<RestPageImpl<MemberPageResponse>> responseEntity = memberFeignClient.getAllMembers(pageable);
+
+        RestPageImpl<MemberPageResponse> memberPage = responseEntity.getBody();
+
+        model.addAttribute("members", memberPage);
+        
+        return "admin/member-list";
+    }
+
+    @PutMapping("/admin/members/{memberId}/status")
+    @ResponseBody
+    public ResponseEntity<Void> updateMemberStatus(@PathVariable Long memberId, @RequestBody Map<String, String> body) {
+        String newStatus = body.get("status");
+        MemberStatusUpdateRequest request = new MemberStatusUpdateRequest(memberId, newStatus);
+        memberFeignClient.updateMemberStatus(request);
 
         return ResponseEntity.ok().build();
     }

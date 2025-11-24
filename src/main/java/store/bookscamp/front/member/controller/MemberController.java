@@ -35,6 +35,7 @@ import store.bookscamp.front.rank.feign.RankFeignClient;
 public class MemberController {
 
     private final MemberFeignClient memberFeignClient;
+    private final RankFeignClient rankFeignClient;
     private final PasswordEncoder passwordEncoder;
 
 

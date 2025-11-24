@@ -20,7 +20,7 @@ public class CouponRestController {
         couponFeignClient.createCoupon(request);
     }
 
-    @DeleteMapping("/api-server/admin/coupons/{couponId}")
+    @PostMapping("/api-server/admin/coupons/{couponId}")
     public void deleteCoupon(@PathVariable Long couponId){
         couponFeignClient.deleteCoupon(couponId);
     }

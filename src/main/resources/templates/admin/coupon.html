@@ -353,7 +353,7 @@
 
             try {
                 const response = await fetch(`${apiUrl}/${couponId}`, {
-                    method: 'DELETE',
+                    method: 'POST',
                     headers: headers,
                     credentials: 'include'
                 });

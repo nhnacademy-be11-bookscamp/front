@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/orange")
+@RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
 

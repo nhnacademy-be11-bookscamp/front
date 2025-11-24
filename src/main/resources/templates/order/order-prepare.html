@@ -1121,7 +1121,7 @@
                 button.disabled = true;
                 button.textContent = '주문 처리 중...';
 
-                const response = await fetch('/orange', {
+                const response = await fetch('/orders', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',

@@ -118,7 +118,7 @@ public class OrderController {
         log.info("주문 생성 응답 데이터: {}", response.getBody());
         log.info("=== 주문 생성 요청 완료 ===");
 
-        return response;
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
     private boolean isAuthenticatedMember(HttpServletRequest request) {

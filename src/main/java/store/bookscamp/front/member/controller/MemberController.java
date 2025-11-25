@@ -187,7 +187,7 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/members")
+    @PostMapping("/members")
     public ResponseEntity<Void> deleteMember(HttpServletRequest request,
                                              HttpServletResponse response){
         memberFeignClient.deleteMember();

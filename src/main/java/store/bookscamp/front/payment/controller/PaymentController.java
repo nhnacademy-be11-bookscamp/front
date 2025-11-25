@@ -68,6 +68,6 @@ public class PaymentController {
         log.info("결제 승인 응답 데이터: {}", response.getBody());
         log.info("=== 결제 승인 요청 완료 ===");
 
-        return response;
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 }

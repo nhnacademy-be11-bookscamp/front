@@ -27,6 +27,21 @@
                 color: #6c757d;
                 font-size: 1rem;
             }
+            /* === 컬럼 폭/줄바꿈 문제 해결 === */
+            /* 주문일 */
+            .order-table th:nth-child(1),
+            .order-table td:nth-child(1) {
+                width: 115px;          /* 날짜가 한 줄에 들어올 최소 폭 */
+                white-space: nowrap;   /* 2025-11-24가 줄바꿈되지 않게 */
+            }
+
+            /* 결제금액 */
+            .order-table th:nth-child(4),
+            .order-table td:nth-child(4) {
+                width: 130px;          /* "33,000원"이 한 줄에 들어올 폭 */
+                white-space: nowrap;   /* 숫자/원 단위 줄바꿈 방지 */
+                text-align: right;
+            }
         </style>
     </th:block>
 </head>
@@ -75,58 +90,38 @@
                             <th scope="col" class="text-end">결제금액</th>
                         </tr>
                         </thead>
-<!--                        <tbody>-->
-<!--                        <tr th:each="order : ${orders}">-->
-<!--                            &lt;!&ndash; 주문일 &ndash;&gt;-->
-<!--                            <td th:text="${#temporals.format(order.orderDate(), 'yyyy-MM-dd')}"></td>-->
 
-<!--                            &lt;!&ndash; 주문번호 &ndash;&gt;-->
-<!--                            <td th:text="${order.orderId()}"></td>-->
+                            <tbody>
+                            <tr th:each="order : ${orders}">
+                                <!-- 주문일 -->
+                                <td th:text="${#temporals.format(order.orderDate(), 'yyyy-MM-dd')}"></td>
 
-<!--                            &lt;!&ndash; 주문상품: 대표도서명 + (외 N권) &ndash;&gt;-->
-<!--                            <td>-->
-<!--                                <span th:text="${order.representativeBookTitle()}"></span>-->
-<!--                                <span th:if="${order.totalQuantity() > 1}"-->
-<!--                                      th:text="${' 외 ' + (order.totalQuantity() - 1) + '권'}"></span>-->
+                                <!-- 주문번호: 클릭 시 /orders/{orderId} 이동 -->
+                                <td>
+                                    <a th:href="@{/orders/{orderId}(orderId=${order.orderId()})}"
+                                       class="text-decoration-none text-dark"
+                                       th:text="${order.orderId()}">
+                                    </a>
+                                </td>
 
-<!--                            </td>-->
+                                <!-- 주문상품: 클릭 시 /orders/{orderId} 이동 -->
+                                <td>
+                                    <a th:href="@{/orders/{orderId}(orderId=${order.orderId()})}"
+                                       class="text-decoration-none text-dark">
+                                        <!-- 대표 도서명 null 안전 처리 -->
+                                        <span th:text="${order.representativeBookTitle() != null ? order.representativeBookTitle() : '삭제된 도서'}"></span>
+                                        <!-- 총 권수 표시 -->
+                                        <span th:if="${order.totalQuantity() > 1}"
+                                              th:text="${' 외 ' + (order.totalQuantity() - 1) + '권'}"></span>
+                                    </a>
+                                </td>
 
-<!--                            &lt;!&ndash; 결제금액 &ndash;&gt;-->
-<!--                            <td class="text-end"-->
-<!--                                th:text="${#numbers.formatInteger(order.finalPaymentAmount(), 3, 'COMMA')} + '원'">-->
-<!--                            </td>-->
-<!--                        </tr>-->
-<!--                        </tbody>-->
-
-                        <tbody>
-                        <tr th:each="order : ${orders}">
-                            <!-- 주문일 -->
-                            <td th:text="${#temporals.format(order.orderDate(), 'yyyy-MM-dd')}"></td>
-
-                            <!-- 주문번호: 클릭 시 /orders/{orderId} 이동 -->
-                            <td>
-                                <a th:href="@{/orders/{orderId}(orderId=${order.orderId()})}"
-                                   class="text-decoration-none text-dark"
-                                   th:text="${order.orderId()}">
-                                </a>
-                            </td>
-
-                            <!-- 주문상품: 클릭 시 /orders/{orderId} 이동 -->
-                            <td>
-                                <a th:href="@{/orders/{orderId}(orderId=${order.orderId()})}"
-                                   class="text-decoration-none text-dark">
-                                    <span th:text="${order.representativeBookTitle()}"></span>
-                                    <span th:if="${order.totalQuantity() > 1}"
-                                          th:text="${' 외 ' + (order.totalQuantity() - 1) + '권'}"></span>
-                                </a>
-                            </td>
-
-                            <!-- 결제금액 -->
-                            <td class="text-end"
-                                th:text="${#numbers.formatInteger(order.finalPaymentAmount(), 3, 'COMMA')} + '원'">
-                            </td>
-                        </tr>
-                        </tbody>
+                                <!-- 결제금액 -->
+                                <td class="text-end"
+                                    th:text="${#numbers.formatInteger(order.finalPaymentAmount(), 3, 'COMMA')} + '원'">
+                                </td>
+                            </tr>
+                            </tbody>
 
                     </table>
                 </div>

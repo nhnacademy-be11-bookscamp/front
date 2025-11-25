@@ -3,7 +3,7 @@ package store.bookscamp.front.order.controller;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Controller
 @RequestMapping("/orders")
 @RequiredArgsConstructor
@@ -47,10 +48,17 @@ public class OrderController {
             HttpServletRequest request,
             Model model
     ) {
+        log.info("=== 주문 준비 요청 시작 ===");
+        log.info("요청 데이터: {}", prepareRequest);
+
         boolean isMember = isAuthenticatedMember(request);
 
         ResponseEntity<OrderPrepareResponse> response = orderFeignClient.prepareOrder(prepareRequest);
         OrderPrepareResponse orderData = response.getBody();
+
+        log.info("주문 준비 응답 상태: {}", response.getStatusCode());
+        log.info("주문 준비 응답 데이터: {}", orderData);
+        log.info("=== 주문 준비 요청 완료 ===");
 
         model.addAttribute("orderData", orderData);
         model.addAttribute("isMember", isMember);
@@ -89,17 +97,28 @@ public class OrderController {
             @RequestBody OrderCreateRequest request,
             HttpServletRequest httpRequest
     ) {
+        log.info("=== 주문 생성 요청 시작 ===");
+        log.info("요청 데이터: {}", request);
+
         boolean isMember = isAuthenticatedMember(httpRequest);
 
         if (!isMember && request.nonMemberInfo() == null) {
+            log.error("주문 생성 실패: 비회원 정보 누락");
             throw new IllegalArgumentException("비회원 정보는 필수입니다.");
         }
 
         if (isMember && request.nonMemberInfo() != null) {
+            log.error("주문 생성 실패: 회원이 비회원 정보 입력");
             throw new IllegalArgumentException("회원은 비회원 정보를 입력할 수 없습니다.");
         }
 
-        return orderFeignClient.createOrder(request);
+        ResponseEntity<OrderCreateResponse> response = orderFeignClient.createOrder(request);
+
+        log.info("주문 생성 응답 상태: {}", response.getStatusCode());
+        log.info("주문 생성 응답 데이터: {}", response.getBody());
+        log.info("=== 주문 생성 요청 완료 ===");
+
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
     private boolean isAuthenticatedMember(HttpServletRequest request) {

@@ -35,12 +35,15 @@ import store.bookscamp.front.member.controller.request.MemberStatusUpdateRequest
 import store.bookscamp.front.member.controller.request.MemberUpdateRequest;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
 import store.bookscamp.front.member.controller.response.MemberPageResponse;
+import store.bookscamp.front.rank.controller.request.RankGetRequest;
+import store.bookscamp.front.rank.feign.RankFeignClient;
 
 @Controller
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberFeignClient memberFeignClient;
+    private final RankFeignClient rankFeignClient;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -85,8 +88,10 @@ public class MemberController {
     @GetMapping("/mypage")
     public ModelAndView getMember(){
         MemberGetResponse memberInfo = memberFeignClient.getMember();
+        RankGetRequest rank = rankFeignClient.getRank().getBody();
         ModelAndView modelAndView = new ModelAndView("member/mypage");
         modelAndView.addObject("memberInfo",memberInfo);
+        modelAndView.addObject("rank", rank);
         return modelAndView;
     }
 
@@ -187,7 +192,7 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/members")
+    @PostMapping("/members/delete")
     public ResponseEntity<Void> deleteMember(HttpServletRequest request,
                                              HttpServletResponse response){
         memberFeignClient.deleteMember();
@@ -211,7 +216,7 @@ public class MemberController {
         return "admin/member-list";
     }
 
-    @PutMapping("/admin/members/{memberId}/status")
+    @PostMapping("/admin/members/{memberId}/status")
     @ResponseBody
     public ResponseEntity<Void> updateMemberStatus(@PathVariable Long memberId, @RequestBody Map<String, String> body) {
         String newStatus = body.get("status");

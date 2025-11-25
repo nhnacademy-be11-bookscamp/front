@@ -1,7 +1,10 @@
 package store.bookscamp.front.cart.controller;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,9 @@ import store.bookscamp.front.cart.controller.request.CartItemAddRequest;
 import store.bookscamp.front.cart.controller.request.CartItemUpdateRequest;
 import store.bookscamp.front.cart.controller.response.CartItemsResponse;
 import store.bookscamp.front.cart.feign.CartFeignClient;
+import store.bookscamp.front.order.dto.OrderCreateRequest;
+import store.bookscamp.front.order.dto.OrderCreateResponse;
+import store.bookscamp.front.order.feign.OrderFeignClient;
 
 @Slf4j
 @Controller
@@ -27,6 +33,7 @@ import store.bookscamp.front.cart.feign.CartFeignClient;
 public class CartController {
 
     private final CartFeignClient cartFeignClient;
+    private final OrderFeignClient orderFeignClient;
 
     @GetMapping
     public String viewCart(Model model, HttpServletResponse servletResponse) {
@@ -71,9 +78,44 @@ public class CartController {
     }
 
     @PostMapping("/clear")
-    public ResponseEntity<Void> clearCart() {
-        ResponseEntity<Void> response = cartFeignClient.clearCart();
-        return ResponseEntity.status(response.getStatusCode()).build();
+    public ResponseEntity<OrderCreateResponse> clearCart(
+            @RequestBody OrderCreateRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        log.info("=== 주문 생성 요청 시작 ===");
+        log.info("요청 데이터: {}", request);
+
+        boolean isMember = isAuthenticatedMember(httpRequest);
+
+        if (!isMember && request.nonMemberInfo() == null) {
+            log.error("주문 생성 실패: 비회원 정보 누락");
+            throw new IllegalArgumentException("비회원 정보는 필수입니다.");
+        }
+
+        if (isMember && request.nonMemberInfo() != null) {
+            log.error("주문 생성 실패: 회원이 비회원 정보 입력");
+            throw new IllegalArgumentException("회원은 비회원 정보를 입력할 수 없습니다.");
+        }
+
+        ResponseEntity<OrderCreateResponse> response = orderFeignClient.createOrder(request);
+
+        log.info("주문 생성 응답 상태: {}", response.getStatusCode());
+        log.info("주문 생성 응답 데이터: {}", response.getBody());
+        log.info("=== 주문 생성 요청 완료 ===");
+
+        return response;
+    }
+
+    private boolean isAuthenticatedMember(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return false;
+        }
+
+        return Arrays.stream(cookies)
+                .anyMatch(cookie -> "Authorization".equals(cookie.getName())
+                        && cookie.getValue() != null
+                        && !cookie.getValue().isEmpty());
     }
 
     private static void setCookieFromApi(HttpServletResponse servletResponse,

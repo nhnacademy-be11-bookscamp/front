@@ -1121,7 +1121,7 @@
                 button.disabled = true;
                 button.textContent = '주문 처리 중...';
 
-                const response = await fetch('/orders', {
+                const response = fetch('/orders', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -1133,7 +1133,7 @@
                     throw new Error(error.message || '주문 처리 실패');
                 }
 
-                const result = await response.json();
+                const result = response.json();
 
                 // 임시: 주문 생성 성공 시 응답 값 확인
                 alert('주문 생성 성공!\n\n' + JSON.stringify(result, null, 2));

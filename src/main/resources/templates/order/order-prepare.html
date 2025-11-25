@@ -1121,19 +1121,26 @@
                 button.disabled = true;
                 button.textContent = '주문 처리 중...';
 
-                const response = fetch('/orders', {
+                console.log('=== 주문 생성 요청 시작 ===', new Date().toISOString());
+                console.log('요청 데이터:', orderRequest);
+
+                const response = await fetch('/orders', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify(orderRequest)
                 });
 
+                console.log('응답 상태:', response.status, response.statusText);
+
                 if (!response.ok) {
                     const error = await response.json();
+                    console.error('주문 생성 실패:', error);
                     throw new Error(error.message || '주문 처리 실패');
                 }
 
-                const result = response.json();
+                const result = await response.json();
+                console.log('주문 생성 성공:', result);
 
                 // 임시: 주문 생성 성공 시 응답 값 확인
                 alert('주문 생성 성공!\n\n' + JSON.stringify(result, null, 2));
@@ -1175,6 +1182,8 @@
 
         // 초기화
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== order-prepare.html 페이지 로드됨 ===', new Date().toISOString());
+
             setTimeout(function() {
                 loadDefaultAddress();
                 calculateTotal();

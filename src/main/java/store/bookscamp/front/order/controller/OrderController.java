@@ -3,11 +3,12 @@ package store.bookscamp.front.order.controller;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +20,11 @@ import store.bookscamp.front.member.controller.MemberFeignClient;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
 import store.bookscamp.front.order.dto.OrderCreateRequest;
 import store.bookscamp.front.order.dto.OrderCreateResponse;
+import store.bookscamp.front.order.dto.OrderDetailResponse;
 import store.bookscamp.front.order.dto.OrderListResponse;
 import store.bookscamp.front.order.dto.OrderPrepareRequest;
 import store.bookscamp.front.order.dto.OrderPrepareResponse;
+import store.bookscamp.front.order.dto.PageResponse;
 import store.bookscamp.front.order.feign.OrderFeignClient;
 
 import java.util.Arrays;
@@ -29,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Controller
 @RequestMapping("/orders")
 @RequiredArgsConstructor
@@ -44,10 +48,17 @@ public class OrderController {
             HttpServletRequest request,
             Model model
     ) {
+        log.info("=== 주문 준비 요청 시작 ===");
+        log.info("요청 데이터: {}", prepareRequest);
+
         boolean isMember = isAuthenticatedMember(request);
 
         ResponseEntity<OrderPrepareResponse> response = orderFeignClient.prepareOrder(prepareRequest);
         OrderPrepareResponse orderData = response.getBody();
+
+        log.info("주문 준비 응답 상태: {}", response.getStatusCode());
+        log.info("주문 준비 응답 데이터: {}", orderData);
+        log.info("=== 주문 준비 요청 완료 ===");
 
         model.addAttribute("orderData", orderData);
         model.addAttribute("isMember", isMember);
@@ -82,8 +93,32 @@ public class OrderController {
 
     @PostMapping
     @ResponseBody
-    public ResponseEntity<OrderCreateResponse> createOrder(@RequestBody OrderCreateRequest request) {
-        return orderFeignClient.createOrder(request);
+    public ResponseEntity<OrderCreateResponse> createOrder(
+            @RequestBody OrderCreateRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        log.info("=== 주문 생성 요청 시작 ===");
+        log.info("요청 데이터: {}", request);
+
+        boolean isMember = isAuthenticatedMember(httpRequest);
+
+        if (!isMember && request.nonMemberInfo() == null) {
+            log.error("주문 생성 실패: 비회원 정보 누락");
+            throw new IllegalArgumentException("비회원 정보는 필수입니다.");
+        }
+
+        if (isMember && request.nonMemberInfo() != null) {
+            log.error("주문 생성 실패: 회원이 비회원 정보 입력");
+            throw new IllegalArgumentException("회원은 비회원 정보를 입력할 수 없습니다.");
+        }
+
+        ResponseEntity<OrderCreateResponse> response = orderFeignClient.createOrder(request);
+
+        log.info("주문 생성 응답 상태: {}", response.getStatusCode());
+        log.info("주문 생성 응답 데이터: {}", response.getBody());
+        log.info("=== 주문 생성 요청 완료 ===");
+
+        return response;
     }
 
     private boolean isAuthenticatedMember(HttpServletRequest request) {
@@ -107,13 +142,13 @@ public class OrderController {
             @RequestParam(defaultValue = "5") int size,
             Model model
     ) {
-        ResponseEntity<Page<OrderListResponse>> response =
+        ResponseEntity<PageResponse<OrderListResponse>> response =
                 orderFeignClient.getOrderList(page, size);
 
-        Page<OrderListResponse> orderPage = response.getBody();
+        PageResponse<OrderListResponse> orderPage = response.getBody();
 
         List<OrderListResponse> orders =
-                (orderPage != null) ? orderPage.getContent() : List.of();
+                (orderPage != null) ? orderPage.content() : List.of();
 
         model.addAttribute("orderPage", orderPage); // 페이징 정보 전체
         model.addAttribute("orders", orders);       // 실제 주문 리스트
@@ -121,5 +156,15 @@ public class OrderController {
         model.addAttribute("pageSize", size);
 
         return "order/order-list";
+    }
+
+    /**
+     * 각각의 주문 내역 상세 조회
+     */
+    @GetMapping("/{orderId}")
+    public String getOrderDetail(@PathVariable Long orderId, Model model) {
+        ResponseEntity<OrderDetailResponse> response = orderFeignClient.getOrderDetail(orderId);
+        model.addAttribute("order", response.getBody());
+        return "order/order-detail";
     }
 }

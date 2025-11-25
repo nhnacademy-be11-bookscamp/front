@@ -25,7 +25,7 @@
             background: #fff;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
         }
 
         .cart-table th {
@@ -100,9 +100,20 @@
             cursor: pointer;
         }
 
-        .cart-btn-danger { background: #dc3545; color: white; }
-        .cart-btn-secondary { background: #656d76; color: white; }
-        .cart-btn-primary { background: #4A90E2; color: white; }
+        .cart-btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .cart-btn-secondary {
+            background: #656d76;
+            color: white;
+        }
+
+        .cart-btn-primary {
+            background: #4A90E2;
+            color: white;
+        }
 
         .cart-summary {
             margin-top: 30px;
@@ -258,13 +269,12 @@
                 return;
             }
 
-            const response = await fetch("/carts/" + cartItemId, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ quantity: newQty }),
+            const response = await fetch("/carts/" + cartItemId + "/update", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({quantity: newQty}),
                 credentials: "include"
-            });
-
+            })
             if (!response.ok) {
                 alert("수량 변경 실패");
                 return;
@@ -282,8 +292,8 @@
         // 삭제
         // -----------------------------
         async function deleteCartItem(cartItemId) {
-            const res = await fetch("/carts/" + cartItemId, {
-                method: "DELETE",
+            const res = await fetch("/carts/" + cartItemId + "/delete", {
+                method: "POST",
                 credentials: "include"
             });
 
@@ -301,8 +311,8 @@
         function clearCart() {
             if (!confirm("장바구니를 모두 비우시겠습니까?")) return;
 
-            fetch("/carts", {
-                method: "DELETE",
+            fetch("/carts/clear", {
+                method: "POST",
                 credentials: "include"
             }).then(res => {
                 if (res.ok) location.reload();
@@ -343,7 +353,7 @@
                         "Content-Type": "application/json"
                     },
                     credentials: "include",
-                    body: JSON.stringify({ items: items })
+                    body: JSON.stringify({items: items})
                 });
 
                 if (response.ok) {

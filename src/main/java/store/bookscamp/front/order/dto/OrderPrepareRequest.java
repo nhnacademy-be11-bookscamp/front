@@ -3,10 +3,13 @@ package store.bookscamp.front.order.dto;
 import java.util.List;
 
 public record OrderPrepareRequest(
-        List<OrderItemRequest> items
+        List<OrderItemRequest> items,
+        Long couponIssueId,
+        Integer usedPoint
 ) {
     public record OrderItemRequest(
             Long bookId,
-            Integer quantity
+            Integer quantity,
+            Long packagingId
     ) {}
 }

@@ -1132,17 +1132,10 @@
                 });
 
                 console.log('응답 상태:', response.status, response.statusText);
-                console.log('요청 완료 - 응답 읽지 않음');
 
-                // 응답 처리 생략 (디버깅용)
-                // if (!response.ok) {
-                //     const error = await response.json();
-                //     console.error('주문 생성 실패:', error);
-                //     throw new Error(error.message || '주문 처리 실패');
-                // }
-
-                // const result = await response.json();
-                // console.log('주문 생성 성공:', result);
+                // 응답 본문을 읽어야 요청이 완료됨 (중복 요청 방지)
+                const result = await response.json();
+                console.log('응답 받음 (처리 안 함):', result);
 
                 // 임시: 주문 생성 성공 시 응답 값 확인
                 // alert('주문 생성 성공!\n\n' + JSON.stringify(result, null, 2));

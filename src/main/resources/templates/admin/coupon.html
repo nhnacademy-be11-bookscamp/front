@@ -380,8 +380,6 @@
                 let html = '';
                 books.forEach(b => {
                     const safeTitle = b.title.replace(/'/g, "\\'");
-                    const author = b.author ? b.author : '-';
-                    const price = b.salePrice ? b.salePrice.toLocaleString() + '원' : '-';
 
                     html += `
                         <div class="modal-list-item d-flex justify-content-between align-items-center"

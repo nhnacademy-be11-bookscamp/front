@@ -1132,18 +1132,20 @@
                 });
 
                 console.log('응답 상태:', response.status, response.statusText);
+                console.log('요청 완료 - 응답 읽지 않음');
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    console.error('주문 생성 실패:', error);
-                    throw new Error(error.message || '주문 처리 실패');
-                }
+                // 응답 처리 생략 (디버깅용)
+                // if (!response.ok) {
+                //     const error = await response.json();
+                //     console.error('주문 생성 실패:', error);
+                //     throw new Error(error.message || '주문 처리 실패');
+                // }
 
-                const result = await response.json();
-                console.log('주문 생성 성공:', result);
+                // const result = await response.json();
+                // console.log('주문 생성 성공:', result);
 
                 // 임시: 주문 생성 성공 시 응답 값 확인
-                alert('주문 생성 성공!\n\n' + JSON.stringify(result, null, 2));
+                // alert('주문 생성 성공!\n\n' + JSON.stringify(result, null, 2));
 
                 // 토스페이먼츠 결제 (임시로 주석 처리)
                 // const tossPayments = TossPayments('test_ck_DnyRpQWGrNz0RNpYJkPbrKwv1M9E');

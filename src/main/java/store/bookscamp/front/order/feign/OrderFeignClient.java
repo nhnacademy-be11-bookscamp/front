@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import store.bookscamp.front.common.config.FeignConfig;
+import store.bookscamp.front.order.dto.NonMemberOrderRequest;
 import store.bookscamp.front.order.dto.OrderCreateRequest;
 import store.bookscamp.front.order.dto.OrderCreateResponse;
 import store.bookscamp.front.order.dto.OrderDetailResponse;
@@ -39,10 +40,19 @@ public interface OrderFeignClient {
     );
 
     /**
-     * 각가의 주문 내역 상세 조회
+     * 상세 주문 내역 조회
      */
     @GetMapping("/api-server/orders/{orderId}")
     ResponseEntity<OrderDetailResponse> getOrderDetail(
             @PathVariable Long orderId);
 
+    /**
+     * 비회원 주문 상세 조회
+     * 주문번호 + 비밀번호
+     */
+    @PostMapping("/api-server/orders/non-member/{orderNumber}")
+    ResponseEntity<OrderDetailResponse> getNonMemberOrderDetail(
+            @PathVariable("orderNumber") String orderNumber,
+            @RequestBody NonMemberOrderRequest request
+    );
 }

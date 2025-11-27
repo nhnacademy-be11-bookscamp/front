@@ -51,10 +51,9 @@ public interface OrderFeignClient {
      * 비회원 주문 상세 조회
      * 주문번호 + 비밀번호
      */
-    @PostMapping("/api-server/non-member/orders/{orderNumber}")
+    @PostMapping("/api-server/orders/non-member/{orderNumber}")
     ResponseEntity<OrderDetailResponse> getNonMemberOrderDetail(
             @PathVariable("orderNumber") String orderNumber,
             @RequestBody NonMemberOrderRequest request
     );
-
 }

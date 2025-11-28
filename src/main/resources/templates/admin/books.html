@@ -343,6 +343,53 @@
                 margin-bottom: 15px;
                 display: block;
             }
+
+            /* 카테고리 */
+            .tree-select-container {
+                position: relative;
+            }
+
+            .selected-box {
+                padding: 12px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                background: white;
+                cursor: pointer;
+            }
+
+            .tree-container {
+                display: none;
+                position: absolute;
+                z-index: 30;
+                width: 100%;
+                max-height: 350px;
+                overflow-y: auto;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 10px;
+            }
+
+            .tree-item {
+                display: flex;
+                align-items: center;
+                padding: 4px 5px;
+                cursor: pointer;
+            }
+
+            .tree-item:hover {
+                background: #f2f2f2;
+            }
+
+            .tree-icon {
+                width: 18px;
+                margin-right: 6px;
+            }
+
+            .depth {
+                margin-left: 20px;
+            }
+
         </style>
     </th:block>
 </head>
@@ -380,17 +427,15 @@
                             <div class="row g-3">
                                 <div class="col-lg-4">
                                     <label class="form-label">카테고리</label>
-                                    <select name="categoryId" class="form-control">
-                                        <option value="" disabled selected>카테고리를 선택하세요</option>
-                                        <th:block th:each="parent : ${categories}">
-                                            <optgroup th:label="${parent.name}">
-                                                <option th:each="child : ${parent.children}"
-                                                        th:value="${child.id}"
-                                                        th:text="${child.name}">
-                                                </option>
-                                            </optgroup>
-                                        </th:block>
-                                    </select>
+                                    <div class="tree-select-container">
+                                        <div id="selectedCategory" class="selected-box" onclick="toggleTree()">
+                                            카테고리를 선택하세요
+                                        </div>
+
+                                        <div id="categoryTree" class="tree-container"></div>
+                                    </div>
+
+                                    <input type="hidden" id="categoryId" name="categoryId">
                                 </div>
                                 <div class="col-lg-4">
                                     <label class="form-label">검색어</label>
@@ -533,6 +578,60 @@
             $('.admin-toggle').attr('tabindex', '0');
         });
     </script>
+
+    <script th:inline="javascript">
+
+        const categories = /*[[${categories}]]*/ [];
+
+        const treeBox = document.getElementById("categoryTree");
+        const selectedBox = document.getElementById("selectedCategory");
+        const hiddenInput = document.getElementById("categoryId");
+
+        function toggleTree() {
+            treeBox.style.display = treeBox.style.display === "block" ? "none" : "block";
+        }
+
+        function buildTree(list, depth = 0) {
+            let html = "<ul style='list-style:none;padding-left:0;'>";
+
+            list.forEach(cat => {
+                const hasChildren = cat.children && cat.children.length > 0;
+                const icon = hasChildren ? "📁" : "📄";
+
+                html += `
+                <li>
+                    <div class="tree-item depth" style="margin-left:${depth * 20}px"
+                         onclick="selectCategory(${cat.id}, '${cat.name}', this, ${hasChildren})">
+                        <span class="tree-icon">${icon}</span>
+                        <span>${cat.name}</span>
+                        <span style="color:#aaa;font-size:12px;"> (ID:${cat.id})</span>
+                    </div>
+                    ${hasChildren ? `<div class="children" style="display:none;">${buildTree(cat.children, depth + 1)}</div>` : ""}
+                </li>
+            `;
+            });
+
+            html += "</ul>";
+            return html;
+        }
+
+        function selectCategory(id, name, element, hasChildren) {
+            hiddenInput.value = id;
+            selectedBox.textContent = name;
+
+            const childrenBox = element.parentElement.querySelector(".children");
+
+            if (hasChildren) {
+                childrenBox.style.display = childrenBox.style.display === "none" ? "block" : "none";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            treeBox.innerHTML = buildTree(categories);
+        });
+
+    </script>
+
 </div>
 </body>
 </html>

@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import store.bookscamp.front.book.controller.response.BookWishListResponse;
@@ -20,11 +22,9 @@ public class WishListAdvice {
     private final BookFeignClient bookFeignClient;
 
     @ModelAttribute("likedCount")
-    public long addLikedCountToModel() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null ||
-                !authentication.isAuthenticated() ||
-                authentication instanceof AnonymousAuthenticationToken) {
+    public long addLikedCountToModel(@AuthenticationPrincipal UserDetails userDetails) {
+
+        if(userDetails == null){
             return 0L;
         }
 

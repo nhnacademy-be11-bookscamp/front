@@ -362,7 +362,7 @@
 
                 try {
                     const response = await fetch(`/admin/orders/${orderId}/status`, {
-                        method: 'PUT',
+                        method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },

@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import store.bookscamp.front.common.config.FeignConfig;
 import store.bookscamp.front.order.dto.NonMemberOrderRequest;
@@ -59,8 +58,6 @@ public interface OrderFeignClient {
             @PathVariable("orderNumber") String orderNumber,
             @RequestBody NonMemberOrderRequest request
     );
-<<<<<<< HEAD
-=======
 
     @GetMapping(value = "/api-server/admin/orders", produces = "application/json")
     ResponseEntity<PageResponse<OrderListResponse>> getAdminOrderList(
@@ -79,5 +76,4 @@ public interface OrderFeignClient {
             @PathVariable Long orderId,
             @RequestBody OrderStatusUpdateRequest request
     );
->>>>>>> 9da31f2c755d09e01557e3105ced787ef19d7fde
 }

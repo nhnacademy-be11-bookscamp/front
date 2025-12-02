@@ -63,6 +63,7 @@ public class OrderController {
 
         model.addAttribute("orderData", orderData);
         model.addAttribute("isMember", isMember);
+        model.addAttribute("orderType", prepareRequest.orderType());
 
         if (isMember) {
             try {

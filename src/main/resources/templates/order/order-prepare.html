@@ -859,6 +859,7 @@
         const isMember = /*[[${isMember}]]*/ false;
         const username = /*[[${username}]]*/ null;
         const addresses = /*[[${addresses}]]*/ [];
+        const orderType = /*[[${orderType}]]*/ 'DIRECT';  // CART 또는 DIRECT
 
         // 총 금액 계산
         function calculateTotal() {
@@ -1109,7 +1110,8 @@
                     deliveryMemo: deliveryMemo
                 },
                 couponIssueId: couponIssueId,
-                usedPoint: usedPoint
+                usedPoint: usedPoint,
+                orderType: orderType  // CART 또는 DIRECT
             };
 
             if (!isMember && orderPassword) {

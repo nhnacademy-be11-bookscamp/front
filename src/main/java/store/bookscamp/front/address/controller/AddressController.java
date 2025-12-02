@@ -24,7 +24,7 @@ import store.bookscamp.front.address.feign.AddressFeignClient;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/mypage/{username}/address")
+@RequestMapping("/mypage/address")
 public class AddressController {
 
     private final AddressFeignClient addressFeignClient;
@@ -33,51 +33,46 @@ public class AddressController {
     private String apiPrefix;
 
     @GetMapping
-    public ModelAndView getAddresses(@PathVariable("username") String username) {
+    public ModelAndView getAddresses() {
 
-        AddressListResponse body = addressFeignClient.getAddresses(username).getBody();
+        AddressListResponse body = addressFeignClient.getAddresses().getBody();
 
         ModelAndView mav = new ModelAndView("member/address/list");
         mav.addObject("apiPrefix", apiPrefix);
-        mav.addObject("username", username);
         mav.addObject("addresses", body == null ? java.util.List.of() : body.addresses());
         return mav;
     }
 
     @GetMapping(produces = "application/json")
     @ResponseBody
-    public ResponseEntity<AddressListResponse> getAddressesJson(@PathVariable("username") String username) {
-        return addressFeignClient.getAddresses(username);
+    public ResponseEntity<AddressListResponse> getAddressesJson() {
+        return addressFeignClient.getAddresses();
     }
 
     @GetMapping("/new")
-    public ModelAndView showCreateAddressForm(@PathVariable String username) {
+    public ModelAndView showCreateAddressForm() {
         ModelAndView mav = new ModelAndView("member/address/new");
         mav.addObject("apiPrefix", apiPrefix);
-        mav.addObject("username", username);
         mav.addObject("form", new AddressCreateRequest(null, null, null, null, null));
         return mav;
     }
 
     @PostMapping
-    public String create(@PathVariable String username,
-                         @ModelAttribute("form") AddressCreateRequest form) {
-        addressFeignClient.createAddress(username, form);
+    public String create(@ModelAttribute("form") AddressCreateRequest form) {
+        addressFeignClient.createAddress(form);
 
-        return "redirect:/mypage/" + username + "/address";
+        return "redirect:/mypage/address";
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Void> createJson(@PathVariable String username,
-                                           @RequestBody AddressCreateRequest form) {
-        return addressFeignClient.createAddress(username, form);
+    public ResponseEntity<Void> createJson(@RequestBody AddressCreateRequest form) {
+        return addressFeignClient.createAddress(form);
     }
 
-    // 예: /members/{u}/address/{id}/edit?label=집&roadNameAddress=서울시..&zipCode=12345
+    // 예: /members/address/{id}/edit?label=집&roadNameAddress=서울시..&zipCode=12345
     @GetMapping("/{id}/edit")
-    public ModelAndView showEditForm(@PathVariable String username,
-                                     @PathVariable Integer id,
+    public ModelAndView showEditForm(@PathVariable Long id,
                                      @RequestParam String label,
                                      @RequestParam String roadNameAddress,
                                      @RequestParam Integer zipCode,
@@ -86,7 +81,6 @@ public class AddressController {
 
         ModelAndView mav = new ModelAndView("member/address/edit");
         mav.addObject("apiPrefix", apiPrefix);
-        mav.addObject("username", username);
         mav.addObject("id", id);
         mav.addObject("form", new AddressUpdateRequest(label, roadNameAddress, zipCode, isDefault, detailAddress));
         return mav;
@@ -95,21 +89,19 @@ public class AddressController {
     }
 
     @PutMapping("/{id}/edit")
-    public String update(@PathVariable String username,
-                         @PathVariable Long id,
+    public String update(@PathVariable Long id,
                          @ModelAttribute("form") AddressUpdateRequest form,
                          RedirectAttributes ra) {
-        addressFeignClient.updateAddress(username, id, form);
+        addressFeignClient.updateAddress(id, form);
         ra.addFlashAttribute("message", "주소가 수정되었습니다!");
-        return "redirect:/mypage/" + username + "/address";
+        return "redirect:/mypage/address";
     }
 
     @DeleteMapping("/{id}/delete")
-    public String delete(@PathVariable String username,
-                         @PathVariable Long id,
+    public String delete(@PathVariable Long id,
                          RedirectAttributes ra) {
-        addressFeignClient.deleteAddress(username, id);
+        addressFeignClient.deleteAddress(id);
         ra.addFlashAttribute("message", "주소가 삭제되었습니다!");
-        return "redirect:/mypage/" + username + "/address";
+        return "redirect:/mypage/address";
     }
 }

@@ -144,7 +144,7 @@
                                     </a>
                                 </div>
                                 <div class="col-12 col-md-3" style="margin-bottom: 10px;">
-                                    <a th:href="@{/mypage/{username}/address(username=${memberInfo.username})}"
+                                    <a th:href="@{/mypage/address}"
                                        class="site-btn"
                                        style="display: block; text-align: center; background: #00B050; text-decoration: none; padding: 12px;">
                                         <i class="fa fa-map-marker"></i> 주소 관리
@@ -158,10 +158,31 @@
                                     </a>
                                 </div>
                             </div>
+<!--                            <div class="row" style="margin-bottom: 30px;">-->
+
+<!--                                &lt;!&ndash; 포인트 내역 버튼 (왼쪽 50%) &ndash;&gt;-->
+<!--                                <div class="col-12 col-md-6" style="margin-bottom: 10px;">-->
+<!--                                    <a th:href="@{/mypage/points}"-->
+<!--                                       class="site-btn"-->
+<!--                                       style="display: block; text-align: center; width: 100%; background: #7fad39; padding: 12px;">-->
+<!--                                        <i class="fa fa-coins"></i> 포인트 내역-->
+<!--                                    </a>-->
+<!--                                </div>-->
+
+<!--                                &lt;!&ndash; 내 리뷰 버튼 (오른쪽 50%) &ndash;&gt;-->
+<!--                                <div class="col-12 col-md-6" style="margin-bottom: 10px;">-->
+<!--                                    <a th:href="@{/mypage/reviews}"-->
+<!--                                       class="site-btn"-->
+<!--                                       style="display: block; text-align: center; width: 100%; background: #FF6F9E; padding: 12px; color: #fff;">-->
+<!--                                        <i class="fa fa-comment-dots"></i> 내 리뷰-->
+<!--                                    </a>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
                             <div class="row" style="margin-bottom: 30px;">
 
-                                <!-- 포인트 내역 버튼 (왼쪽 50%) -->
-                                <div class="col-12 col-md-6" style="margin-bottom: 10px;">
+                                <!-- 포인트 내역 버튼 -->
+                                <div class="col-12 col-md-4" style="margin-bottom: 10px;">
                                     <a th:href="@{/mypage/points}"
                                        class="site-btn"
                                        style="display: block; text-align: center; width: 100%; background: #7fad39; padding: 12px;">
@@ -169,15 +190,27 @@
                                     </a>
                                 </div>
 
-                                <!-- 내 리뷰 버튼 (오른쪽 50%) -->
-                                <div class="col-12 col-md-6" style="margin-bottom: 10px;">
+                                <!-- 내 리뷰 버튼 -->
+                                <div class="col-12 col-md-4" style="margin-bottom: 10px;">
                                     <a th:href="@{/mypage/reviews}"
                                        class="site-btn"
                                        style="display: block; text-align: center; width: 100%; background: #FF6F9E; padding: 12px; color: #fff;">
                                         <i class="fa fa-comment-dots"></i> 내 리뷰
                                     </a>
                                 </div>
+
+                                <!-- 주문내역조회 버튼 -->
+                                <div class="col-12 col-md-4" style="margin-bottom: 10px;">
+                                    <a th:href="@{/orders/list}"
+                                       class="site-btn"
+                                       style="display: block; text-align: center; width: 100%; background: #495057; padding: 12px; color: #fff;">
+                                        <i class="fa fa-list-alt"></i> 주문내역조회
+                                    </a>
+                                </div>
+
                             </div>
+
+
                         </div>
 
                         <div style="padding: 20px; background: #fff3cd; border: 1px solid #dc3545; border-radius: 4px; margin-top: 30px;">

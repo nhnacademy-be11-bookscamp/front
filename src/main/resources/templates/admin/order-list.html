@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>주문 관리 | 북스캠프</title>
+
+    <!-- 주문 관리 전용 스타일 -->
+    <th:block layout:fragment="extra-css">
+        <style>
+            .order-management-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 1rem;
+            }
+            .order-management-subtitle {
+                color: #6c757d;
+                margin-bottom: 1.5rem;
+            }
+            .order-table th, .order-table td {
+                vertical-align: middle;
+                font-size: 0.95rem;
+            }
+            .order-empty {
+                padding: 3rem 0;
+                text-align: center;
+                color: #6c757d;
+                font-size: 1rem;
+            }
+            /* 주문일 */
+            .order-table th:nth-child(1),
+            .order-table td:nth-child(1) {
+                width: 115px;
+                white-space: nowrap;
+            }
+            /* 주문번호 */
+            .order-table th:nth-child(2),
+            .order-table td:nth-child(2) {
+                width: 100px;
+            }
+            /* 결제금액 */
+            .order-table th:nth-child(4),
+            .order-table td:nth-child(4) {
+                width: 130px;
+                white-space: nowrap;
+                text-align: right;
+            }
+            .sort-controls {
+                margin-bottom: 1rem;
+            }
+            .sort-controls select {
+                width: auto;
+                display: inline-block;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <!-- Hero 섹션 비우기 -->
+    <section layout:fragment="hero" class="hero" style="display: none;">
+    </section>
+
+    <!-- 메인 콘텐츠 -->
+    <div layout:fragment="content">
+        <section class="product spad">
+            <div class="container">
+                <div class="row">
+                    <!-- 관리자 사이드바 -->
+                    <div class="col-lg-3">
+                        <div class="hero__categories">
+                            <div class="hero__categories__all">
+                                <i class="fa fa-bars"></i>
+                                <span>관리자 메뉴</span>
+                            </div>
+                            <ul th:replace="~{fragment/admin-sidebar :: sidebar}">
+                                <li><a href="#">메뉴</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 주문 관리 영역 -->
+                    <div class="col-lg-9">
+                        <div style="background: #ffffff; padding: 30px; border: 1px solid #ebebeb; border-radius: 4px;">
+                            <h4 class="order-management-title">
+                                <i class="fa fa-shopping-cart" style="margin-right: 10px; color: #0064FF;"></i>
+                                주문 관리
+                            </h4>
+                            <p class="order-management-subtitle">전체 주문 내역을 조회하고 관리할 수 있습니다.</p>
+
+                            <!-- 정렬 옵션 -->
+                            <div class="sort-controls">
+                                <label for="sortSelect">정렬 기준:</label>
+                                <select id="sortSelect" class="form-select" onchange="changeSort(this.value)">
+                                    <option value="createdAt,desc" th:selected="${sort == 'createdAt,desc'}">최신순</option>
+                                    <option value="createdAt,asc" th:selected="${sort == 'createdAt,asc'}">오래된 순</option>
+                                    <option value="finalPaymentAmount,desc" th:selected="${sort == 'finalPaymentAmount,desc'}">금액 높은 순</option>
+                                    <option value="finalPaymentAmount,asc" th:selected="${sort == 'finalPaymentAmount,asc'}">금액 낮은 순</option>
+                                </select>
+                            </div>
+
+                            <!-- 주문 내역이 없는 경우 -->
+                            <div th:if="${orders == null or #lists.isEmpty(orders)}" class="order-empty">
+                                주문 내역이 없습니다.
+                            </div>
+
+                            <!-- 주문 내역이 있는 경우 -->
+                            <div th:if="${orders != null and !#lists.isEmpty(orders)}">
+                                <div class="table-responsive">
+                                    <table class="table table-hover order-table">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">주문일</th>
+                                            <th scope="col">주문번호</th>
+                                            <th scope="col">주문상품</th>
+                                            <th scope="col" class="text-end">결제금액</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="order : ${orders}">
+                                            <!-- 주문일 -->
+                                            <td th:text="${#temporals.format(order.orderDate(), 'yyyy-MM-dd')}"></td>
+
+                                            <!-- 주문번호: 클릭 시 /admin/orders/{orderId} 이동 -->
+                                            <td>
+                                                <a th:href="@{/admin/orders/{orderId}(orderId=${order.orderId()})}"
+                                                   class="text-decoration-none text-dark"
+                                                   th:text="${order.orderId()}">
+                                                </a>
+                                            </td>
+
+                                            <!-- 주문상품: 클릭 시 /admin/orders/{orderId} 이동 -->
+                                            <td>
+                                                <a th:href="@{/admin/orders/{orderId}(orderId=${order.orderId()})}"
+                                                   class="text-decoration-none text-dark">
+                                                    <!-- 대표 도서명 null 안전 처리 -->
+                                                    <span th:text="${order.representativeBookTitle() != null ? order.representativeBookTitle() : '삭제된 도서'}"></span>
+                                                    <!-- 총 권수 표시 -->
+                                                    <span th:if="${order.totalQuantity() > 1}"
+                                                          th:text="${' 외 ' + (order.totalQuantity() - 1) + '권'}"></span>
+                                                </a>
+                                            </td>
+
+                                            <!-- 결제금액 -->
+                                            <td class="text-end"
+                                                th:text="${#numbers.formatInteger(order.finalPaymentAmount(), 3, 'COMMA')} + '원'">
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- 페이징 -->
+                                <nav class="mt-3" th:if="${orderPage != null and orderPage.totalPages > 1}">
+                                    <ul class="pagination justify-content-center mb-0">
+
+                                        <!-- 이전 페이지 -->
+                                        <li class="page-item" th:classappend="${orderPage.first} ? 'disabled'">
+                                            <a class="page-link"
+                                               th:href="@{/admin/orders(page=${currentPage - 1}, size=${pageSize}, sort=${sort})}"
+                                               aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+
+                                        <!-- 페이지 번호 -->
+                                        <li class="page-item"
+                                            th:each="p : ${#numbers.sequence(0, orderPage.totalPages - 1)}"
+                                            th:classappend="${p == currentPage} ? 'active'">
+                                            <a class="page-link"
+                                               th:text="${p + 1}"
+                                               th:href="@{/admin/orders(page=${p}, size=${pageSize}, sort=${sort})}">
+                                            </a>
+                                        </li>
+
+                                        <!-- 다음 페이지 -->
+                                        <li class="page-item" th:classappend="${orderPage.last} ? 'disabled'">
+                                            <a class="page-link"
+                                               th:href="@{/admin/orders(page=${currentPage + 1}, size=${pageSize}, sort=${sort})}"
+                                               aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 추가 JavaScript -->
+    <div layout:fragment="extra-js">
+        <script>
+            $(document).ready(function() {
+                // 관리자 사이드바 전용 토글
+                $('.admin-category-header').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var menuId = $(this).data('admin-menu');
+                    var $submenu = $('#admin-menu-' + menuId);
+                    var $toggle = $(this).find('.admin-toggle');
+
+                    $toggle.toggleClass('active');
+                    $submenu.slideToggle(300);
+                });
+
+                // 초기화: aria 속성 설정
+                $('.admin-toggle').attr('role', 'button');
+                $('.admin-toggle').attr('aria-expanded', 'false');
+                $('.admin-toggle').attr('tabindex', '0');
+            });
+
+            // 정렬 변경 함수
+            function changeSort(sortValue) {
+                var currentPage = [[${currentPage}]];
+                var pageSize = [[${pageSize}]];
+                window.location.href = '/admin/orders?page=' + currentPage + '&size=' + pageSize + '&sort=' + sortValue;
+            }
+        </script>
+    </div>
+</body>
+</html>

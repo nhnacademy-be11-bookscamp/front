@@ -18,6 +18,7 @@ import store.bookscamp.front.address.controller.response.AddressListResponse;
 import store.bookscamp.front.address.feign.AddressFeignClient;
 import store.bookscamp.front.member.controller.MemberFeignClient;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
+import store.bookscamp.front.order.dto.NonMemberOrderRequest;
 import store.bookscamp.front.order.dto.OrderCreateRequest;
 import store.bookscamp.front.order.dto.OrderCreateResponse;
 import store.bookscamp.front.order.dto.OrderDetailResponse;
@@ -62,13 +63,14 @@ public class OrderController {
 
         model.addAttribute("orderData", orderData);
         model.addAttribute("isMember", isMember);
+        model.addAttribute("orderType", prepareRequest.orderType());
 
         if (isMember) {
             try {
                 MemberGetResponse memberInfo = memberFeignClient.getMember();
                 String username = memberInfo.username();
                 
-                ResponseEntity<AddressListResponse> addressResponse = addressFeignClient.getAddresses(username);
+                ResponseEntity<AddressListResponse> addressResponse = addressFeignClient.getAddresses();
                 AddressListResponse addressList = addressResponse.getBody();
                 
                 List<AddressListResponse.AddressResponse> sortedAddresses = addressList != null && addressList.addresses() != null
@@ -166,5 +168,34 @@ public class OrderController {
         ResponseEntity<OrderDetailResponse> response = orderFeignClient.getOrderDetail(orderId);
         model.addAttribute("order", response.getBody());
         return "order/order-detail";
+    }
+
+    /**
+     * 비회원 주문 내역 상세 조회
+     * 주문번호, 비밀번호
+     */
+    @PostMapping("/non-member/detail")
+    public String getNonMemberDetail(
+            @RequestParam("orderNumber") String orderNumber,
+            @RequestParam("password") String password,
+            Model model
+    ) {
+        log.info("====테스트!! : 비회원 주문 상세 조회 요청 시작===");
+        log.info("주문번호 : {}", orderNumber);
+
+        NonMemberOrderRequest request = new NonMemberOrderRequest(password);
+
+        ResponseEntity<OrderDetailResponse> response = orderFeignClient.getNonMemberOrderDetail(orderNumber, request);
+
+        OrderDetailResponse orderDetail = response.getBody();
+
+        log.info("비회원 주문 상세 조회 응답 상태: {}", response.getStatusCode());
+        log.info("비회원 주문 상세 조회 응답 데이터: {}", orderDetail);
+        log.info("=== 비회원 주문 상세 조회 요청 완료 ===");
+
+        model.addAttribute("order", orderDetail);
+        model.addAttribute("isMember", false);
+
+        return "order/non-member-detail";
     }
 }

@@ -7,7 +7,8 @@ public record OrderCreateRequest(
         DeliveryInfo deliveryInfo,
         Long couponIssueId,
         Integer usedPoint,
-        NonMemberInfo nonMemberInfo
+        NonMemberInfo nonMemberInfo,
+        String orderType
 ) {
     public record OrderItemRequest(
             Long bookId,

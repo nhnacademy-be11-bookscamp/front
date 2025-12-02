@@ -26,7 +26,7 @@
                         </div>
 
                         <!-- 등록 폼 -->
-                        <form th:action="@{|/mypage/${username}/address|}"
+                        <form th:action="@{|/mypage/address|}"
                               method="post" th:object="${form}">
 
                             <!-- 별칭 -->
@@ -94,7 +94,7 @@
                                 <button type="submit" class="site-btn" style="padding:10px 20px;">
                                     등록
                                 </button>
-                                <a th:href="@{|/mypage/${username}/address|}"
+                                <a th:href="@{|/mypage/address|}"
                                    class="site-btn"
                                    style="background:#6f6f6f; padding:10px 20px;">
                                     목록으로

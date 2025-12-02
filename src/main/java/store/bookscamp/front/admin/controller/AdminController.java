@@ -85,6 +85,10 @@ public class AdminController {
             @PathVariable Long orderId,
             @RequestBody OrderStatusUpdateRequest request
     ) {
-        return orderFeignClient.updateOrderStatus(orderId, request);
+        ResponseEntity<OrderStatusUpdateResponse> response = orderFeignClient.updateOrderStatus(orderId, request);
+        return ResponseEntity
+                .status(response.getStatusCode())
+                .headers(response.getHeaders())
+                .body(response.getBody());
     }
 }

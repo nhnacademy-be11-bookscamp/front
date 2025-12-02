@@ -70,7 +70,7 @@ public class OrderController {
                 MemberGetResponse memberInfo = memberFeignClient.getMember();
                 String username = memberInfo.username();
                 
-                ResponseEntity<AddressListResponse> addressResponse = addressFeignClient.getAddresses(username);
+                ResponseEntity<AddressListResponse> addressResponse = addressFeignClient.getAddresses();
                 AddressListResponse addressList = addressResponse.getBody();
                 
                 List<AddressListResponse.AddressResponse> sortedAddresses = addressList != null && addressList.addresses() != null

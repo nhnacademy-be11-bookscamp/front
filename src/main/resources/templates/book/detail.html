@@ -152,9 +152,8 @@
                                     class="site-btn"
                                     id="likeButton"
                                     style="width: 140px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: white; color: #dc3545; border: 2px solid #dc3545; transition: all 0.3s;">
-                                <span class="icon-unliked"><i class="fa-regular fa-heart"></i></span>
-                                <span class="icon-liked" style="display: none;"><i class="fa-solid fa-heart"></i></span>
-                                <span>좋아요</span>
+
+                                <span class="icon-unliked"><i class="fa fa-heart-o"></i></span> <span class="icon-liked" style="display: none;"><i class="fa fa-heart"></i></span> <span>좋아요</span>
                                 <span id="likeCount" th:text="${bookLike.likeCount}">0</span>
                             </button>
                             <button type="button" class="site-btn" id="addToCartBtn"
@@ -496,6 +495,23 @@
             const likeButton = document.getElementById('likeButton');
             const bookId = /*[[${book.id}]]*/ null;
 
+            // 헤더 위시리스트 카운트 업데이트 함수
+            function updateHeaderWishlistCount(changeAmount) {
+                const targetIds = ['header-wishlist-count', 'mobile-wishlist-count'];
+                targetIds.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        let currentCount = parseInt(element.innerText, 10);
+                        if (isNaN(currentCount)) currentCount = 0;
+
+                        let newCount = currentCount + changeAmount;
+                        if (newCount < 0) newCount = 0;
+
+                        element.innerText = newCount;
+                    }
+                });
+            }
+
             if (likeButton) {
                 const likeCountElement = document.getElementById('likeCount');
                 const isAlreadyLiked = /*[[${isLikedByCurrentUser}]]*/ false;
@@ -508,15 +524,19 @@
                 }
 
                 likeButton.addEventListener('click', async function() {
+                    // 1. 낙관적 업데이트
                     const isLiked = likeButton.classList.toggle('liked');
 
                     if (isLiked) {
                         currentLikeCount++;
+                        updateHeaderWishlistCount(1); // 헤더 +1
                     } else {
                         currentLikeCount--;
+                        updateHeaderWishlistCount(-1); // 헤더 -1
                     }
                     likeCountElement.innerText = currentLikeCount;
 
+                    // 2. 서버 요청
                     try {
                         const response = await fetch(`${apiUrl}/${bookId}`, {
                             method: 'POST',
@@ -526,8 +546,15 @@
                         });
 
                         if (response.redirected || response.status === 401 || response.status === 403) {
+                            // 실패 시 롤백
                             likeButton.classList.toggle('liked');
-                            if (isLiked) currentLikeCount--; else currentLikeCount++;
+                            if (isLiked) {
+                                currentLikeCount--;
+                                updateHeaderWishlistCount(-1);
+                            } else {
+                                currentLikeCount++;
+                                updateHeaderWishlistCount(1);
+                            }
                             likeCountElement.innerText = currentLikeCount;
 
                             alert('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.');
@@ -537,8 +564,15 @@
 
                         const contentType = response.headers.get("content-type");
                         if (response.ok && contentType && !contentType.includes("application/json")) {
+                            // 실패 시 롤백
                             likeButton.classList.toggle('liked');
-                            if (isLiked) currentLikeCount--; else currentLikeCount++;
+                            if (isLiked) {
+                                currentLikeCount--;
+                                updateHeaderWishlistCount(-1);
+                            } else {
+                                currentLikeCount++;
+                                updateHeaderWishlistCount(1);
+                            }
                             likeCountElement.innerText = currentLikeCount;
 
                             alert('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.');
@@ -549,14 +583,19 @@
                         if (!response.ok) {
                             throw new Error('Server response was not ok');
                         }
+                        // 성공 시 추가 작업 없음
+
                     } catch (e) {
                         console.error('에러:', e);
 
+                        // 에러 시 롤백
                         likeButton.classList.toggle('liked');
                         if (isLiked) {
                             currentLikeCount--;
+                            updateHeaderWishlistCount(-1);
                         } else {
                             currentLikeCount++;
+                            updateHeaderWishlistCount(1);
                         }
                         likeCountElement.innerText = currentLikeCount;
 

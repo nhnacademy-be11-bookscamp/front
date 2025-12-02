@@ -4,8 +4,7 @@ import java.util.List;
 
 public record OrderPrepareRequest(
         List<OrderItemRequest> items,
-        Long couponIssueId,
-        Integer usedPoint
+        String orderType
 ) {
     public record OrderItemRequest(
             Long bookId,

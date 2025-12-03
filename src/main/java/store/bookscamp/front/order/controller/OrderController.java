@@ -25,6 +25,8 @@ import store.bookscamp.front.order.dto.OrderDetailResponse;
 import store.bookscamp.front.order.dto.OrderListResponse;
 import store.bookscamp.front.order.dto.OrderPrepareRequest;
 import store.bookscamp.front.order.dto.OrderPrepareResponse;
+import store.bookscamp.front.order.dto.OrderReturnRequest;
+import store.bookscamp.front.order.dto.OrderReturnResponse;
 import store.bookscamp.front.order.dto.PageResponse;
 import store.bookscamp.front.order.feign.OrderFeignClient;
 
@@ -152,8 +154,8 @@ public class OrderController {
         List<OrderListResponse> orders =
                 (orderPage != null) ? orderPage.content() : List.of();
 
-        model.addAttribute("orderPage", orderPage); // 페이징 정보 전체
-        model.addAttribute("orders", orders);       // 실제 주문 리스트
+        model.addAttribute("orderPage", orderPage);
+        model.addAttribute("orders", orders);
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", size);
 
@@ -197,5 +199,24 @@ public class OrderController {
         model.addAttribute("isMember", false);
 
         return "order/non-member-detail";
+    }
+
+    /**
+     * 주문 반품
+     */
+    @PostMapping("/{orderId}/return")
+    @ResponseBody
+    public ResponseEntity<OrderReturnResponse> returnOrder(
+            @PathVariable Long orderId,
+            @RequestBody OrderReturnRequest request
+    ) {
+        log.info("반품 신청 요청 - orderId: {}, returnType: {}", orderId, request.returnType());
+
+        ResponseEntity<OrderReturnResponse> response = orderFeignClient.returnOrder(orderId, request);
+
+        log.info("반품 신청 완료 - orderId: {}, statusCode: {}, response: {}",
+                orderId, response.getStatusCode(), response.getBody());
+
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 }

@@ -1,4 +1,4 @@
-package store.bookscamp.front.pronthistory.controller;
+package store.bookscamp.front.pointhistory.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import store.bookscamp.front.pointhistory.PointType;
-import store.bookscamp.front.pointhistory.controller.PointHistoryController;
 import store.bookscamp.front.pointhistory.controller.response.PageResponse;
 import store.bookscamp.front.pointhistory.controller.response.PointHistoryResponse;
 import store.bookscamp.front.pointhistory.feign.PointHistoryFeignClient;

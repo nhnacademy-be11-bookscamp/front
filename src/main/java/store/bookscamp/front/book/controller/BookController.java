@@ -138,7 +138,7 @@ public class BookController {
 
     // 도서 수정
 
-    @GetMapping("admin/books/{id}/update")
+    @GetMapping("admin/books/{id}")
     public String showUpdatePage(@PathVariable Long id, Model model) {
 
         BookInfoResponse book = bookFeignClient.getBookDetail(id);
@@ -151,7 +151,7 @@ public class BookController {
         return "book/update";
     }
 
-    @PutMapping(value = "/admin/books/{id}/update")
+    @PutMapping(value = "/admin/books/{id}")
     public String updateBook(
             @PathVariable Long id,
             @ModelAttribute BookUpdateRequest req,
@@ -243,6 +243,9 @@ public class BookController {
         model.addAttribute("isLikedByCurrentUser", likeStatus);
 
         model.addAttribute("apiPrefix", apiPrefix);
+
+        String aiReview = reviewFeignClient.getAiReview(id).getBody();
+        model.addAttribute("aiReview", aiReview);
 
         PageResponse<BookReviewResponse> reviews = reviewFeignClient.getBookReviews(id, page, 3).getBody();
         model.addAttribute("reviews", reviews);

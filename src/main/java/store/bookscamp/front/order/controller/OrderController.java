@@ -209,17 +209,24 @@ public class OrderController {
      */
     @PostMapping("/{orderId}/return")
     @ResponseBody
-    public ResponseEntity<OrderReturnResponse> returnOrder(
+    public ResponseEntity<?> returnOrder(
             @PathVariable Long orderId,
             @RequestBody OrderReturnRequest request
     ) {
         log.info("반품 신청 요청 - orderId: {}, returnType: {}", orderId, request.returnType());
 
-        ResponseEntity<OrderReturnResponse> response = orderFeignClient.returnOrder(orderId, request);
+        try {
+            ResponseEntity<OrderReturnResponse> response = orderFeignClient.returnOrder(orderId, request);
 
-        log.info("반품 신청 완료 - orderId: {}, statusCode: {}, response: {}",
-                orderId, response.getStatusCode(), response.getBody());
+            log.info("반품 신청 완료 - orderId: {}, statusCode: {}, response: {}",
+                    orderId, response.getStatusCode(), response.getBody());
 
-        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (feign.FeignException e) {
+            log.error("반품 신청 실패 - orderId: {}, statusCode: {}, error: {}",
+                    orderId, e.status(), e.contentUTF8());
+
+            return ResponseEntity.status(e.status()).body(e.contentUTF8());
+        }
     }
 }

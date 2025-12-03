@@ -16,6 +16,8 @@ import store.bookscamp.front.order.dto.OrderDetailResponse;
 import store.bookscamp.front.order.dto.OrderListResponse;
 import store.bookscamp.front.order.dto.OrderPrepareRequest;
 import store.bookscamp.front.order.dto.OrderPrepareResponse;
+import store.bookscamp.front.order.dto.OrderReturnRequest;
+import store.bookscamp.front.order.dto.OrderReturnResponse;
 import store.bookscamp.front.order.dto.OrderStatusUpdateRequest;
 import store.bookscamp.front.order.dto.OrderStatusUpdateResponse;
 import store.bookscamp.front.order.dto.PageResponse;
@@ -75,5 +77,14 @@ public interface OrderFeignClient {
     ResponseEntity<OrderStatusUpdateResponse> updateOrderStatus(
             @PathVariable Long orderId,
             @RequestBody OrderStatusUpdateRequest request
+    );
+
+    /**
+     * 주문 반품
+     */
+    @PostMapping(value = "/api-server/orders/{orderId}/return", produces = "application/json")
+    ResponseEntity<OrderReturnResponse> returnOrder(
+            @PathVariable Long orderId,
+            @RequestBody OrderReturnRequest request
     );
 }

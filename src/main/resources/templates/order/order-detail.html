@@ -70,6 +70,33 @@
                 padding-top: 0.75rem;
                 font-weight: 700;
             }
+            .return-btn {
+                background-color: #dc3545;
+                border-color: #dc3545;
+            }
+            .return-btn:hover {
+                background-color: #c82333;
+                border-color: #bd2130;
+            }
+            .return-type-card {
+                cursor: pointer;
+                transition: all 0.2s;
+                border: 2px solid #dee2e6;
+            }
+            .return-type-card:hover {
+                border-color: #0d6efd;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .return-type-card.selected {
+                border-color: #0d6efd;
+                background-color: #e7f1ff;
+            }
+            .return-info-text {
+                font-size: 0.85rem;
+                color: #6c757d;
+                line-height: 1.6;
+            }
         </style>
     </th:block>
 </head>
@@ -122,10 +149,19 @@
                         </span>
                     </div>
                 </div>
-                <div class="text-md-end">
-                    <div class="order-label">결제 금액</div>
-                    <div class="fs-5 fw-bold"
-                         th:text="${#numbers.formatInteger(order.finalPaymentAmount(), 3, 'COMMA')} + '원'">
+                <div class="text-md-end d-flex flex-column gap-2">
+                    <div>
+                        <div class="order-label">결제 금액</div>
+                        <div class="fs-5 fw-bold"
+                             th:text="${#numbers.formatInteger(order.finalPaymentAmount(), 3, 'COMMA')} + '원'">
+                        </div>
+                    </div>
+                    <!-- 반품 가능한 상태일 때만 반품 버튼 표시 -->
+                    <div th:if="${order.orderStatus() == 'SHIPPED' || order.orderStatus() == 'DELIVERED'}">
+                        <button type="button" class="btn btn-danger return-btn" data-bs-toggle="modal" data-bs-target="#returnModal"
+                                th:attr="data-order-id=${order.orderId()}">
+                            반품 신청
+                        </button>
                     </div>
                 </div>
             </div>
@@ -239,10 +275,172 @@
     <div class="container my-5" th:if="${order == null}">
         <p class="text-center text-muted">주문 정보를 불러올 수 없습니다.</p>
     </div>
+
+    <!-- 반품 신청 모달 -->
+    <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="returnModalLabel">반품 신청</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">반품 사유를 선택해주세요.</p>
+
+                    <!-- 단순 변심 카드 -->
+                    <div class="card return-type-card mb-3" data-return-type="CHANGE_OF_MIND">
+                        <div class="card-body">
+                            <h6 class="card-title mb-2">단순 변심</h6>
+                            <p class="return-info-text mb-0">
+                                • 출고일로부터 10일 이내 반품 가능<br>
+                                • 배송비는 환불되지 않습니다<br>
+                                • 환불 포인트 = (실제 결제액 - 배송비) + 사용한 포인트 - 적립된 포인트
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 파손/파본 카드 -->
+                    <div class="card return-type-card" data-return-type="DAMAGED_OR_DEFECTIVE">
+                        <div class="card-body">
+                            <h6 class="card-title mb-2">파손/파본</h6>
+                            <p class="return-info-text mb-0">
+                                • 출고일로부터 30일 이내 반품 가능<br>
+                                • 배송비 포함 전액 환불<br>
+                                • 환불 포인트 = 실제 결제액 + 사용한 포인트 - 적립된 포인트
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <small>
+                            <strong>유의사항</strong><br>
+                            반품 신청 시 해당 주문으로 적립된 포인트는 회수됩니다.<br>
+                            반품이 완료되면 환불 포인트가 즉시 지급됩니다.
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-danger" id="confirmReturnBtn" disabled>반품 신청</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <th:block layout:fragment="extra-js">
-    <!-- 주문 상세 전용 스크립트가 필요하면 여기에 -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const returnTypeCards = document.querySelectorAll('.return-type-card');
+            const confirmReturnBtn = document.getElementById('confirmReturnBtn');
+            const returnModal = document.getElementById('returnModal');
+            let selectedReturnType = null;
+            let currentOrderId = null;
+
+            // 반품 버튼 클릭 시 주문 ID 저장
+            const returnBtn = document.querySelector('.return-btn');
+            if (returnBtn) {
+                returnBtn.addEventListener('click', function() {
+                    currentOrderId = this.getAttribute('data-order-id');
+                });
+            }
+
+            // 반품 사유 카드 선택 이벤트
+            returnTypeCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // 모든 카드의 선택 상태 제거
+                    returnTypeCards.forEach(c => c.classList.remove('selected'));
+
+                    // 현재 카드 선택
+                    this.classList.add('selected');
+                    selectedReturnType = this.getAttribute('data-return-type');
+
+                    // 확인 버튼 활성화
+                    confirmReturnBtn.disabled = false;
+                });
+            });
+
+            // 반품 신청 확인 버튼 클릭 이벤트
+            confirmReturnBtn.addEventListener('click', async function() {
+                if (!selectedReturnType || !currentOrderId) {
+                    alert('반품 사유를 선택해주세요.');
+                    return;
+                }
+
+                // 버튼 비활성화 (중복 요청 방지)
+                confirmReturnBtn.disabled = true;
+                confirmReturnBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>처리 중...';
+
+                try {
+                    const response = await fetch(`/orders/${currentOrderId}/return`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            returnType: selectedReturnType
+                        }),
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        // Bootstrap 모달 닫기
+                        const bsModal = bootstrap.Modal.getInstance(returnModal);
+                        bsModal.hide();
+
+                        // 성공 메시지
+                        alert(
+                            `반품 신청이 완료되었습니다.\n\n` +
+                            `주문번호: ${data.orderNumber}\n` +
+                            `환불 포인트: ${data.point.toLocaleString()}P\n\n` +
+                            `환불 포인트가 즉시 지급되었습니다.`
+                        );
+
+                        // 페이지 새로고침
+                        window.location.reload();
+                    } else {
+                        const errorData = await response.json();
+                        let errorMessage = '반품 신청에 실패했습니다.';
+
+                        if (errorData.message) {
+                            if (errorData.message.includes('PERIOD_EXPIRED')) {
+                                errorMessage = '반품 가능 기간이 지났습니다.';
+                            } else if (errorData.message.includes('NOT_FOUND')) {
+                                errorMessage = '주문 정보를 찾을 수 없습니다.';
+                            } else if (errorData.message.includes('INVALID_STATUS')) {
+                                errorMessage = '반품 가능한 주문 상태가 아닙니다.';
+                            } else {
+                                errorMessage = errorData.message;
+                            }
+                        }
+
+                        alert(errorMessage);
+
+                        // 버튼 상태 복원
+                        confirmReturnBtn.disabled = false;
+                        confirmReturnBtn.textContent = '반품 신청';
+                    }
+                } catch (error) {
+                    console.error('반품 신청 오류:', error);
+                    alert('반품 신청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+
+                    // 버튼 상태 복원
+                    confirmReturnBtn.disabled = false;
+                    confirmReturnBtn.textContent = '반품 신청';
+                }
+            });
+
+            // 모달이 닫힐 때 선택 상태 초기화
+            returnModal.addEventListener('hidden.bs.modal', function() {
+                returnTypeCards.forEach(card => card.classList.remove('selected'));
+                selectedReturnType = null;
+                confirmReturnBtn.disabled = true;
+                confirmReturnBtn.textContent = '반품 신청';
+            });
+        });
+    </script>
 </th:block>
 
 </body>

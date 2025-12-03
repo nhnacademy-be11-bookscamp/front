@@ -32,7 +32,7 @@
                                 총 <b th:text="${addresses != null ? addresses.size() : 0}">0</b>개
                             </div>
                             <a class="site-btn"
-                               th:href="@{/mypage/{username}/address/new(username=${username})}"
+                               th:href="@{/mypage/address/new}"
                                style="text-decoration:none; padding:10px 14px;">
                                 <i class="fa fa-plus"></i> 새 주소 추가
                             </a>
@@ -92,8 +92,7 @@
                                             <!-- 수정: 컨트롤러 @RequestParam 에 맞춰 전체 주소를 쿼리스트링으로 전달 -->
                                             <a class="site-btn"
                                                style="background:#6f6f6f; padding:8px 12px;"
-                                               th:href="@{/mypage/{username}/address/{id}/edit(
-                                                    username=${username},
+                                               th:href="@{/mypage/address/{id}/edit(
                                                     id=${addr.id},
                                                     label=${addr.label},
                                                     roadNameAddress=${addr.roadNameAddress},
@@ -105,7 +104,7 @@
                                             </a>
 
                                             <!-- 삭제 (POST + hidden delete) -->
-                                            <form th:action="@{|/mypage/${username}/address/${addr.id}/delete|}"
+                                            <form th:action="@{|/mypage/address/${addr.id}/delete|}"
                                                   method="post"
                                                   onsubmit="return confirm('정말 삭제하시겠어요?');">
                                                 <input type="hidden" name="_method" value="delete"/>
@@ -141,8 +140,7 @@
                                             <!-- 수정 (일반 주소도 동일하게 전체 파라미터 전달) -->
                                             <a class="site-btn"
                                                style="background:#6f6f6f; padding:8px 12px;"
-                                               th:href="@{/mypage/{username}/address/{id}/edit(
-                                                    username=${username},
+                                               th:href="@{/mypage/address/{id}/edit(
                                                     id=${addr.id},
                                                     label=${addr.label},
                                                     roadNameAddress=${addr.roadNameAddress},
@@ -154,7 +152,7 @@
                                             </a>
 
                                             <!-- 삭제 -->
-                                            <form th:action="@{|/mypage/${username}/address/${addr.id}/delete|}"
+                                            <form th:action="@{|/mypage/address/${addr.id}/delete|}"
                                                   method="post"
                                                   onsubmit="return confirm('정말 삭제하시겠어요?');">
                                                 <input type="hidden" name="_method" value="delete"/>

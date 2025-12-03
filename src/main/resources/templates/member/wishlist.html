@@ -9,7 +9,6 @@
 
     <th:block layout:fragment="extra-css">
         <style>
-            /* (기존 버튼 스타일...) */
             .btn-cart-buy, .btn-buy-now {
                 color: white;
                 padding: 10px 20px;
@@ -285,6 +284,23 @@
             headers[csrfHeader] = csrfToken;
         }
 
+        // 헤더 위시리스트 카운트 업데이트 함수
+        function updateHeaderWishlistCount(changeAmount) {
+            const targetIds = ['header-wishlist-count', 'mobile-wishlist-count'];
+            targetIds.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    let currentCount = parseInt(element.innerText, 10);
+                    if (isNaN(currentCount)) currentCount = 0;
+
+                    let newCount = currentCount + changeAmount;
+                    if (newCount < 0) newCount = 0;
+
+                    element.innerText = newCount;
+                }
+            });
+        }
+
         async function submitDelete(buttonElement, itemId) {
             if (!confirm('위시리스트에서 이 상품을 삭제하시겠습니까?')) {
                 return;
@@ -308,8 +324,11 @@
                 }
 
                 alert('위시리스트에서 삭제되었습니다.');
-                const row = document.getElementById('wishlist-item-' + itemId);
 
+                // [수정됨] 헤더 카운트 감소 호출
+                updateHeaderWishlistCount(-1);
+
+                const row = document.getElementById('wishlist-item-' + itemId);
                 const tableBody = row ? row.parentNode : null;
 
                 if (row && tableBody) {

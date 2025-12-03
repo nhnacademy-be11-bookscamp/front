@@ -55,8 +55,17 @@
                                     <span style="width: 100px; color: #6f6f6f; font-weight: 600;">재고</span>
                                     <span style="color: #333;">
                                         <span th:text="${book.stock + '권'}">10권</span>
-                                        <span th:if="${book.stock > 0 and book.stock <= 10}" style="margin-left: 10px; color: #ff9800; font-weight: 600;">품절임박</span>
-                                        <span th:if="${book.stock == 0}" style="margin-left: 10px; color: #dc3545; font-weight: 600;">품절</span>
+
+                                        <th:block th:if="${book.status.name() == 'DISCONTINUED'}">
+                                            <span style="margin-left: 10px; color: #999; font-weight: 700; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px; font-size: 12px;">
+                                                판매중지
+                                            </span>
+                                        </th:block>
+
+                                        <th:block th:unless="${book.status.name() == 'DISCONTINUED'}">
+                                            <span th:if="${book.stock == 0}" style="margin-left: 10px; color: #dc3545; font-weight: 600;">품절</span>
+                                            <span th:if="${book.stock > 0 and book.stock <= 10}" style="margin-left: 10px; color: #ff9800; font-weight: 600;">품절임박</span>
+                                        </th:block>
                                     </span>
                                 </li>
                                 <li style="padding: 8px 0; display: flex;">
@@ -152,9 +161,8 @@
                                     class="site-btn"
                                     id="likeButton"
                                     style="width: 140px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: white; color: #dc3545; border: 2px solid #dc3545; transition: all 0.3s;">
-                                <span class="icon-unliked"><i class="fa-regular fa-heart"></i></span>
-                                <span class="icon-liked" style="display: none;"><i class="fa-solid fa-heart"></i></span>
-                                <span>좋아요</span>
+
+                                <span class="icon-unliked"><i class="fa fa-heart-o"></i></span> <span class="icon-liked" style="display: none;"><i class="fa fa-heart"></i></span> <span>좋아요</span>
                                 <span id="likeCount" th:text="${bookLike.likeCount}">0</span>
                             </button>
                             <button type="button" class="site-btn" id="addToCartBtn"
@@ -164,7 +172,7 @@
                         </div>
                         <div>
                             <button type="button" class="site-btn" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600;"
-                                    th:disabled="${book.stock == 0}"
+                                    th:disabled="${book.stock == 0 or book.status.name() == 'DISCONTINUED'}"
                                     th:attr="data-book-id=${book.id}"
                                     onclick="directBuy(this)">
                                 <i class="fa fa-credit-card"></i> 바로 구매
@@ -509,6 +517,23 @@
             const likeButton = document.getElementById('likeButton');
             const bookId = /*[[${book.id}]]*/ null;
 
+            // 헤더 위시리스트 카운트 업데이트 함수
+            function updateHeaderWishlistCount(changeAmount) {
+                const targetIds = ['header-wishlist-count', 'mobile-wishlist-count'];
+                targetIds.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        let currentCount = parseInt(element.innerText, 10);
+                        if (isNaN(currentCount)) currentCount = 0;
+
+                        let newCount = currentCount + changeAmount;
+                        if (newCount < 0) newCount = 0;
+
+                        element.innerText = newCount;
+                    }
+                });
+            }
+
             if (likeButton) {
                 const likeCountElement = document.getElementById('likeCount');
                 const isAlreadyLiked = /*[[${isLikedByCurrentUser}]]*/ false;
@@ -521,15 +546,19 @@
                 }
 
                 likeButton.addEventListener('click', async function() {
+                    // 1. 낙관적 업데이트
                     const isLiked = likeButton.classList.toggle('liked');
 
                     if (isLiked) {
                         currentLikeCount++;
+                        updateHeaderWishlistCount(1); // 헤더 +1
                     } else {
                         currentLikeCount--;
+                        updateHeaderWishlistCount(-1); // 헤더 -1
                     }
                     likeCountElement.innerText = currentLikeCount;
 
+                    // 2. 서버 요청
                     try {
                         const response = await fetch(`${apiUrl}/${bookId}`, {
                             method: 'POST',
@@ -539,8 +568,15 @@
                         });
 
                         if (response.redirected || response.status === 401 || response.status === 403) {
+                            // 실패 시 롤백
                             likeButton.classList.toggle('liked');
-                            if (isLiked) currentLikeCount--; else currentLikeCount++;
+                            if (isLiked) {
+                                currentLikeCount--;
+                                updateHeaderWishlistCount(-1);
+                            } else {
+                                currentLikeCount++;
+                                updateHeaderWishlistCount(1);
+                            }
                             likeCountElement.innerText = currentLikeCount;
 
                             alert('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.');
@@ -550,8 +586,15 @@
 
                         const contentType = response.headers.get("content-type");
                         if (response.ok && contentType && !contentType.includes("application/json")) {
+                            // 실패 시 롤백
                             likeButton.classList.toggle('liked');
-                            if (isLiked) currentLikeCount--; else currentLikeCount++;
+                            if (isLiked) {
+                                currentLikeCount--;
+                                updateHeaderWishlistCount(-1);
+                            } else {
+                                currentLikeCount++;
+                                updateHeaderWishlistCount(1);
+                            }
                             likeCountElement.innerText = currentLikeCount;
 
                             alert('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.');
@@ -562,14 +605,19 @@
                         if (!response.ok) {
                             throw new Error('Server response was not ok');
                         }
+                        // 성공 시 추가 작업 없음
+
                     } catch (e) {
                         console.error('에러:', e);
 
+                        // 에러 시 롤백
                         likeButton.classList.toggle('liked');
                         if (isLiked) {
                             currentLikeCount--;
+                            updateHeaderWishlistCount(-1);
                         } else {
                             currentLikeCount++;
+                            updateHeaderWishlistCount(1);
                         }
                         likeCountElement.innerText = currentLikeCount;
 
@@ -676,8 +724,14 @@
             addToCartBtn.addEventListener('click', async function () {
 
                 const bookId = /*[[${book.id}]]*/ null;
+                const bookStatus = /*[[${book.status.name()}]]*/ '';
                 const quantity = parseInt(document.getElementById('quantity').value, 10);
                 const stock = parseInt(document.getElementById('quantity').dataset.stock);
+
+                if (bookStatus === 'DISCONTINUED') {
+                    alert('판매가 중지된 도서입니다.');
+                    return;
+                }
 
                 if (stock === 0) {
                     alert('재고가 없어 장바구니에 담을 수 없습니다.');
@@ -729,7 +783,8 @@
                         bookId: parseInt(bookId),
                         quantity: parseInt(quantity)
                     }
-                ]
+                ],
+                orderType: 'DIRECT'  // 바로 구매
             };
 
             try {

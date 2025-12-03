@@ -353,7 +353,10 @@
                         "Content-Type": "application/json"
                     },
                     credentials: "include",
-                    body: JSON.stringify({items: items})
+                    body: JSON.stringify({
+                        items: items,
+                        orderType: 'CART'  // 장바구니 주문
+                    })
                 });
 
                 if (response.ok) {

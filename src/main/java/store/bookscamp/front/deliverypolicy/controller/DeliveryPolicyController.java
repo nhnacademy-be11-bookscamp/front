@@ -58,11 +58,9 @@ public class DeliveryPolicyController {
         }
 
         try {
-            // 정책이 이미 있으면 → 수정
             service.updateDeliveryPolicy(form);
             ra.addFlashAttribute("successMessage", "수정되었습니다.");
         } catch (Exception ex) {
-            // 정책이 없어서 update 실패 → 생성 시도
             service.createDeliveryPolicy(
                     new DeliveryPolicyCreateRequest(
                             form.freeDeliveryThreshold(),

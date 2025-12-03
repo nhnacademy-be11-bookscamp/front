@@ -401,22 +401,11 @@
                         // 페이지 새로고침
                         window.location.reload();
                     } else {
-                        const errorData = await response.json();
-                        let errorMessage = '반품 신청에 실패했습니다.';
+                        // API에서 에러 메시지를 String으로 반환
+                        const errorMessage = await response.text();
 
-                        if (errorData.message) {
-                            if (errorData.message.includes('PERIOD_EXPIRED')) {
-                                errorMessage = '반품 가능 기간이 지났습니다.';
-                            } else if (errorData.message.includes('NOT_FOUND')) {
-                                errorMessage = '주문 정보를 찾을 수 없습니다.';
-                            } else if (errorData.message.includes('INVALID_STATUS')) {
-                                errorMessage = '반품 가능한 주문 상태가 아닙니다.';
-                            } else {
-                                errorMessage = errorData.message;
-                            }
-                        }
-
-                        alert(errorMessage);
+                        // 에러 메시지 표시
+                        alert(errorMessage || '반품 신청에 실패했습니다.');
 
                         // 버튼 상태 복원
                         confirmReturnBtn.disabled = false;

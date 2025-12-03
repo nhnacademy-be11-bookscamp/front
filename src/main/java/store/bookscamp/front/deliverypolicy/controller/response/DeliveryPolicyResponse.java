@@ -1,7 +1,6 @@
 package store.bookscamp.front.deliverypolicy.controller.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 
 @Getter

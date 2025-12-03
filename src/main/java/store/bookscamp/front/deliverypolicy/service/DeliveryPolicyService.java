@@ -2,6 +2,7 @@ package store.bookscamp.front.deliverypolicy.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import store.bookscamp.front.deliverypolicy.controller.request.DeliveryPolicyCreateRequest;
 import store.bookscamp.front.deliverypolicy.controller.request.DeliveryPolicyUpdateRequest;
 import store.bookscamp.front.deliverypolicy.controller.response.DeliveryPolicyResponse;
 import store.bookscamp.front.deliverypolicy.feign.DeliveryPolicyFeignClient;
@@ -11,6 +12,10 @@ import store.bookscamp.front.deliverypolicy.feign.DeliveryPolicyFeignClient;
 public class DeliveryPolicyService {
 
     private final DeliveryPolicyFeignClient client;
+
+    public DeliveryPolicyResponse createDeliveryPolicy(DeliveryPolicyCreateRequest request) {
+        return client.createDeliveryPolicy(request);
+    }
 
     // 배송비 정책 조회
     public DeliveryPolicyResponse getDeliveryPolicy() {

@@ -391,8 +391,8 @@
                         rewardValue: Number(document.getElementById("pp-update-rewardValue").value)
                     };
 
-                    fetch(`/admin/point-policies/${id}`, {
-                        method: "PUT",
+                    fetch(`/admin/point-policies/${id}/update`, {
+                        method: "POST",
                         headers: headers(),
                         body: JSON.stringify(payload)
                     }).then(res => {
@@ -407,8 +407,8 @@
                         const id = btn.dataset.id;
                         if (!confirm(`정책 ID ${id} 삭제?`)) return;
 
-                        fetch(`/admin/point-policies/${id}`, {
-                            method: "DELETE",
+                        fetch(`/admin/point-policies/${id}/delete`, {
+                            method: "POST",
                             headers: headers()
                         }).then(res => {
                             res.ok ? location.reload() : alert("정책 삭제 실패");

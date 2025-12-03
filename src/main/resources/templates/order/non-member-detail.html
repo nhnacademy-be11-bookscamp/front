@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>북스캠프 | 비회원 주문 상세</title>
+
+    <th:block layout:fragment="extra-css">
+        <style>
+            .order-detail-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
+            .order-detail-subtitle {
+                color: #6c757d;
+                margin-bottom: 1.5rem;
+            }
+            .order-summary-pill {
+                background-color: #f8f9fa;
+                border-radius: 999px;
+                padding: 0.75rem 1.25rem;
+                display: inline-flex;
+                align-items: center;
+                gap: 1.5rem;
+                font-size: 0.95rem;
+            }
+            .order-summary-pill .label {
+                color: #6c757d;
+                margin-right: 0.25rem;
+            }
+            .section-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+            }
+            .order-item-row {
+                padding: 1rem 0;
+                border-top: 1px solid #f1f1f1;
+            }
+            .order-item-row:last-child {
+                border-bottom: 1px solid #f1f1f1;
+            }
+            .order-item-title {
+                font-weight: 500;
+                margin-bottom: 0.25rem;
+            }
+            .order-item-meta {
+                font-size: 0.9rem;
+                color: #6c757d;
+            }
+            .order-section {
+                margin-top: 2rem;
+            }
+            .order-section .card {
+                border-radius: 0.75rem;
+            }
+            .order-section .card-body {
+                padding: 1.5rem 1.75rem;
+            }
+            .order-label {
+                font-size: 0.9rem;
+                color: #6c757d;
+            }
+            .order-value {
+                font-size: 0.95rem;
+            }
+            .order-total-row {
+                border-top: 1px solid #e9ecef;
+                margin-top: 0.75rem;
+                padding-top: 0.75rem;
+                font-weight: 700;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+
+<!-- Hero: 빵크럼 + 타이틀 -->
+<section class="hero" layout:fragment="hero">
+    <div class="container py-3">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/}">홈</a>
+                        </li>
+                        <!-- 비회원 주문조회 진입 페이지 경로는 실제 구현에 맞게 수정 -->
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/orders/non-member}">비회원 주문조회</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">주문 상세</li>
+                    </ol>
+                </nav>
+                <h2 class="order-detail-title">비회원 주문/배송 조회 상세</h2>
+                <p class="order-detail-subtitle mb-0">
+                    주문번호와 비밀번호로 조회하신 비회원 주문의 배송 및 결제 정보를 확인하실 수 있습니다.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 메인 콘텐츠 -->
+<div layout:fragment="content">
+    <div class="container my-4" th:if="${order != null}">
+
+        <!-- 상단 주문 요약 -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div>
+                    <div class="mb-2">
+                        <span class="badge bg-secondary-subtle text-secondary fw-semibold"
+                              th:text="${order.orderStatus()}">
+                            주문상태
+                        </span>
+                    </div>
+                    <div class="order-summary-pill">
+                        <span>
+                            <span class="label">주문일</span>
+                            <span th:text="${#temporals.format(order.orderDate(), 'yyyy.MM.dd')}"></span>
+                        </span>
+                        <span>
+                            <span class="label">주문번호</span>
+                            <!-- 비회원도 orderId 대신 orderNumber 를 내려줄 거라면 DTO/컨트롤러에서 교체 필요 -->
+                            <span th:text="${order.orderId()}"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="text-md-end">
+                    <div class="order-label">결제 금액</div>
+                    <div class="fs-5 fw-bold"
+                         th:text="${#numbers.formatInteger(order.finalPaymentAmount(), 3, 'COMMA')} + '원'">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 배송(상품 목록) 섹션 -->
+        <section class="order-section">
+            <h3 class="section-title">배송</h3>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(order.items())}">
+                        <p class="text-muted mb-0">주문 상품 정보가 없습니다.</p>
+                    </div>
+
+                    <div th:each="item : ${order.items()}" class="order-item-row row">
+                        <div class="col-12 col-md-8">
+                            <div class="order-item-title" th:text="${item.bookTitle()}"></div>
+                            <div class="order-item-meta">
+                                수량:
+                                <span th:text="${item.orderQuantity()}"></span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 text-md-end mt-2 mt-md-0">
+                            <div class="order-value fw-semibold"
+                                 th:text="${#numbers.formatInteger(item.bookTotalAmount(), 3, 'COMMA')} + '원'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 배송 정보 섹션 -->
+        <section class="order-section">
+            <h3 class="section-title">배송 정보</h3>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="order-label">수령인 / 전화번호</div>
+                        <div class="order-value">
+                            <span th:text="${order.recipientName()}"></span>
+                            <span th:if="${order.recipientPhone() != null and !order.recipientPhone().isEmpty()}">
+                                &nbsp;/&nbsp;<span th:text="${order.recipientPhone()}"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="order-label">배송지 정보</div>
+                        <div class="order-value" th:text="${order.deliveryAddress()}"></div>
+                    </div>
+                    <div>
+                        <div class="order-label">배송 요청사항</div>
+                        <div class="order-value text-muted"
+                             th:text="${order.deliveryMemo() != null ? order.deliveryMemo() : '요청사항 없음'}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 결제 정보 섹션 -->
+        <section class="order-section">
+            <h3 class="section-title">결제 정보</h3>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row mb-1">
+                        <div class="col-6 order-label">상품 금액</div>
+                        <div class="col-6 text-end order-value"
+                             th:text="${#numbers.formatInteger(order.productAmount(), 3, 'COMMA')} + '원'">
+                        </div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-6 order-label">배송비</div>
+                        <div class="col-6 text-end order-value"
+                             th:text="${#numbers.formatInteger(order.deliveryFee(), 3, 'COMMA')} + '원'">
+                        </div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-6 order-label">포장비</div>
+                        <div class="col-6 text-end order-value"
+                             th:text="${#numbers.formatInteger(order.packagingFee(), 3, 'COMMA')} + '원'">
+                        </div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-6 order-label">할인 금액</div>
+                        <div class="col-6 text-end order-value text-danger"
+                             th:text="'-' + ${#numbers.formatInteger(order.discountAmount(), 3, 'COMMA')} + '원'">
+                        </div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-6 order-label">사용 포인트</div>
+                        <div class="col-6 text-end order-value text-danger"
+                             th:text="'-' + ${#numbers.formatInteger(order.usedPoint(), 3, 'COMMA')} + 'P'">
+                        </div>
+                    </div>
+
+                    <div class="row order-total-row">
+                        <div class="col-6">결제 금액</div>
+                        <div class="col-6 text-end fs-5"
+                             th:text="${#numbers.formatInteger(order.finalPaymentAmount(), 3, 'COMMA')} + '원'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- order 가 null 인 경우 -->
+    <div class="container my-5" th:if="${order == null}">
+        <p class="text-center text-muted">주문 정보를 불러올 수 없습니다.</p>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <!-- 비회원 주문 상세 전용 스크립트가 필요하면 여기에 -->
+</th:block>
+
+</body>
+</html>

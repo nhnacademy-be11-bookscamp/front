@@ -79,7 +79,7 @@
             </div>
         </div>
 
-        <!-- ✅ 검색 + 정렬 폼 (수정됨) -->
+        <!--  검색 + 정렬 폼 (수정됨) -->
         <form th:action="@{/books}" method="get" style="margin-bottom: 1.5rem;">
             <div class="row">
 
@@ -121,12 +121,12 @@
 
             </div>
         </form>
-        <!-- ✅ 폼 끝 -->
+        <!--  폼 끝 -->
 
         <!-- 도서 목록 -->
         <div class="book-list-container">
 
-            <div class="book-list-item" th:each="book : ${booksPage.content}" th:classappend="|rank-${book.aiRank()}|">
+            <div class="book-list-item" th:each="book : ${booksPage.content}" th:classappend="${book.aiRecommand != ''} ? 'rank-' + ${book.aiRank()} : ''">
                 <div class="book-list-item__thumb">
                     <a th:href="@{/books/{id}(id=${book.id})}">
                         <img th:src="${book.thumbnailUrl}" th:alt="${book.title}">

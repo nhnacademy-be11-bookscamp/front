@@ -152,12 +152,12 @@
                                     class="site-btn"
                                     id="likeButton"
                                     style="width: 140px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: white; color: #dc3545; border: 2px solid #dc3545; transition: all 0.3s;">
-                                <span class="icon-unliked"><i class="fa-regular fa-heart"></i></span>
-                                <span class="icon-liked" style="display: none;"><i class="fa-solid fa-heart"></i></span>
-                                <span>좋아요</span>
+
+                                <span class="icon-unliked"><i class="fa fa-heart-o"></i></span> <span class="icon-liked" style="display: none;"><i class="fa fa-heart"></i></span> <span>좋아요</span>
                                 <span id="likeCount" th:text="${bookLike.likeCount}">0</span>
                             </button>
-                            <button type="button" class="site-btn" style="flex: 1; padding: 14px; background: #6f6f6f;">
+                            <button type="button" class="site-btn" id="addToCartBtn"
+                                    style="flex: 1; padding: 14px; background: #6f6f6f;">
                                 <i class="fa fa-shopping-cart"></i> 장바구니
                             </button>
                         </div>
@@ -200,6 +200,70 @@
                 </div>
             </div>
 
+            <div class="row" style="margin-top: 60px;">
+                <div class="col-lg-12">
+                    <div style="background: white; padding: 40px; border: 1px solid #ebebeb; border-radius: 4px;">
+
+                        <div style="margin-bottom: 30px;">
+                            <h4 style="font-weight:700; margin-bottom: 15px;">
+                                <i style="color:#ffb400; margin-right:8px;"></i>
+                                평균 평점
+                            </h4>
+
+                            <div style="font-size: 32px; font-weight: 700; color: #ffb400;">
+                                ★ [[${avgScore}]]
+                                <span style="color:#999; font-size:18px;"> / 5.0</span>
+                            </div>
+                        </div>
+
+                        <h4 style="font-weight:700; margin-bottom:20px; border-bottom:2px solid #333; padding-bottom:10px;">
+                            <i style="margin-right:8px; color:#7fad39;"></i>
+                            사용자 리뷰 (<span th:text="${reviewCount}">0</span>)
+                        </h4>
+
+                        <div th:if="${#lists.isEmpty(reviews.content)}"
+                             style="text-align:center; padding:40px 0; color:#888;">
+                            등록된 리뷰가 없습니다.
+                        </div>
+
+                        <div th:each="r : ${reviews.content}" style="border-bottom:1px solid #eee; padding:20px 0;">
+                            <div style="display:flex; justify-content:space-between;">
+                                <strong th:text="${r.username}" style="font-size:16px; color:#333;"></strong>
+                                <span style="color:#999;"
+                                      th:text="${#temporals.format(r.createdAt, 'yyyy.MM.dd')}"></span>
+                            </div>
+
+                            <div style="color:#ffb400; font-size:18px; font-weight:700; margin:6px 0;">
+                                ★ [[${r.score}]]
+                            </div>
+
+                            <p th:text="${r.content}" style="margin:10px 0; white-space:pre-wrap;"></p>
+
+                            <div th:if="${r.imageUrls() != null}" style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <img th:each="img : ${r.imageUrls()}"
+                                     th:src="${img}"
+                                     style="width:90px; height:90px; object-fit:cover; border-radius:4px; border:1px solid #ddd;">
+                            </div>
+                        </div>
+
+                        <div style="text-align:center; margin-top:25px;">
+                            <a th:if="${reviews.number > 0}"
+                               th:href="@{'/books/' + ${book.id} + '?page=' + ${reviews.number - 1}}"
+                               style="margin-right:10px; padding:8px 14px; border:1px solid #ccc; border-radius:4px; color:#555;">
+                                이전
+                            </a>
+
+                            <a th:if="${reviews.number + 1 < reviews.totalPages}"
+                               th:href="@{'/books/' + ${book.id} + '?page=' + ${reviews.number + 1}}"
+                               style="padding:8px 14px; border:1px solid #ccc; border-radius:4px; color:#555;">
+                                다음
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
     </section>
 </div>
@@ -208,7 +272,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.4.5/swiper-bundle.min.css" />
 
     <style>
-        /* (기존 좋아요 버튼 스타일) */
         #likeButton.liked {
             background: #dc3545 !important;
             color: white !important;
@@ -225,7 +288,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        /* (기존) Swiper 캐러셀 스타일 */
         .product-swiper-container {
             width: 100%;
             height: 500px;
@@ -276,7 +338,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.4.5/swiper-bundle.min.js"></script>
 
     <script th:inline="javascript">
-        /*<![CDATA[*/ // Thymeleaf + JS 안전 블록
+        /*<![CDATA[*/
 
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
@@ -284,7 +346,6 @@
             }
         });
 
-        // [수정] 도서 소개 주입
         let explanation = document.querySelector('#explanation');
         if (explanation) {
             explanation.innerHTML = /*[[${book.explanation}]]*/ '도서 설명이 여기에 표시됩니다.';
@@ -295,13 +356,9 @@
             bookContent.innerHTML = /*[[${book.content}]]*/ '도서 목차가 여기에 표시됩니다.';
         }
 
-
-        // ##### [기존] 쿠폰 발급 (다운로드) 함수 #####
-        // ----------------------------------------------------
         async function issueCoupon(buttonElement, couponId) {
-            // 1. 버튼 비활성화 (중복 클릭 방지)
             buttonElement.disabled = true;
-            buttonElement.textContent = '발급 중...';
+            buttonElement.textContent = '처리 중...';
             buttonElement.style.opacity = '0.7';
 
             try {
@@ -316,6 +373,20 @@
                     credentials: 'include'
                 });
 
+                if (response.redirected || response.status === 401 || response.status === 403) {
+                    alert('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.');
+                    window.location.href = /*[[@{/login}]]*/ '/login';
+                    return;
+                }
+
+                const contentType = response.headers.get("content-type");
+
+                if (response.ok && contentType && !contentType.includes("application/json")) {
+                    alert('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.');
+                    window.location.href = /*[[@{/login}]]*/ '/login';
+                    return;
+                }
+
                 if (response.ok) {
                     const issuedCouponId = await response.json();
                     buttonElement.textContent = '발급 완료';
@@ -323,16 +394,23 @@
                     buttonElement.style.borderColor = '#6f6f6f';
                     showMessage(`쿠폰이 발급되었습니다! (ID: ${issuedCouponId})`, 'success');
                 } else {
-                    const errorResponse = await response.json();
+                    const errorResponse = await response.json().catch(() => ({}));
                     const errorMessage = errorResponse.message || '알 수 없는 오류';
+
                     buttonElement.textContent = '쿠폰 받기';
                     buttonElement.disabled = false;
                     buttonElement.style.opacity = '1';
                     showMessage(`발급 실패: ${errorMessage}`, 'error');
                 }
             } catch (error) {
-                // 5. 네트워크 오류
                 console.error('쿠폰 발급 실패:', error);
+
+                if (error instanceof SyntaxError) {
+                    alert('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.');
+                    window.location.href = /*[[@{/login}]]*/ '/login';
+                    return;
+                }
+
                 buttonElement.textContent = '쿠폰 받기';
                 buttonElement.disabled = false;
                 buttonElement.style.opacity = '1';
@@ -417,10 +495,27 @@
             const likeButton = document.getElementById('likeButton');
             const bookId = /*[[${book.id}]]*/ null;
 
+            // 헤더 위시리스트 카운트 업데이트 함수
+            function updateHeaderWishlistCount(changeAmount) {
+                const targetIds = ['header-wishlist-count', 'mobile-wishlist-count'];
+                targetIds.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        let currentCount = parseInt(element.innerText, 10);
+                        if (isNaN(currentCount)) currentCount = 0;
+
+                        let newCount = currentCount + changeAmount;
+                        if (newCount < 0) newCount = 0;
+
+                        element.innerText = newCount;
+                    }
+                });
+            }
+
             if (likeButton) {
                 const likeCountElement = document.getElementById('likeCount');
                 const isAlreadyLiked = /*[[${isLikedByCurrentUser}]]*/ false;
-                const apiUrl = '/api-server/books/like';
+                const apiUrl = '/api-server/books/joa';
 
                 let currentLikeCount = parseInt(likeCountElement.innerText, 10);
 
@@ -428,48 +523,89 @@
                     likeButton.classList.add('liked');
                 }
 
-                likeButton.addEventListener('click', function() {
+                likeButton.addEventListener('click', async function() {
+                    // 1. 낙관적 업데이트
                     const isLiked = likeButton.classList.toggle('liked');
 
                     if (isLiked) {
                         currentLikeCount++;
+                        updateHeaderWishlistCount(1); // 헤더 +1
                     } else {
                         currentLikeCount--;
+                        updateHeaderWishlistCount(-1); // 헤더 -1
                     }
-
                     likeCountElement.innerText = currentLikeCount;
 
-                    fetch(`${apiUrl}/${bookId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ liked: isLiked }),
-                        credentials: 'include'
-                    })
-                        .then(res => {
-                            if (!res.ok) {
-                                throw new Error('Server response was not ok');F
-                            }
-                            return res.text();
-                        })
-                        .then(text => {
-                            if (text) {
-                                console.log('서버 응답:', JSON.parse(text));
-                            } else {
-                                console.log('서버 응답 성공 (본문 없음)');
-                            }
-                        })
-                        .catch(e => {
-                            console.error('에러:', e);
-                            alert('좋아요 처리에 실패했습니다.');
-                            likeButton.classList.toggle('liked');
+                    // 2. 서버 요청
+                    try {
+                        const response = await fetch(`${apiUrl}/${bookId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ liked: isLiked }),
+                            credentials: 'include'
+                        });
 
+                        if (response.redirected || response.status === 401 || response.status === 403) {
+                            // 실패 시 롤백
+                            likeButton.classList.toggle('liked');
                             if (isLiked) {
                                 currentLikeCount--;
+                                updateHeaderWishlistCount(-1);
                             } else {
                                 currentLikeCount++;
+                                updateHeaderWishlistCount(1);
                             }
                             likeCountElement.innerText = currentLikeCount;
-                        });
+
+                            alert('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.');
+                            window.location.href = /*[[@{/login}]]*/ '/login';
+                            return;
+                        }
+
+                        const contentType = response.headers.get("content-type");
+                        if (response.ok && contentType && !contentType.includes("application/json")) {
+                            // 실패 시 롤백
+                            likeButton.classList.toggle('liked');
+                            if (isLiked) {
+                                currentLikeCount--;
+                                updateHeaderWishlistCount(-1);
+                            } else {
+                                currentLikeCount++;
+                                updateHeaderWishlistCount(1);
+                            }
+                            likeCountElement.innerText = currentLikeCount;
+
+                            alert('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.');
+                            window.location.href = /*[[@{/login}]]*/ '/login';
+                            return;
+                        }
+
+                        if (!response.ok) {
+                            throw new Error('Server response was not ok');
+                        }
+                        // 성공 시 추가 작업 없음
+
+                    } catch (e) {
+                        console.error('에러:', e);
+
+                        // 에러 시 롤백
+                        likeButton.classList.toggle('liked');
+                        if (isLiked) {
+                            currentLikeCount--;
+                            updateHeaderWishlistCount(-1);
+                        } else {
+                            currentLikeCount++;
+                            updateHeaderWishlistCount(1);
+                        }
+                        likeCountElement.innerText = currentLikeCount;
+
+                        if (e instanceof SyntaxError) {
+                            alert('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.');
+                            window.location.href = /*[[@{/login}]]*/ '/login';
+                        } else {
+                            alert('좋아요 처리에 실패했습니다.');
+                        }
+                    }
                 });
             }
 
@@ -539,28 +675,27 @@
             setupTruncation(document.querySelector('#explanation'));
 
             const swiper = new Swiper('.product-swiper-container', {
-                loop: true, // 무한 반복
+                loop: true,
                 autoplay: {
                     delay: 5000,
                     disableOnInteraction: false,
                 },
-                pagination: { // 하단 점 버튼
+                pagination: {
                     el: '.swiper-pagination',
                     clickable: true,
                 },
-                navigation: { // 좌우 화살표
+                navigation: {
                     nextEl: '.swiper-button-next',
                     prevEl: '.swiper-button-prev',
                 },
             });
 
-            if (bookId) {
+            console.log("bookId: " + bookId);
+            if (bookId != null) {
                 loadAndSetupCoupons(bookId);
             }
-
         });
 
-        // --- 4. (신규) 장바구니 담기 로직 ---
         const addToCartBtn = document.getElementById('addToCartBtn');
 
         if (addToCartBtn) {
@@ -570,13 +705,11 @@
                 const quantity = parseInt(document.getElementById('quantity').value, 10);
                 const stock = parseInt(document.getElementById('quantity').dataset.stock);
 
-                // 재고 0 → 장바구니 불가
                 if (stock === 0) {
                     alert('재고가 없어 장바구니에 담을 수 없습니다.');
                     return;
                 }
 
-                // 선택한 수량이 재고 초과
                 if (quantity > stock) {
                     alert('재고 수량을 초과하여 담을 수 없습니다.');
                     return;
@@ -593,7 +726,7 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        credentials: 'include',   // cartToken 쿠키 전달
+                        credentials: 'include',
                         body: JSON.stringify(requestBody)
                     });
 
@@ -612,22 +745,18 @@
             });
         }
 
-        // --- 장바구니 로직 종료 ---
-
-
-        // 바로 구매 함수
         async function directBuy(button) {
             const bookId = button.getAttribute('data-book-id');
             const quantity = document.getElementById('quantity').value;
 
-            // JSON 형식으로 주문 준비 요청
             const requestData = {
                 items: [
                     {
                         bookId: parseInt(bookId),
                         quantity: parseInt(quantity)
                     }
-                ]
+                ],
+                orderType: 'DIRECT'  // 바로 구매
             };
 
             try {
@@ -641,7 +770,6 @@
                 });
 
                 if (response.ok) {
-                    // HTML 응답을 받아서 페이지 이동
                     const html = await response.text();
                     document.open();
                     document.write(html);
@@ -655,7 +783,7 @@
             }
         }
 
-        /*]]>*/ // Thymeleaf + JS 안전 블록
+        /*]]>*/
     </script>
 </th:block>
 </body>

@@ -72,7 +72,7 @@ public class PackagingController {
         return "redirect:/admin/packagings/" + id;
     }
 
-    @DeleteMapping("/admin/packagings/{id}/delete")
+    @PostMapping("/admin/packagings/{id}/delete")
     @ResponseBody
     public ResponseEntity<Void> deletePackaging(@PathVariable Long id) {
         packagingService.delete(id);

@@ -1,5 +1,6 @@
 package store.bookscamp.front.pointhistory.controller;
 
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +20,10 @@ public class PointHistoryController {
     public String getMyPoints(@RequestParam(defaultValue = "0") int page, Model model) {
 
         PageResponse<PointHistoryResponse> response = pointHistoryFeignClient.getMyPointHistories(page, 10).getBody();
+
+        if (response == null) {
+            response = PageResponse.empty();
+        }
 
         model.addAttribute("points", response.getContent());
         model.addAttribute("page", response);

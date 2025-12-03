@@ -9,7 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 public class CartTokenCookieInterceptor implements RequestInterceptor {
 
-    private final static String CART_TOKEN_COOKIE = "cartToken";
+    private static final String CART_TOKEN_COOKIE = "cartToken";
 
     @Override
     public void apply(RequestTemplate requestTemplate) {

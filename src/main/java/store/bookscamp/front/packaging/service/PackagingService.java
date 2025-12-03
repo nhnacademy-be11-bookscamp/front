@@ -1,5 +1,6 @@
 package store.bookscamp.front.packaging.service;
 
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,9 @@ public class PackagingService {
     private final PackagingFeignClient packagingFeignClient;
 
     private List<String> uploadOne(List<MultipartFile> files) {
-        if (files == null || files.isEmpty()) {return null;}
+        if (files == null || files.isEmpty()) {return Collections.emptyList();}
         files.removeIf(MultipartFile::isEmpty);
-        if (files.isEmpty()) {return null;}
+        if (files.isEmpty()) {return Collections.emptyList();}
 
         List<String> urls = minioService.uploadFiles(files, "package");
 

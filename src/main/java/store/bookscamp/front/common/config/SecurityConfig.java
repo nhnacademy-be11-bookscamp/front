@@ -31,6 +31,9 @@ import store.bookscamp.front.common.exception.CustomAccessDeniedHandler;
 @Configuration
 public class SecurityConfig {
 
+    private static final String LOGIN = "/login";
+    private static final String ADMIN_LOGIN = "/admin/login";
+
     private final AuthFeignClient authFeignClient;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
@@ -106,15 +109,15 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
-                        .requestMatchers("/admin/login").permitAll()
+                        .requestMatchers(ADMIN_LOGIN).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
         );
 
         http.authenticationProvider(adminAuthenticationProvider());
 
         http.formLogin(form -> form
-                        .loginPage("/admin/login")
-                        .loginProcessingUrl("/admin/login")
+                        .loginPage(ADMIN_LOGIN)
+                        .loginProcessingUrl(ADMIN_LOGIN)
                         .defaultSuccessUrl("/admin")
                         .failureUrl("/admin/login?error")
                         .usernameParameter("username")
@@ -154,8 +157,8 @@ public class SecurityConfig {
         http.authenticationProvider(customAuthenticationProvider());
 
         http.formLogin(form -> form
-            .loginPage("/login")
-            .loginProcessingUrl("/login")
+            .loginPage(LOGIN)
+            .loginProcessingUrl(LOGIN)
             .defaultSuccessUrl("/")
             .failureUrl("/login?error")
             .usernameParameter("username")
@@ -171,7 +174,7 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
         );
         http.oauth2Login(oauth2 -> oauth2
-                .loginPage("/login")
+                .loginPage(LOGIN)
                 .successHandler(new CustomOAuthSuccessHandler("/"))
                 .userInfoEndpoint(userInfo -> userInfo
                         .userService(customOAuth2UserService)

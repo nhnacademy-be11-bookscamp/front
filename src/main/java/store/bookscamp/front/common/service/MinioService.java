@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import store.bookscamp.front.common.exception.FileStorageException;
 
 @Slf4j
 @Service
@@ -56,7 +57,7 @@ public class MinioService {
                 case "book" -> bookBucket;
                 case "review" -> reviewBucket;
                 case "package" -> packageBucket;
-                default -> throw new RuntimeException();
+                default -> throw new IllegalArgumentException("지원하지 않는 파일 타입입니다: " + type);
             };
 
             // 미니오에 버킷이름 존재 확인, 없으면 생성
@@ -77,7 +78,7 @@ public class MinioService {
 
             // 고유 파일명 생성
             for (MultipartFile file : files) {
-                String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 
                 // 미니오에 파일 업로드
                 minioClient.putObject(
@@ -89,12 +90,13 @@ public class MinioService {
                                 .build()
                 );
 
-                String url = String.format("%s/%s/%s", minioUrl, bucketName, fileName);
                 String publicUrl = String.format("%s/%s/%s", minioPublicUrl, bucketName, fileName);
                 urls.add(publicUrl);
             }
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw new FileStorageException("MinIO 파일 업로드 중 오류가 발생했습니다.", e);
         }
         return urls;
     }
@@ -106,7 +108,7 @@ public class MinioService {
                 case "book" -> bookBucket;
                 case "review" -> reviewBucket;
                 case "package", "packaging" -> packageBucket;
-                default -> throw new RuntimeException("Unsupported type: " + type);
+                default -> throw new IllegalArgumentException("지원하지 않는 파일 타입입니다: " + type);
             };
 
             String objectName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
@@ -120,7 +122,7 @@ public class MinioService {
 
             log.info("MinIO 파일 삭제 완료: {}", objectName);
         } catch (Exception e){
-            throw new RuntimeException();
+            throw new FileStorageException("MinIO 파일 삭제 중 오류가 발생했습니다: " + imageUrl, e);
         }
     }
 }

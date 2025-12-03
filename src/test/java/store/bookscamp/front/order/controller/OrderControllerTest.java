@@ -176,7 +176,7 @@ class OrderControllerTest {
                     List.of(order1), 1, 5, 1, 1, true, true
             );
 
-            given(orderFeignClient.getOrderList(eq(0), eq(5)))
+            given(orderFeignClient.getOrderList(0, 5))
                     .willReturn(ResponseEntity.ok(mockPageResponse));
 
             // when & then
@@ -198,7 +198,7 @@ class OrderControllerTest {
             // given
             OrderDetailResponse mockResponse = createOrderDetailResponse();
 
-            given(orderFeignClient.getOrderDetail(eq(100L)))
+            given(orderFeignClient.getOrderDetail(100L))
                     .willReturn(ResponseEntity.ok(mockResponse));
 
             // when & then

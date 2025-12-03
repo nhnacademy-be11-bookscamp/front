@@ -19,6 +19,9 @@ import java.util.Map;
 @Controller
 public class DormantMemberController {
 
+    private static final String REDIRECTION_DORMANT = "redirect:/dormant";
+    private static final String USER_NAME = "username";
+
     private final AuthFeignClient authFeignClient;
 
     /**
@@ -40,25 +43,25 @@ public class DormantMemberController {
         try {
             // 1. FeignClient 요청을 위한 Map 생성
             Map<String, String> requestMap = new HashMap<>();
-            requestMap.put("username", username);
+            requestMap.put(USER_NAME, username);
 
             // 2. Auth Server로 요청 전송
             authFeignClient.sendDormantCode(requestMap);
 
             // 3. 성공 시: 다시 dormant 페이지로 가되, 'sent=true' 파라미터를 붙임
-            redirectAttributes.addAttribute("username", username);
+            redirectAttributes.addAttribute(USER_NAME, username);
             redirectAttributes.addAttribute("sent", "true"); // 이 파라미터가 있으면 입력창이 보임
 
-            return "redirect:/dormant";
+            return REDIRECTION_DORMANT;
 
         } catch (Exception e) {
             // 실패 시 (Auth서버 에러 등): 에러 메시지와 함께 리다이렉트
             log.error("인증번호 발송 실패: {}", e.getMessage());
 
-            redirectAttributes.addAttribute("username", username);
+            redirectAttributes.addAttribute(USER_NAME, username);
             redirectAttributes.addAttribute("error", "send_failed");
 
-            return "redirect:/dormant";
+            return REDIRECTION_DORMANT;
         }
     }
 
@@ -73,7 +76,7 @@ public class DormantMemberController {
         try {
             // 1. FeignClient 요청 Map 생성
             Map<String, String> requestMap = new HashMap<>();
-            requestMap.put("username", username);
+            requestMap.put(USER_NAME, username);
             requestMap.put("code", code);
 
             // 2. Auth Server로 검증 요청
@@ -87,11 +90,11 @@ public class DormantMemberController {
             // 4. 실패 시 (인증번호 틀림 등): 다시 입력 화면으로 돌려보냄
             log.error("휴면 해제 검증 실패: {}", e.getMessage());
 
-            redirectAttributes.addAttribute("username", username);
+            redirectAttributes.addAttribute(USER_NAME, username);
             redirectAttributes.addAttribute("sent", "true"); // 입력창 유지
             redirectAttributes.addAttribute("error", "invalid"); // "인증번호가 틀렸습니다" 표시용
 
-            return "redirect:/dormant";
+            return REDIRECTION_DORMANT;
         }
     }
 }

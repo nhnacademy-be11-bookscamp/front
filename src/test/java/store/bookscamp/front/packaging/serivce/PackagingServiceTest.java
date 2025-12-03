@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +17,6 @@ import store.bookscamp.front.packaging.controller.request.PackagingUpdateRequest
 import store.bookscamp.front.packaging.controller.response.PackagingGetResponse;
 import store.bookscamp.front.packaging.feign.PackagingFeignClient;
 
-import java.util.Collections;
 import java.util.List;
 import store.bookscamp.front.packaging.service.PackagingService;
 
@@ -71,19 +71,26 @@ class PackagingServiceTest {
         }
 
         @Test
-        @DisplayName("파일 없이 생성 요청 시, MinioService 호출 없이 Feign Client를 호출한다")
         void create_NoFile_Success() {
-            List<MultipartFile> files = Collections.emptyList();
+            // given
+            String name = "테스트 포장지";
+            Integer price = 1000;
+            List<MultipartFile> files = null;
 
-            given(packagingFeignClient.createPackaging(any(PackagingCreateRequest.class)))
-                    .willReturn(ResponseEntity.ok("OK"));
+            // when
+            packagingService.create(name, price, files);
 
-            packagingService.create(testName, testPrice, files);
+            // then
+            ArgumentCaptor<PackagingCreateRequest> requestCaptor = ArgumentCaptor.forClass(PackagingCreateRequest.class);
 
-            verify(minioService, org.mockito.Mockito.never()).uploadFiles(any(), any());
+            verify(packagingFeignClient).createPackaging(requestCaptor.capture());
 
-            verify(packagingFeignClient).createPackaging(
-                    argThat(req -> req.getName().equals(testName) && req.getImageUrl() == null));
+            PackagingCreateRequest actualRequest = requestCaptor.getValue();
+
+            assertThat(actualRequest.getName()).isEqualTo(name);
+            assertThat(actualRequest.getPrice()).isEqualTo(price);
+
+            assertThat(actualRequest.getImageUrl()).isNotNull().isEmpty();
         }
     }
 

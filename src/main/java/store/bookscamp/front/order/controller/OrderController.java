@@ -41,6 +41,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderController {
 
+    private static final String ADDRESSES = "addresses";
+    private static final String USER_NAME = "username";
+
     private final OrderFeignClient orderFeignClient;
     private final AddressFeignClient addressFeignClient;
     private final MemberFeignClient memberFeignClient;
@@ -78,18 +81,18 @@ public class OrderController {
                 List<AddressListResponse.AddressResponse> sortedAddresses = addressList != null && addressList.addresses() != null
                     ? addressList.addresses().stream()
                         .sorted(Comparator.comparing(AddressListResponse.AddressResponse::isDefault).reversed())
-                        .collect(Collectors.toList())
+                        .toList()
                     : List.of();
                 
-                model.addAttribute("addresses", sortedAddresses);
-                model.addAttribute("username", username);
+                model.addAttribute(ADDRESSES, sortedAddresses);
+                model.addAttribute(USER_NAME, username);
             } catch (Exception e) {
-                model.addAttribute("addresses", List.of());
-                model.addAttribute("username", null);
+                model.addAttribute(ADDRESSES, List.of());
+                model.addAttribute(USER_NAME, null);
             }
         } else {
-            model.addAttribute("addresses", List.of());
-            model.addAttribute("username", null);
+            model.addAttribute(ADDRESSES, List.of());
+            model.addAttribute(USER_NAME, null);
         }
 
         return "order/order-prepare";
@@ -206,17 +209,24 @@ public class OrderController {
      */
     @PostMapping("/{orderId}/return")
     @ResponseBody
-    public ResponseEntity<OrderReturnResponse> returnOrder(
+    public ResponseEntity<?> returnOrder(
             @PathVariable Long orderId,
             @RequestBody OrderReturnRequest request
     ) {
         log.info("반품 신청 요청 - orderId: {}, returnType: {}", orderId, request.returnType());
 
-        ResponseEntity<OrderReturnResponse> response = orderFeignClient.returnOrder(orderId, request);
+        try {
+            ResponseEntity<OrderReturnResponse> response = orderFeignClient.returnOrder(orderId, request);
 
-        log.info("반품 신청 완료 - orderId: {}, statusCode: {}, response: {}",
-                orderId, response.getStatusCode(), response.getBody());
+            log.info("반품 신청 완료 - orderId: {}, statusCode: {}, response: {}",
+                    orderId, response.getStatusCode(), response.getBody());
 
-        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (feign.FeignException e) {
+            log.error("반품 신청 실패 - orderId: {}, statusCode: {}, error: {}",
+                    orderId, e.status(), e.contentUTF8());
+
+            return ResponseEntity.status(e.status()).body(e.contentUTF8());
+        }
     }
 }

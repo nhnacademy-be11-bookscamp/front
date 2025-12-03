@@ -76,6 +76,6 @@ public class PackagingController {
     @ResponseBody
     public ResponseEntity<Void> deletePackaging(@PathVariable Long id) {
         packagingService.delete(id);
-        return ResponseEntity.noContent().build(); //"redirect:/admin/packagings";
+        return ResponseEntity.noContent().build();
     }
 }

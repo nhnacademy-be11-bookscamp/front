@@ -24,7 +24,6 @@ import store.bookscamp.front.order.feign.OrderFeignClient;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -35,9 +34,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class OrderControllerTest {
 
-    private MockMvc mvc; // MockMvc 주입 방식을 변경
+    private MockMvc mvc;
 
-    private final ObjectMapper objectMapper = new ObjectMapper(); // ObjectMapper는 직접 생성
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
     private OrderFeignClient orderFeignClient;
@@ -51,8 +50,8 @@ class OrderControllerTest {
     @InjectMocks
     private OrderController orderController;
 
-    private final String BASE_URL = "/orders";
-    private final Cookie AUTH_COOKIE = new Cookie("Authorization", "valid_token");
+    private final String baseUrl = "/orders";
+    private final Cookie authCookie = new Cookie("Authorization", "valid_token");
 
     @BeforeEach
     void setup() {
@@ -109,8 +108,8 @@ class OrderControllerTest {
             given(addressFeignClient.getAddresses())
                     .willReturn(ResponseEntity.ok(mockAddressList));
 
-            mvc.perform(post(BASE_URL + "/prepare")
-                            .cookie(AUTH_COOKIE) // 회원 인증 쿠키
+            mvc.perform(post(baseUrl + "/prepare")
+                            .cookie(authCookie)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(prepareRequest)))
                     .andDo(print())
@@ -131,7 +130,7 @@ class OrderControllerTest {
                     .willReturn(ResponseEntity.ok(mockPrepareResponse));
 
             // when & then
-            mvc.perform(post(BASE_URL + "/prepare")
+            mvc.perform(post(baseUrl + "/prepare")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(prepareRequest)))
                     .andDo(print())
@@ -154,8 +153,8 @@ class OrderControllerTest {
             given(orderFeignClient.createOrder(any(OrderCreateRequest.class)))
                     .willReturn(ResponseEntity.ok(mockResponse));
 
-            mvc.perform(post(BASE_URL)
-                            .cookie(AUTH_COOKIE) // 회원 인증 쿠키
+            mvc.perform(post(baseUrl)
+                            .cookie(authCookie)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -181,7 +180,7 @@ class OrderControllerTest {
                     .willReturn(ResponseEntity.ok(mockPageResponse));
 
             // when & then
-            mvc.perform(get(BASE_URL + "/list")
+            mvc.perform(get(baseUrl + "/list")
                             .param("page", "0")
                             .param("size", "5"))
                     .andExpect(status().isOk())
@@ -203,7 +202,7 @@ class OrderControllerTest {
                     .willReturn(ResponseEntity.ok(mockResponse));
 
             // when & then
-            mvc.perform(get(BASE_URL + "/{orderId}", 100L))
+            mvc.perform(get(baseUrl + "/{orderId}", 100L))
                     .andExpect(status().isOk())
                     .andExpect(view().name("order/order-detail"));
         }
@@ -213,8 +212,8 @@ class OrderControllerTest {
     @DisplayName("POST /orders/non-member/detail")
     class GetNonMemberDetailTest {
 
-        private final String NON_MEMBER_ORDER_NUMBER = "NM-12345";
-        private final String PASSWORD = "valid_password";
+        private final String nonMemberOrderNumber = "NM-12345"; // password
+        private final String password = "valid_password";
 
         @Test
         @DisplayName("비회원 주문 상세 조회 성공 시 응답 데이터와 isMember=false를 Model에 담아 반환한다")
@@ -223,14 +222,13 @@ class OrderControllerTest {
             OrderDetailResponse mockResponse = createOrderDetailResponse();
 
             given(orderFeignClient.getNonMemberOrderDetail(
-                    eq(NON_MEMBER_ORDER_NUMBER),
+                    eq(nonMemberOrderNumber),
                     any(NonMemberOrderRequest.class)))
                     .willReturn(ResponseEntity.ok(mockResponse));
 
-            // when & then
-            mvc.perform(post(BASE_URL + "/non-member/detail")
-                            .param("orderNumber", NON_MEMBER_ORDER_NUMBER)
-                            .param("password", PASSWORD))
+            mvc.perform(post(baseUrl + "/non-member/detail")
+                            .param("orderNumber", nonMemberOrderNumber)
+                            .param("password", password))
                     .andExpect(status().isOk())
                     .andExpect(view().name("order/non-member-detail"))
                     .andExpect(model().attribute("isMember", false));

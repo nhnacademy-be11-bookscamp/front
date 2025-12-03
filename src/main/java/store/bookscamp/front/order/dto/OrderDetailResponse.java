@@ -14,7 +14,7 @@ public record OrderDetailResponse(
         // 배송 정보
         String recipientName,
         String recipientPhone,
-        String deliveryAddress,  // "[우편번호] 도로명 상세주소"
+        String deliveryAddress,
         String deliveryMemo,
 
         int productAmount,

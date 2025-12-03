@@ -191,7 +191,7 @@ public class MemberController {
     }
 
     @PutMapping("/members/change-password")
-    public ResponseEntity<Void> updatePassword(@PathVariable String id,@RequestBody MemberPasswordUpdateRequest request){
+    public ResponseEntity<Void> updatePassword(@RequestBody MemberPasswordUpdateRequest request){
         memberFeignClient.updatePassword(request);
         return ResponseEntity.ok().build();
     }

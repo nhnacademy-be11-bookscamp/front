@@ -44,8 +44,8 @@ public class TokenRefreshService {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentAccessTokenInContext = null;
-            if (authentication != null && authentication.getPrincipal() instanceof TokenDetails) {
-                currentAccessTokenInContext = ((TokenDetails) authentication.getPrincipal()).getRawJwtToken();
+            if (authentication != null && authentication.getPrincipal() instanceof TokenDetails tokenDetails) {
+                currentAccessTokenInContext = tokenDetails.getRawJwtToken();
             }
 
             if (failedAccessToken != null && !failedAccessToken.equals(currentAccessTokenInContext)) {

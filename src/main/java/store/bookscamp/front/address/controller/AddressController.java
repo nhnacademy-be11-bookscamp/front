@@ -49,7 +49,7 @@ public class AddressController {
     @GetMapping("/new")
     public ModelAndView showCreateAddressForm() {
         ModelAndView mav = new ModelAndView("member/address/new");
-        mav.addObject("form", new AddressCreateRequest(null, null, null, null, null));
+        mav.addObject("form", new AddressCreateRequest());
         return mav;
     }
 

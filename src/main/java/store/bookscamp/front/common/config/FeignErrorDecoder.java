@@ -52,7 +52,7 @@ public class FeignErrorDecoder implements ErrorDecoder {
                         response.status(),
                         "Token refreshed, retrying request.",
                         response.request().httpMethod(),
-                        (Date) null,
+                        (Long) null,
                         response.request()
                 );
             } else {

@@ -41,6 +41,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderController {
 
+    private static final String ADDRESSES = "addresses";
+    private static final String USER_NAME = "username";
+
     private final OrderFeignClient orderFeignClient;
     private final AddressFeignClient addressFeignClient;
     private final MemberFeignClient memberFeignClient;
@@ -78,18 +81,18 @@ public class OrderController {
                 List<AddressListResponse.AddressResponse> sortedAddresses = addressList != null && addressList.addresses() != null
                     ? addressList.addresses().stream()
                         .sorted(Comparator.comparing(AddressListResponse.AddressResponse::isDefault).reversed())
-                        .collect(Collectors.toList())
+                        .toList()
                     : List.of();
                 
-                model.addAttribute("addresses", sortedAddresses);
-                model.addAttribute("username", username);
+                model.addAttribute(ADDRESSES, sortedAddresses);
+                model.addAttribute(USER_NAME, username);
             } catch (Exception e) {
-                model.addAttribute("addresses", List.of());
-                model.addAttribute("username", null);
+                model.addAttribute(ADDRESSES, List.of());
+                model.addAttribute(USER_NAME, null);
             }
         } else {
-            model.addAttribute("addresses", List.of());
-            model.addAttribute("username", null);
+            model.addAttribute(ADDRESSES, List.of());
+            model.addAttribute(USER_NAME, null);
         }
 
         return "order/order-prepare";

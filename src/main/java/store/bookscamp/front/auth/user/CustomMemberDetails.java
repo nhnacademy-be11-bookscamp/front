@@ -16,7 +16,7 @@ public class CustomMemberDetails implements UserDetails, TokenDetails, OAuth2Use
     private final String rawJwtToken;
 
     @Setter
-    private Map<String, Object> attributes;
+    private transient Map<String, Object> attributes;
 
     public CustomMemberDetails(String role, String rawJwtToken) {
         this.role = role;

@@ -138,11 +138,17 @@ class TagControllerTest {
         void createTag_FeignException_Duplicate() throws Exception {
             String errorMessage = "이미 존재하는 태그입니다.";
 
-            feign.Response feignResponse = feign.Response.builder() // <--- 여기를 수정했습니다.
-                    .status(HttpStatus.CONFLICT.value()) // 409
+            feign.Response feignResponse = feign.Response.builder()
+                    .status(HttpStatus.CONFLICT.value())
                     .reason("Conflict")
-                    .request(feign.Request.create(feign.Request.HttpMethod.POST, "/api/tags",
-                            Collections.emptyMap(), null, StandardCharsets.UTF_8))
+                    .request(feign.Request.create(
+                            feign.Request.HttpMethod.POST,
+                            "/api/tags",
+                            Collections.emptyMap(),
+                            null,
+                            StandardCharsets.UTF_8,
+                            null
+                    ))
                     .body("Tag already exists", StandardCharsets.UTF_8)
                     .build();
 

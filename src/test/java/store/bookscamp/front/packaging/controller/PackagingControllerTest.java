@@ -50,9 +50,11 @@ class PackagingControllerTest {
         mvc = MockMvcBuilders.standaloneSetup(packagingController).build();
     }
 
-    private PackagingGetResponse createResponse(Long id, String name) {
+    // 변경됨: 파라미터 제거
+    private PackagingGetResponse createResponse() {
         return new PackagingGetResponse();
     }
+
     @Nested
     @DisplayName("GET " + baseUrl)
     class ShowListTest {
@@ -62,8 +64,8 @@ class PackagingControllerTest {
         void showList_Success() throws Exception {
             // given
             List<PackagingGetResponse> mockList = List.of(
-                    createResponse(1L, "일반 포장"),
-                    createResponse(2L, "고급 포장")
+                    createResponse(), // 변경됨: 인자 제거
+                    createResponse()  // 변경됨: 인자 제거
             );
             given(packagingService.getAll()).willReturn(mockList);
 
@@ -85,7 +87,7 @@ class PackagingControllerTest {
         @DisplayName("포장재 상세 조회 성공 시 객체를 Model에 담아 반환한다")
         void showDetail_Success() throws Exception {
             // given
-            PackagingGetResponse mockResponse = createResponse(testId, "일반 포장");
+            PackagingGetResponse mockResponse = createResponse(); // 변경됨: 인자 제거
             given(packagingService.get(testId)).willReturn(mockResponse);
 
             mvc.perform(get(baseUrl + "/{id}", testId))
@@ -120,7 +122,7 @@ class PackagingControllerTest {
                             .file(file)
                             .param("name", name)
                             .param("price", String.valueOf(price))
-                            .with(request -> { // POST 요청임을 명시적으로 지정
+                            .with(request -> {
                                 request.setMethod("POST");
                                 return request;
                             })
@@ -138,7 +140,7 @@ class PackagingControllerTest {
             mvc.perform(multipart(baseUrl)
                             .param("name", name)
                             .param("price", String.valueOf(price))
-                            .with(request -> { // POST 요청임을 명시적으로 지정
+                            .with(request -> {
                                 request.setMethod("POST");
                                 return request;
                             })
@@ -167,7 +169,7 @@ class PackagingControllerTest {
         @DisplayName("포장재 수정 폼 조회 성공 시 기존 데이터를 Model에 담아 반환한다")
         void showUpdate_Success() throws Exception {
             // given
-            PackagingGetResponse mockResponse = createResponse(testId, "수정 대상");
+            PackagingGetResponse mockResponse = createResponse(); // 변경됨: 인자 제거
             given(packagingService.get(testId)).willReturn(mockResponse);
 
             // when & then
@@ -185,7 +187,7 @@ class PackagingControllerTest {
     @DisplayName("PUT " + baseUrl + "/{id}/update")
     class UpdatePackagingTest {
 
-        private final String name = "수정된 이름"; // price
+        private final String name = "수정된 이름";
         private final int price = 2000;
 
         @Test

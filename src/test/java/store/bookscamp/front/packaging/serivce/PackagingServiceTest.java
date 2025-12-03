@@ -17,7 +17,6 @@ import store.bookscamp.front.packaging.controller.request.PackagingUpdateRequest
 import store.bookscamp.front.packaging.controller.response.PackagingGetResponse;
 import store.bookscamp.front.packaging.feign.PackagingFeignClient;
 
-import java.util.Collections;
 import java.util.List;
 import store.bookscamp.front.packaging.service.PackagingService;
 

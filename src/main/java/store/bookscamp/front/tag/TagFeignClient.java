@@ -14,8 +14,6 @@ import store.bookscamp.front.tag.controller.request.TagCreateRequest;
 import store.bookscamp.front.tag.controller.request.TagUpdateRequest;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
 
-import java.util.List;
-
 @FeignClient(name = "tagApiClient", url = "${gateway.base-url}")
 public interface TagFeignClient {
 

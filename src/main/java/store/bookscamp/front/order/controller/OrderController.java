@@ -152,8 +152,8 @@ public class OrderController {
         List<OrderListResponse> orders =
                 (orderPage != null) ? orderPage.content() : List.of();
 
-        model.addAttribute("orderPage", orderPage); // 페이징 정보 전체
-        model.addAttribute("orders", orders);       // 실제 주문 리스트
+        model.addAttribute("orderPage", orderPage);
+        model.addAttribute("orders", orders);
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", size);
 

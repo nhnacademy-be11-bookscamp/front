@@ -37,10 +37,10 @@ class PackagingServiceTest {
     @Mock
     private PackagingFeignClient packagingFeignClient;
 
-    private final Long TEST_ID = 1L;
-    private final String TEST_NAME = "테스트 포장지";
-    private final int TEST_PRICE = 1000;
-    private final String TEST_URL = "http://minio.url/test.jpg";
+    private final Long testId = 1L; // testUrl
+    private final String testName = "테스트 포장지";
+    private final int testPrice = 1000;
+    private final String testUrl = "http://minio.url/test.jpg";
 
     private MockMultipartFile createMockFile(String filename, String content) {
         return new MockMultipartFile("file", filename, "image/jpeg", content.getBytes());
@@ -55,19 +55,19 @@ class PackagingServiceTest {
         void create_WithOneFile_Success() {
             MockMultipartFile file = createMockFile("p1.jpg", "content");
             List<MultipartFile> files = new java.util.ArrayList<>(List.of(file));
-            given(minioService.uploadFiles(anyList(), eq("package"))).willReturn(List.of(TEST_URL));
+            given(minioService.uploadFiles(anyList(), eq("package"))).willReturn(List.of(testUrl));
 
             given(packagingFeignClient.createPackaging(any(PackagingCreateRequest.class)))
                     .willReturn(ResponseEntity.ok("OK"));
 
-            packagingService.create(TEST_NAME, TEST_PRICE, files);
+            packagingService.create(testName, testPrice, files);
 
-            verify(minioService).uploadFiles(eq(files), eq("package"));
+            verify(minioService).uploadFiles(files, "package");
 
             verify(packagingFeignClient).createPackaging(
-                    argThat(req -> req.getName().equals(TEST_NAME) &&
-                            req.getPrice().equals(TEST_PRICE) &&
-                            req.getImageUrl().get(0).equals(TEST_URL)));
+                    argThat(req -> req.getName().equals(testName) &&
+                            req.getPrice().equals(testPrice) &&
+                            req.getImageUrl().get(0).equals(testUrl)));
         }
 
         @Test
@@ -78,12 +78,12 @@ class PackagingServiceTest {
             given(packagingFeignClient.createPackaging(any(PackagingCreateRequest.class)))
                     .willReturn(ResponseEntity.ok("OK"));
 
-            packagingService.create(TEST_NAME, TEST_PRICE, files);
+            packagingService.create(testName, testPrice, files);
 
             verify(minioService, org.mockito.Mockito.never()).uploadFiles(any(), any());
 
             verify(packagingFeignClient).createPackaging(
-                    argThat(req -> req.getName().equals(TEST_NAME) && req.getImageUrl() == null));
+                    argThat(req -> req.getName().equals(testName) && req.getImageUrl() == null));
         }
     }
 
@@ -96,13 +96,13 @@ class PackagingServiceTest {
         @Test
         @DisplayName("단건 조회 성공 시 응답 DTO를 반환한다")
         void get_Success() {
-            given(packagingFeignClient.getPackaging(eq(TEST_ID)))
+            given(packagingFeignClient.getPackaging(testId))
                     .willReturn(ResponseEntity.ok(mockResponse));
 
-            PackagingGetResponse result = packagingService.get(TEST_ID);
+            PackagingGetResponse result = packagingService.get(testId);
 
             assertThat(result).isEqualTo(mockResponse);
-            verify(packagingFeignClient).getPackaging(eq(TEST_ID));
+            verify(packagingFeignClient).getPackaging(testId);
         }
 
         @Test
@@ -126,26 +126,19 @@ class PackagingServiceTest {
         @Test
         @DisplayName("이미지 파일 교체와 함께 수정 요청 시, MinioService 호출 후 Feign Client를 호출한다")
         void update_WithNewFile_Success() {
-            // given
             MockMultipartFile file = createMockFile("p_new.jpg", "new_content");
             List<MultipartFile> files = new java.util.ArrayList<>(List.of(file));
-            // MinioService Mocking
-            given(minioService.uploadFiles(anyList(), eq("package"))).willReturn(List.of(TEST_URL));
+            given(minioService.uploadFiles(anyList(), eq("package"))).willReturn(List.of(testUrl));
 
-            // Feign Client Mocking
-            given(packagingFeignClient.updatePackaging(eq(TEST_ID), any(PackagingUpdateRequest.class)))
+            given(packagingFeignClient.updatePackaging(eq(testId), any(PackagingUpdateRequest.class)))
                     .willReturn(ResponseEntity.ok("OK"));
 
-            // when
-            packagingService.update(TEST_ID, TEST_NAME, TEST_PRICE, files);
+            packagingService.update(testId, testName, testPrice, files);
 
-            // then
-            // 1. MinioService 호출 검증
-            verify(minioService).uploadFiles(eq(files), eq("package"));
+            verify(minioService).uploadFiles(files, "package");
 
-            // 2. Feign Client가 URL을 포함한 Request로 호출되었는지 검증
-            verify(packagingFeignClient).updatePackaging(eq(TEST_ID),
-                    argThat(req -> req.getName().equals(TEST_NAME) && req.getImageUrl().get(0).equals(TEST_URL)));
+            verify(packagingFeignClient).updatePackaging(eq(testId),
+                    argThat(req -> req.getName().equals(testName) && req.getImageUrl().get(0).equals(testUrl)));
         }
 
         @Test
@@ -153,27 +146,27 @@ class PackagingServiceTest {
         void update_NoFile_Success() {
             List<MultipartFile> files = null;
 
-            given(packagingFeignClient.updatePackaging(eq(TEST_ID), any(PackagingUpdateRequest.class)))
+            given(packagingFeignClient.updatePackaging(eq(testId), any(PackagingUpdateRequest.class)))
                     .willReturn(ResponseEntity.ok("OK"));
 
-            packagingService.update(TEST_ID, TEST_NAME, TEST_PRICE, files);
+            packagingService.update(testId, testName, testPrice, files);
 
             verify(minioService, org.mockito.Mockito.never()).uploadFiles(any(), any());
 
-            verify(packagingFeignClient).updatePackaging(eq(TEST_ID),
-                    argThat(req -> req.getName().equals(TEST_NAME) && req.getImageUrl() == null));
+            verify(packagingFeignClient).updatePackaging(eq(testId),
+                    argThat(req -> req.getName().equals(testName) && req.getImageUrl() == null));
         }
     }
 
     @Test
     @DisplayName("포장재 삭제 (delete): Feign Client를 호출하여 삭제를 요청한다")
     void delete_Success() {
-        given(packagingFeignClient.deletePackaging(eq(TEST_ID)))
+        given(packagingFeignClient.deletePackaging(testId))
                 .willReturn(ResponseEntity.ok("OK"));
 
-        packagingService.delete(TEST_ID);
+        packagingService.delete(testId);
 
-        verify(packagingFeignClient).deletePackaging(eq(TEST_ID));
+        verify(packagingFeignClient).deletePackaging(testId);
     }
 
     @Test
@@ -183,11 +176,11 @@ class PackagingServiceTest {
         MockMultipartFile file2 = createMockFile("p2.jpg", "c2");
         List<MultipartFile> files = new java.util.ArrayList<>(List.of(file1, file2));
 
-        given(minioService.uploadFiles(anyList(), anyString())).willReturn(List.of(TEST_URL, "http://other.url/p2.jpg"));
-        packagingService.update(TEST_ID, TEST_NAME, TEST_PRICE, files);
+        given(minioService.uploadFiles(anyList(), anyString())).willReturn(List.of(testUrl, "http://other.url/p2.jpg"));
+        packagingService.update(testId, testName, testPrice, files);
 
-        verify(packagingFeignClient).updatePackaging(eq(TEST_ID),
-                argThat(req -> req.getImageUrl() != null && req.getImageUrl().size() == 1 && req.getImageUrl().get(0).equals(TEST_URL)));
+        verify(packagingFeignClient).updatePackaging(eq(testId),
+                argThat(req -> req.getImageUrl() != null && req.getImageUrl().size() == 1 && req.getImageUrl().get(0).equals(testUrl)));
     }
 
     @Test
@@ -198,11 +191,11 @@ class PackagingServiceTest {
 
         List<MultipartFile> files = new java.util.ArrayList<>(List.of(emptyFile));
 
-        packagingService.update(TEST_ID, TEST_NAME, TEST_PRICE, files);
+        packagingService.update(testId, testName, testPrice, files);
 
         verify(minioService, org.mockito.Mockito.never()).uploadFiles(any(), any());
 
-        verify(packagingFeignClient).updatePackaging(eq(TEST_ID),
+        verify(packagingFeignClient).updatePackaging(eq(testId),
                 argThat(req -> req.getImageUrl() == null));
     }
 }

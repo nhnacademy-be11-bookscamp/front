@@ -25,18 +25,18 @@ class DeliveryPolicyServiceTest {
     @Mock
     private DeliveryPolicyFeignClient client;
 
-    final Long TEST_POLICY_ID = 1L;
-    private final int TEST_THRESHOLD = 50000;
-    private final int TEST_FEE = 3000;
+    final Long testPolicyId = 1L;
+    private final int testThreshold = 50000;
+    private final int testFee = 3000;
 
     private DeliveryPolicyResponse createResponse() {
-        return new DeliveryPolicyResponse(TEST_POLICY_ID, TEST_THRESHOLD, TEST_FEE);
+        return new DeliveryPolicyResponse(testPolicyId, testThreshold, testFee);
     }
 
     @Test
     @DisplayName("배송비 정책 생성 요청 시 Feign Client의 createDeliveryPolicy가 호출되고 응답을 반환한다")
     void createDeliveryPolicy_success() {
-        DeliveryPolicyCreateRequest request = new DeliveryPolicyCreateRequest(TEST_THRESHOLD, TEST_FEE);
+        DeliveryPolicyCreateRequest request = new DeliveryPolicyCreateRequest(testThreshold, testFee);
         DeliveryPolicyResponse mockResponse = createResponse();
 
         given(client.createDeliveryPolicy(any(DeliveryPolicyCreateRequest.class)))
@@ -65,7 +65,7 @@ class DeliveryPolicyServiceTest {
     @Test
     @DisplayName("배송비 정책 수정 요청 시 Feign Client의 updateDeliveryPolicy가 호출되고 응답을 반환한다")
     void updateDeliveryPolicy_success() {
-        DeliveryPolicyUpdateRequest request = new DeliveryPolicyUpdateRequest(TEST_THRESHOLD, TEST_FEE);
+        DeliveryPolicyUpdateRequest request = new DeliveryPolicyUpdateRequest(testThreshold, testFee);
         DeliveryPolicyResponse mockResponse = createResponse();
 
         given(client.updateDeliveryPolicy(any(DeliveryPolicyUpdateRequest.class)))

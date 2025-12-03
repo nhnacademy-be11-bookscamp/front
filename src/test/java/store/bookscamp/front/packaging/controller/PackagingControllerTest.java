@@ -42,8 +42,8 @@ class PackagingControllerTest {
     @InjectMocks
     private PackagingController packagingController;
 
-    private final String BASE_URL = "/admin/packagings";
-    private final Long TEST_ID = 1L;
+    private final String baseUrl = "/admin/packagings";
+    private final Long testId = 1L;
 
     @BeforeEach
     void setup() {
@@ -54,7 +54,7 @@ class PackagingControllerTest {
         return new PackagingGetResponse();
     }
     @Nested
-    @DisplayName("GET " + BASE_URL)
+    @DisplayName("GET " + baseUrl)
     class ShowListTest {
 
         @Test
@@ -67,7 +67,7 @@ class PackagingControllerTest {
             );
             given(packagingService.getAll()).willReturn(mockList);
 
-            mvc.perform(get(BASE_URL))
+            mvc.perform(get(baseUrl))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(view().name("admin/packagings/packagings"))
@@ -78,32 +78,32 @@ class PackagingControllerTest {
     }
 
     @Nested
-    @DisplayName("GET " + BASE_URL + "/{id}")
+    @DisplayName("GET " + baseUrl + "/{id}")
     class ShowDetailTest {
 
         @Test
         @DisplayName("포장재 상세 조회 성공 시 객체를 Model에 담아 반환한다")
         void showDetail_Success() throws Exception {
             // given
-            PackagingGetResponse mockResponse = createResponse(TEST_ID, "일반 포장");
-            given(packagingService.get(eq(TEST_ID))).willReturn(mockResponse);
+            PackagingGetResponse mockResponse = createResponse(testId, "일반 포장");
+            given(packagingService.get(testId)).willReturn(mockResponse);
 
-            mvc.perform(get(BASE_URL + "/{id}", TEST_ID))
+            mvc.perform(get(baseUrl + "/{id}", testId))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(view().name("admin/packagings/detail"))
                     .andExpect(model().attribute("packaging", mockResponse));
 
-            verify(packagingService).get(eq(TEST_ID));
+            verify(packagingService).get(testId);
         }
     }
 
     @Nested
-    @DisplayName("POST " + BASE_URL)
+    @DisplayName("POST " + baseUrl)
     class CreatePackagingTest {
 
-        private final String NAME = "새 포장재";
-        private final int PRICE = 1000;
+        private final String name = "새 포장재";
+        private final int price = 1000;
 
         @Test
         @DisplayName("이미지 파일과 함께 포장재 생성 성공 시 목록 페이지로 리다이렉트한다")
@@ -116,10 +116,10 @@ class PackagingControllerTest {
                     "file content".getBytes()
             );
 
-            mvc.perform(multipart(BASE_URL)
+            mvc.perform(multipart(baseUrl)
                             .file(file)
-                            .param("name", NAME)
-                            .param("price", String.valueOf(PRICE))
+                            .param("name", name)
+                            .param("price", String.valueOf(price))
                             .with(request -> { // POST 요청임을 명시적으로 지정
                                 request.setMethod("POST");
                                 return request;
@@ -127,17 +127,17 @@ class PackagingControllerTest {
                     )
                     .andDo(print())
                     .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl(BASE_URL));
+                    .andExpect(redirectedUrl(baseUrl));
 
-            verify(packagingService).create(eq(NAME), eq(PRICE), anyList());
+            verify(packagingService).create(eq(name), eq(price), anyList());
         }
 
         @Test
         @DisplayName("파일 없이 포장재 생성 성공 시 목록 페이지로 리다이렉트한다")
         void createPackaging_NoFile_Success() throws Exception {
-            mvc.perform(multipart(BASE_URL)
-                            .param("name", NAME)
-                            .param("price", String.valueOf(PRICE))
+            mvc.perform(multipart(baseUrl)
+                            .param("name", name)
+                            .param("price", String.valueOf(price))
                             .with(request -> { // POST 요청임을 명시적으로 지정
                                 request.setMethod("POST");
                                 return request;
@@ -145,55 +145,55 @@ class PackagingControllerTest {
                     )
                     .andDo(print())
                     .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl(BASE_URL));
+                    .andExpect(redirectedUrl(baseUrl));
 
-            verify(packagingService).create(eq(NAME), eq(PRICE), any());
+            verify(packagingService).create(eq(name), eq(price), any());
         }
     }
 
     @Test
-    @DisplayName("GET " + BASE_URL + "/create: 포장재 생성 폼 페이지를 반환한다")
+    @DisplayName("GET " + baseUrl + "/create: 포장재 생성 폼 페이지를 반환한다")
     void showCreatePackaging_Success() throws Exception {
-        mvc.perform(get(BASE_URL + "/create"))
+        mvc.perform(get(baseUrl + "/create"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/packagings/form"));
     }
 
     @Nested
-    @DisplayName("GET " + BASE_URL + "/{id}/update")
+    @DisplayName("GET " + baseUrl + "/{id}/update")
     class ShowUpdateTest {
 
         @Test
         @DisplayName("포장재 수정 폼 조회 성공 시 기존 데이터를 Model에 담아 반환한다")
         void showUpdate_Success() throws Exception {
             // given
-            PackagingGetResponse mockResponse = createResponse(TEST_ID, "수정 대상");
-            given(packagingService.get(eq(TEST_ID))).willReturn(mockResponse);
+            PackagingGetResponse mockResponse = createResponse(testId, "수정 대상");
+            given(packagingService.get(testId)).willReturn(mockResponse);
 
             // when & then
-            mvc.perform(get(BASE_URL + "/{id}/update", TEST_ID))
+            mvc.perform(get(baseUrl + "/{id}/update", testId))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(view().name("admin/packagings/form"))
                     .andExpect(model().attribute("packaging", mockResponse));
 
-            verify(packagingService).get(eq(TEST_ID));
+            verify(packagingService).get(testId);
         }
     }
 
     @Nested
-    @DisplayName("PUT " + BASE_URL + "/{id}/update")
+    @DisplayName("PUT " + baseUrl + "/{id}/update")
     class UpdatePackagingTest {
 
-        private final String NAME = "수정된 이름";
-        private final int PRICE = 2000;
+        private final String name = "수정된 이름"; // price
+        private final int price = 2000;
 
         @Test
         @DisplayName("이미지 교체 없이 포장재 수정 성공 시 상세 페이지로 리다이렉트한다")
         void updatePackaging_NoFile_Success() throws Exception {
-            mvc.perform(multipart(BASE_URL + "/{id}/update", TEST_ID)
-                            .param("name", NAME)
-                            .param("price", String.valueOf(PRICE))
+            mvc.perform(multipart(baseUrl + "/{id}/update", testId)
+                            .param("name", name)
+                            .param("price", String.valueOf(price))
                             .with(request -> {
                                 request.setMethod("PUT");
                                 return request;
@@ -201,9 +201,9 @@ class PackagingControllerTest {
                     )
                     .andDo(print())
                     .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl(BASE_URL + "/" + TEST_ID));
+                    .andExpect(redirectedUrl(baseUrl + "/" + testId));
 
-            verify(packagingService).update(eq(TEST_ID), eq(NAME), eq(PRICE), any());
+            verify(packagingService).update(eq(testId), eq(name), eq(price), any());
         }
 
         @Test
@@ -216,10 +216,10 @@ class PackagingControllerTest {
                     "new file content".getBytes()
             );
 
-            mvc.perform(multipart(BASE_URL + "/{id}/update", TEST_ID)
+            mvc.perform(multipart(baseUrl + "/{id}/update", testId)
                             .file(file)
-                            .param("name", NAME)
-                            .param("price", String.valueOf(PRICE))
+                            .param("name", name)
+                            .param("price", String.valueOf(price))
                             .with(request -> {
                                 request.setMethod("PUT");
                                 return request;
@@ -227,26 +227,25 @@ class PackagingControllerTest {
                     )
                     .andDo(print())
                     .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl(BASE_URL + "/" + TEST_ID));
+                    .andExpect(redirectedUrl(baseUrl + "/" + testId));
 
-            // service.update 메서드가 정확히 호출되었는지 검증
-            verify(packagingService).update(eq(TEST_ID), eq(NAME), eq(PRICE), anyList());
+            verify(packagingService).update(eq(testId), eq(name), eq(price), anyList());
         }
     }
 
     @Nested
-    @DisplayName("POST " + BASE_URL + "/{id}/delete")
+    @DisplayName("POST " + baseUrl + "/{id}/delete")
     class DeletePackagingTest {
 
         @Test
         @DisplayName("포장재 삭제 성공 시 204 No Content를 반환한다")
         void deletePackaging_Success() throws Exception {
-            mvc.perform(post(BASE_URL + "/{id}/delete", TEST_ID)
-                            .contentType(MediaType.APPLICATION_JSON)) // @ResponseBody로 ResponseEntity를 반환하므로 JSON/NoContent 기대
+            mvc.perform(post(baseUrl + "/{id}/delete", testId)
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
-                    .andExpect(status().isNoContent()); // 204 No Content
+                    .andExpect(status().isNoContent());
 
-            verify(packagingService).delete(eq(TEST_ID));
+            verify(packagingService).delete(testId);
         }
     }
 }

@@ -39,13 +39,12 @@ class DeliveryPolicyControllerTest {
     @InjectMocks
     private DeliveryPolicyController deliveryPolicyController;
 
-    private final String BASE_URL = "/admin/delivery-policy";
-    private final Long TEST_POLICY_ID = 1L;
-    private final int TEST_THRESHOLD = 50000;
-    private final int TEST_FEE = 3000;
-
+    private final String baseUrl = "/admin/delivery-policy";
+    private final Long testPolicyId = 1L;
+    private final int testThreshold = 50000;
+    private final int testFee = 3000;
     private DeliveryPolicyResponse createResponse() {
-        return new DeliveryPolicyResponse(TEST_POLICY_ID, TEST_THRESHOLD, TEST_FEE);
+        return new DeliveryPolicyResponse(testPolicyId, testThreshold, testFee);
     }
 
     @BeforeEach
@@ -54,7 +53,7 @@ class DeliveryPolicyControllerTest {
     }
 
     @Nested
-    @DisplayName("GET " + BASE_URL)
+    @DisplayName("GET " + baseUrl)
     class GetDeliveryPolicyTest {
 
         @Test
@@ -63,14 +62,14 @@ class DeliveryPolicyControllerTest {
             DeliveryPolicyResponse mockPolicy = createResponse();
             given(deliveryPolicyService.getDeliveryPolicy()).willReturn(mockPolicy);
 
-            mvc.perform(get(BASE_URL))
+            mvc.perform(get(baseUrl))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(view().name("admin/delivery-policy"))
                     .andExpect(model().attribute("policy", mockPolicy))
                     .andExpect(model().attribute("isNew", false)) // 정책이 존재함
                     .andExpect(model().attribute("form",
-                            new DeliveryPolicyUpdateRequest(TEST_THRESHOLD, TEST_FEE)));
+                            new DeliveryPolicyUpdateRequest(testThreshold, testFee)));
 
             verify(deliveryPolicyService).getDeliveryPolicy();
         }
@@ -80,7 +79,7 @@ class DeliveryPolicyControllerTest {
         void getDeliveryPolicy_Failure_NoPolicy() throws Exception {
             doThrow(FeignException.NotFound.class).when(deliveryPolicyService).getDeliveryPolicy();
 
-            mvc.perform(get(BASE_URL))
+            mvc.perform(get(baseUrl))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(view().name("admin/delivery-policy"))
@@ -92,14 +91,14 @@ class DeliveryPolicyControllerTest {
     }
 
     @Nested
-    @DisplayName("POST " + BASE_URL)
+    @DisplayName("POST " + baseUrl)
     class SubmitDeliveryPolicyTest {
 
-        private final DeliveryPolicyUpdateRequest VALID_UPDATE_FORM =
-                new DeliveryPolicyUpdateRequest(TEST_THRESHOLD, TEST_FEE);
+        private final DeliveryPolicyUpdateRequest validUpdateForm =
+                new DeliveryPolicyUpdateRequest(testThreshold, testFee);
 
-        private final DeliveryPolicyUpdateRequest INVALID_UPDATE_FORM =
-                new DeliveryPolicyUpdateRequest(-100, 3000); // 유효성 검사 실패 가정
+        private final DeliveryPolicyUpdateRequest invalidUpdateForm =
+                new DeliveryPolicyUpdateRequest(-100, 3000);
 
         @Test
         @DisplayName("정책이 존재할 때: 유효한 폼 제출 시 기존 정책을 수정하고 리다이렉트한다")
@@ -107,10 +106,10 @@ class DeliveryPolicyControllerTest {
             given(deliveryPolicyService.updateDeliveryPolicy(any(DeliveryPolicyUpdateRequest.class)))
                     .willReturn(createResponse());
 
-            mvc.perform(post(BASE_URL)
-                            .param("freeDeliveryThreshold", String.valueOf(TEST_THRESHOLD))
-                            .param("baseDeliveryFee", String.valueOf(TEST_FEE))
-                            .flashAttr("form", VALID_UPDATE_FORM))
+            mvc.perform(post(baseUrl)
+                            .param("freeDeliveryThreshold", String.valueOf(testThreshold))
+                            .param("baseDeliveryFee", String.valueOf(testFee))
+                            .flashAttr("form", validUpdateForm))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/admin/delivery-policy"));
 
@@ -125,10 +124,10 @@ class DeliveryPolicyControllerTest {
             given(deliveryPolicyService.createDeliveryPolicy(any(DeliveryPolicyCreateRequest.class)))
                     .willReturn(createResponse());
 
-            mvc.perform(post(BASE_URL)
-                            .param("freeDeliveryThreshold", String.valueOf(TEST_THRESHOLD))
-                            .param("baseDeliveryFee", String.valueOf(TEST_FEE))
-                            .flashAttr("form", VALID_UPDATE_FORM))
+            mvc.perform(post(baseUrl)
+                            .param("freeDeliveryThreshold", String.valueOf(testThreshold))
+                            .param("baseDeliveryFee", String.valueOf(testFee))
+                            .flashAttr("form", validUpdateForm))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/admin/delivery-policy"));
 
@@ -142,10 +141,10 @@ class DeliveryPolicyControllerTest {
             DeliveryPolicyResponse mockPolicy = createResponse();
             given(deliveryPolicyService.getDeliveryPolicy()).willReturn(mockPolicy);
 
-            mvc.perform(post(BASE_URL)
-                            .param("freeDeliveryThreshold", String.valueOf(INVALID_UPDATE_FORM.freeDeliveryThreshold()))
-                            .param("baseDeliveryFee", String.valueOf(INVALID_UPDATE_FORM.baseDeliveryFee()))
-                            .flashAttr("form", INVALID_UPDATE_FORM))
+            mvc.perform(post(baseUrl)
+                            .param("freeDeliveryThreshold", String.valueOf(invalidUpdateForm.freeDeliveryThreshold()))
+                            .param("baseDeliveryFee", String.valueOf(invalidUpdateForm.baseDeliveryFee()))
+                            .flashAttr("form", invalidUpdateForm))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(view().name("admin/delivery-policy"))
@@ -161,15 +160,15 @@ class DeliveryPolicyControllerTest {
         void submitPolicy_BindingError_NoPolicy() throws Exception {
             doThrow(FeignException.NotFound.class).when(deliveryPolicyService).getDeliveryPolicy();
 
-            mvc.perform(post(BASE_URL)
-                            .param("freeDeliveryThreshold", String.valueOf(INVALID_UPDATE_FORM.freeDeliveryThreshold()))
-                            .param("baseDeliveryFee", String.valueOf(INVALID_UPDATE_FORM.baseDeliveryFee()))
-                            .flashAttr("form", INVALID_UPDATE_FORM))
+            mvc.perform(post(baseUrl)
+                            .param("freeDeliveryThreshold", String.valueOf(invalidUpdateForm.freeDeliveryThreshold()))
+                            .param("baseDeliveryFee", String.valueOf(invalidUpdateForm.baseDeliveryFee()))
+                            .flashAttr("form", invalidUpdateForm))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(view().name("admin/delivery-policy"))
-                    .andExpect(model().attributeHasErrors("form")) // 유효성 검사 오류 확인
-                    .andExpect(model().attribute("isNew", true)); // 정책 없음
+                    .andExpect(model().attributeHasErrors("form"))
+                    .andExpect(model().attribute("isNew", true));
 
             verify(deliveryPolicyService).getDeliveryPolicy();
         }

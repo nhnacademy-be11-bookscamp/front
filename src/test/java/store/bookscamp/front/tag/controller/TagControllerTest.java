@@ -49,8 +49,8 @@ class TagControllerTest {
     @InjectMocks
     private TagController tagController;
 
-    private final String BASE_URL = "/admin/tags";
-    private final int PAGE_SIZE = 5;
+    private final String baseUrl = "/admin/tags";
+    private final int pageSize = 5;
 
     @BeforeEach
     void setup() {
@@ -70,17 +70,17 @@ class TagControllerTest {
         @DisplayName("태그 목록 조회 성공 시 페이징 정보와 태그 리스트를 ModelAndView에 담아 반환한다")
         void showTagPage_Success() throws Exception {
             int page = 1;
-            Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+            Pageable pageable = PageRequest.of(page, pageSize);
             List<TagGetResponse> tags = List.of(
                     createTagResponse(1L, "소설"),
                     createTagResponse(2L, "IT")
             );
             Page<TagGetResponse> mockPage = new PageImpl<>(tags, pageable, 10);
 
-            given(tagFeignClient.getAll(eq(page), eq(PAGE_SIZE)))
+            given(tagFeignClient.getAll(page, pageSize))
                     .willReturn(mockPage);
 
-            mvc.perform(get(BASE_URL)
+            mvc.perform(get(baseUrl)
                             .param("page", String.valueOf(page)))
                     .andDo(print())
                     .andExpect(status().isOk())
@@ -90,7 +90,7 @@ class TagControllerTest {
                     .andExpect(model().attribute("currentPage", page))
                     .andExpect(model().attribute("totalPages", 2));
 
-            verify(tagFeignClient).getAll(eq(page), eq(PAGE_SIZE));
+            verify(tagFeignClient).getAll(page, pageSize);
         }
 
         @Test
@@ -98,13 +98,13 @@ class TagControllerTest {
         void showTagPage_EmptyList() throws Exception {
             // given
             int page = 0;
-            Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+            Pageable pageable = PageRequest.of(page, pageSize);
             Page<TagGetResponse> mockPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
-            given(tagFeignClient.getAll(eq(page), eq(PAGE_SIZE)))
+            given(tagFeignClient.getAll(page, pageSize))
                     .willReturn(mockPage);
 
-            mvc.perform(get(BASE_URL))
+            mvc.perform(get(baseUrl))
                     .andExpect(status().isOk())
                     .andExpect(model().attribute("tags", Collections.emptyList()));
         }
@@ -114,18 +114,18 @@ class TagControllerTest {
     @DisplayName("POST /admin/tags")
     class CreateTagTest {
 
-        private final String TAG_NAME = "신규 태그";
+        private final String tagName = "신규 태그"; // tagName
 
         @Test
         @DisplayName("태그 생성 요청 성공 시 목록 페이지로 리다이렉트한다")
         void createTag_Success() throws Exception {
-            TagGetResponse mockResponse = createTagResponse(10L, TAG_NAME);
+            TagGetResponse mockResponse = createTagResponse(10L, tagName);
 
             given(tagFeignClient.createTag(any(TagCreateRequest.class)))
                     .willReturn(mockResponse);
 
-            mvc.perform(post(BASE_URL)
-                            .param("name", TAG_NAME))
+            mvc.perform(post(baseUrl)
+                            .param("name", tagName))
                     .andDo(print())
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/admin/tags"));
@@ -151,8 +151,8 @@ class TagControllerTest {
             given(tagFeignClient.createTag(any(TagCreateRequest.class)))
                     .willThrow(mockException);
 
-            mvc.perform(post(BASE_URL)
-                            .param("name", TAG_NAME))
+            mvc.perform(post(baseUrl)
+                            .param("name", tagName))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(view().name("tags/tag"))
@@ -167,39 +167,39 @@ class TagControllerTest {
     @DisplayName("POST /admin/tags/{id}")
     class UpdateTagTest {
 
-        private final Long TAG_ID = 1L;
-        private final String NEW_NAME = "새로운 이름";
+        private final Long tagId = 1L;
+        private final String newName = "새로운 이름";
 
         @Test
         @DisplayName("태그 수정 요청 성공 시 목록 페이지로 리다이렉트한다")
         void updateTag_Success() throws Exception {
-            given(tagFeignClient.updateTag(eq(TAG_ID), any(TagUpdateRequest.class)))
+            given(tagFeignClient.updateTag(eq(tagId), any(TagUpdateRequest.class)))
                     .willReturn(ResponseEntity.ok().build());
 
-            mvc.perform(post(BASE_URL + "/{id}", TAG_ID)
-                            .param("name", NEW_NAME))
+            mvc.perform(post(baseUrl + "/{id}", tagId)
+                            .param("name", newName))
                     .andDo(print())
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/admin/tags"));
 
-            verify(tagFeignClient).updateTag(eq(TAG_ID), any(TagUpdateRequest.class));        }
+            verify(tagFeignClient).updateTag(eq(tagId), any(TagUpdateRequest.class));        }
     }
 
     @Nested
     @DisplayName("POST /admin/tags/{id}/delete")
     class DeleteTagTest {
 
-        private final Long TAG_ID = 1L;
+        private final Long tagId = 1L;
 
         @Test
         @DisplayName("태그 삭제 요청 성공 시 목록 페이지로 리다이렉트한다")
         void deleteTag_Success() throws Exception {
-            mvc.perform(post(BASE_URL + "/{id}/delete", TAG_ID))
+            mvc.perform(post(baseUrl + "/{id}/delete", tagId))
                     .andDo(print())
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/admin/tags"));
 
-            verify(tagFeignClient).deleteTag(TAG_ID);
+            verify(tagFeignClient).deleteTag(tagId);
         }
     }
 }

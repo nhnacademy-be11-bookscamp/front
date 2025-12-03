@@ -3,6 +3,7 @@ package store.bookscamp.front.auth.user;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,8 @@ public class CustomMemberDetails implements UserDetails, TokenDetails, OAuth2Use
     private String username;
     private final String role;
     private final String rawJwtToken;
+
+    @Setter
     private Map<String, Object> attributes;
 
     public CustomMemberDetails(String role, String rawJwtToken) {
@@ -61,9 +64,5 @@ public class CustomMemberDetails implements UserDetails, TokenDetails, OAuth2Use
             return null;
         }
         return String.valueOf(this.attributes.get("idNo"));
-    }
-
-    public void setAttributes(Map<String,Object> attributes){
-        this.attributes = attributes;
     }
 }

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpHeaders; // [추가됨] Spring HttpHeaders import
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import org.springframework.security.core.Authentication;
 import store.bookscamp.front.auth.user.TokenDetails;
-
 
 @Slf4j
 @Service
@@ -81,18 +81,22 @@ public class TokenRefreshService {
                     isSecure = request.getHeader("x-forwarded-proto").equals("https");
                 }
 
-                ResponseCookie atCookie = ResponseCookie.from("Authorization", newAccessToken)
+                // [수정 포인트 1] "Authorization" 문자열도 기왕이면 상수로 변경 (선택사항이지만 권장)
+                ResponseCookie atCookie = ResponseCookie.from(HttpHeaders.AUTHORIZATION, newAccessToken)
                         .path("/")
                         .httpOnly(true)
                         .secure(isSecure)
                         .sameSite(isSecure ? "None" : "Lax")
                         .build();
 
-                response.addHeader("Set-Cookie", atCookie.toString());
+                // [수정 포인트 2] "Set-Cookie" -> HttpHeaders.SET_COOKIE로 변경
+                response.addHeader(HttpHeaders.SET_COOKIE, atCookie.toString());
 
-                String newRtCookieString = reissueResponse.getHeaders().getFirst("Set-Cookie");
+                // [수정 포인트 3] "Set-Cookie" -> HttpHeaders.SET_COOKIE로 변경
+                String newRtCookieString = reissueResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
                 if (newRtCookieString != null) {
-                    response.addHeader("Set-Cookie", newRtCookieString);
+                    // [수정 포인트 4] "Set-Cookie" -> HttpHeaders.SET_COOKIE로 변경
+                    response.addHeader(HttpHeaders.SET_COOKIE, newRtCookieString);
                 }
 
                 updateSecurityContext(newRawAccessToken, newAccessToken);
@@ -106,7 +110,6 @@ public class TokenRefreshService {
             }
         }
     }
-
 
     private void updateSecurityContext(String rawJwtToken, String jwtToken) {
         DecodedJWT decodedJWT = JWT.decode(jwtToken);

@@ -21,8 +21,6 @@ import store.bookscamp.front.payment.feign.PaymentFeignClient;
 @RequiredArgsConstructor
 public class PaymentController {
 
-    private final PaymentFeignClient paymentFeignClient;
-
     @GetMapping("/success")
     public String paymentSuccess(
             @RequestParam String paymentKey,
@@ -54,20 +52,5 @@ public class PaymentController {
         model.addAttribute("errorCode", code);
         model.addAttribute("errorMessage", message);
         return "payment/fail";
-    }
-
-    @PostMapping("/confirm")
-    @ResponseBody
-    public ResponseEntity<PaymentConfirmResponse> confirmPayment(@RequestBody PaymentConfirmRequest request) {
-        log.info("=== 결제 승인 요청 시작 ===");
-        log.info("요청 데이터: {}", request);
-
-        ResponseEntity<PaymentConfirmResponse> response = paymentFeignClient.confirmPayment(request);
-
-        log.info("결제 승인 응답 상태: {}", response.getStatusCode());
-        log.info("결제 승인 응답 데이터: {}", response.getBody());
-        log.info("=== 결제 승인 요청 완료 ===");
-
-        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 }

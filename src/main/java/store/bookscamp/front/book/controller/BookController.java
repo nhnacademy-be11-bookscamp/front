@@ -1,5 +1,7 @@
 package store.bookscamp.front.book.controller;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -271,5 +273,17 @@ public class BookController {
         model.addAttribute("apiPrefix", apiPrefix);
 
         return "member/wishlist";
+    }
+
+    @GetMapping("/books/new")
+    public String newBooks(
+            Model model,
+            @PageableDefault(size = 9, sort = "publishDate,desc") Pageable pageable
+    ){
+        RestPageImpl<BookSortResponse> responsePage = bookFeignClient.getNewBooks(pageable).getBody();
+
+        model.addAttribute("responsePage", responsePage);
+
+        return "book/latestBooks";
     }
 }

@@ -21,7 +21,6 @@ public interface AddressFeignClient {
             @PathVariable("addressId") Long addressId,
             @RequestBody AddressUpdateRequest request);
 
-
     @DeleteMapping("/api-server/member/address/{addressId}")
     ResponseEntity<Void> deleteAddress(@PathVariable("addressId") Long addressId);
 }

@@ -1110,6 +1110,36 @@
             }
         }
 
+        async function handleZeroPayment(orderNumber) {
+            try {
+                const response = await fetch('/payments/confirm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        paymentKey: null,        // 0원 결제 시 null
+                        orderNumber: orderNumber,
+                        amount: 0
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    window.location.href = `/payments/success?paymentKey=ZERO_PAYMENT&orderId=${orderNumber}&amount=0`;
+                } else {
+                    const error = await response.json();
+                    alert(`결제 실패: ${error.message}`);
+                    window.location.href = `/payments/fail?code=PAYMENT_ERROR&message=${encodeURIComponent(error.message)}`;
+                }
+            } catch (error) {
+                console.error('0원 결제 처리 중 오류:', error);
+                alert('결제 처리 중 오류가 발생했습니다.');
+                throw error;
+            }
+        }
+
         // 주문 제출
         async function submitOrder() {
             // 배송지 검증
@@ -1203,17 +1233,25 @@
                 const result = await response.json();
                 console.log('주문 생성 성공:', result);
 
-                // 토스페이먼츠 결제
-                const tossPayments = TossPayments('test_ck_DnyRpQWGrNz0RNpYJkPbrKwv1M9E');
-                await tossPayments.requestPayment('TOSSPAY', {
-                    amount: result.finalAmount,
-                    orderId: result.orderNumber,
-                    orderName: `북스캠프 도서 ${orderData.orderItems.length}건`,
-                    successUrl: window.location.origin + '/payments/success',
-                    failUrl: window.location.origin + '/payments/fail',
-                    customerName: recipientName,
-                    customerMobilePhone: recipientPhone.replace(/-/g, '')
-                });
+                // 최종 결제 금액 확인
+                const finalAmount = result.finalAmount;
+
+                if (finalAmount === 0) {
+                    // 0원 결제: 토스 결제 위젯 건너뛰고 바로 결제 확인 API 호출
+                    await handleZeroPayment(result.orderNumber);
+                } else {
+                    // 일반 결제: 토스페이먼츠 결제
+                    const tossPayments = TossPayments('test_ck_DnyRpQWGrNz0RNpYJkPbrKwv1M9E');
+                    await tossPayments.requestPayment('TOSSPAY', {
+                        amount: finalAmount,
+                        orderId: result.orderNumber,
+                        orderName: `북스캠프 도서 ${orderData.orderItems.length}건`,
+                        successUrl: window.location.origin + '/payments/success',
+                        failUrl: window.location.origin + '/payments/fail',
+                        customerName: recipientName,
+                        customerMobilePhone: recipientPhone.replace(/-/g, '')
+                    });
+                }
             } catch (error) {
                 console.error(error);
                 alert(error.message || '주문 처리 중 오류가 발생했습니다.');

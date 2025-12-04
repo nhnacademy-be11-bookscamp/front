@@ -239,13 +239,22 @@
 
         // 페이지 로드 시 결제 승인 요청
         document.addEventListener('DOMContentLoaded', function() {
-            if (!paymentKey || !orderNumber || !amount) {
+            if (!paymentKey || !orderNumber || amount === null) {
                 alert('잘못된 접근입니다.');
                 location.href = '/';
                 return;
             }
 
-            confirmPayment();
+            if (paymentKey === 'ZERO_PAYMENT' && amount === 0) {
+                document.getElementById('processing-container').style.display = 'none';
+                document.getElementById('success-container').style.display = 'block';
+
+                document.getElementById('order-number').textContent = orderNumber;
+                document.getElementById('paid-amount').textContent = '0원';
+                document.getElementById('paid-at').textContent = new Date().toLocaleString('ko-KR');
+            } else {
+                confirmPayment();
+            }
         });
         /*]]>*/
     </script>

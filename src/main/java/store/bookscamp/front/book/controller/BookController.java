@@ -1,7 +1,5 @@
 package store.bookscamp.front.book.controller;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -218,7 +216,7 @@ public class BookController {
         return "book/list";
     }
 
-    @GetMapping({"/books/{id}","/admin/books/{id}"})
+    @GetMapping("/books/{id}")
     public String bookDetail(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable("id") Long id,

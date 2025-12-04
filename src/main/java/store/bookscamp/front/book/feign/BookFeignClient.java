@@ -2,6 +2,8 @@ package store.bookscamp.front.book.feign;
 
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -76,5 +78,10 @@ public interface BookFeignClient {
             @RequestParam("keyword") String keyword,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
+    );
+
+    @GetMapping("/api-server/books/newBooks")
+    ResponseEntity<RestPageImpl<BookSortResponse>> getNewBooks(
+            @PageableDefault(size = 9, sort = "publishDate,desc") Pageable pageable
     );
 }

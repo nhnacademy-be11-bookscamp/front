@@ -31,5 +31,5 @@ public class CouponIssueRestController {
     @PostMapping("/api-server/coupon-issue/issue")
     public Long issueCoupon(@RequestBody CouponIssueRequest couponIssueRequest){
         return couponIssueFeignClient.issueCoupon(couponIssueRequest).getBody();
-    };
+    }
 }

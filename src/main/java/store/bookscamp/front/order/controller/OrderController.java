@@ -13,33 +13,30 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import store.bookscamp.front.address.controller.response.AddressListResponse;
 import store.bookscamp.front.address.feign.AddressFeignClient;
 import store.bookscamp.front.member.controller.MemberFeignClient;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
 import store.bookscamp.front.order.dto.NonMemberOrderRequest;
-import store.bookscamp.front.order.dto.OrderCreateRequest;
-import store.bookscamp.front.order.dto.OrderCreateResponse;
 import store.bookscamp.front.order.dto.OrderDetailResponse;
 import store.bookscamp.front.order.dto.OrderListResponse;
 import store.bookscamp.front.order.dto.OrderPrepareRequest;
 import store.bookscamp.front.order.dto.OrderPrepareResponse;
-import store.bookscamp.front.order.dto.OrderReturnRequest;
-import store.bookscamp.front.order.dto.OrderReturnResponse;
 import store.bookscamp.front.order.dto.PageResponse;
 import store.bookscamp.front.order.feign.OrderFeignClient;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
+
+    private static final String ADDRESSES = "addresses";
+    private static final String USER_NAME = "username";
 
     private final OrderFeignClient orderFeignClient;
     private final AddressFeignClient addressFeignClient;
@@ -78,51 +75,21 @@ public class OrderController {
                 List<AddressListResponse.AddressResponse> sortedAddresses = addressList != null && addressList.addresses() != null
                     ? addressList.addresses().stream()
                         .sorted(Comparator.comparing(AddressListResponse.AddressResponse::isDefault).reversed())
-                        .collect(Collectors.toList())
+                        .toList()
                     : List.of();
                 
-                model.addAttribute("addresses", sortedAddresses);
-                model.addAttribute("username", username);
+                model.addAttribute(ADDRESSES, sortedAddresses);
+                model.addAttribute(USER_NAME, username);
             } catch (Exception e) {
-                model.addAttribute("addresses", List.of());
-                model.addAttribute("username", null);
+                model.addAttribute(ADDRESSES, List.of());
+                model.addAttribute(USER_NAME, null);
             }
         } else {
-            model.addAttribute("addresses", List.of());
-            model.addAttribute("username", null);
+            model.addAttribute(ADDRESSES, List.of());
+            model.addAttribute(USER_NAME, null);
         }
 
         return "order/order-prepare";
-    }
-
-    @PostMapping
-    @ResponseBody
-    public ResponseEntity<OrderCreateResponse> createOrder(
-            @RequestBody OrderCreateRequest request,
-            HttpServletRequest httpRequest
-    ) {
-        log.info("=== 주문 생성 요청 시작 ===");
-        log.info("요청 데이터: {}", request);
-
-        boolean isMember = isAuthenticatedMember(httpRequest);
-
-        if (!isMember && request.nonMemberInfo() == null) {
-            log.error("주문 생성 실패: 비회원 정보 누락");
-            throw new IllegalArgumentException("비회원 정보는 필수입니다.");
-        }
-
-        if (isMember && request.nonMemberInfo() != null) {
-            log.error("주문 생성 실패: 회원이 비회원 정보 입력");
-            throw new IllegalArgumentException("회원은 비회원 정보를 입력할 수 없습니다.");
-        }
-
-        ResponseEntity<OrderCreateResponse> response = orderFeignClient.createOrder(request);
-
-        log.info("주문 생성 응답 상태: {}", response.getStatusCode());
-        log.info("주문 생성 응답 데이터: {}", response.getBody());
-        log.info("=== 주문 생성 요청 완료 ===");
-
-        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
     private boolean isAuthenticatedMember(HttpServletRequest request) {
@@ -201,22 +168,4 @@ public class OrderController {
         return "order/non-member-detail";
     }
 
-    /**
-     * 주문 반품
-     */
-    @PostMapping("/{orderId}/return")
-    @ResponseBody
-    public ResponseEntity<OrderReturnResponse> returnOrder(
-            @PathVariable Long orderId,
-            @RequestBody OrderReturnRequest request
-    ) {
-        log.info("반품 신청 요청 - orderId: {}, returnType: {}", orderId, request.returnType());
-
-        ResponseEntity<OrderReturnResponse> response = orderFeignClient.returnOrder(orderId, request);
-
-        log.info("반품 신청 완료 - orderId: {}, statusCode: {}, response: {}",
-                orderId, response.getStatusCode(), response.getBody());
-
-        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
-    }
 }

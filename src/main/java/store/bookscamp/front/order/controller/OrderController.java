@@ -25,6 +25,8 @@ import store.bookscamp.front.order.dto.OrderDetailResponse;
 import store.bookscamp.front.order.dto.OrderListResponse;
 import store.bookscamp.front.order.dto.OrderPrepareRequest;
 import store.bookscamp.front.order.dto.OrderPrepareResponse;
+import store.bookscamp.front.order.dto.OrderReturnRequest;
+import store.bookscamp.front.order.dto.OrderReturnResponse;
 import store.bookscamp.front.order.dto.PageResponse;
 import store.bookscamp.front.order.feign.OrderFeignClient;
 
@@ -38,6 +40,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
+
+    private static final String ADDRESSES = "addresses";
+    private static final String USER_NAME = "username";
 
     private final OrderFeignClient orderFeignClient;
     private final AddressFeignClient addressFeignClient;
@@ -76,18 +81,18 @@ public class OrderController {
                 List<AddressListResponse.AddressResponse> sortedAddresses = addressList != null && addressList.addresses() != null
                     ? addressList.addresses().stream()
                         .sorted(Comparator.comparing(AddressListResponse.AddressResponse::isDefault).reversed())
-                        .collect(Collectors.toList())
+                        .toList()
                     : List.of();
                 
-                model.addAttribute("addresses", sortedAddresses);
-                model.addAttribute("username", username);
+                model.addAttribute(ADDRESSES, sortedAddresses);
+                model.addAttribute(USER_NAME, username);
             } catch (Exception e) {
-                model.addAttribute("addresses", List.of());
-                model.addAttribute("username", null);
+                model.addAttribute(ADDRESSES, List.of());
+                model.addAttribute(USER_NAME, null);
             }
         } else {
-            model.addAttribute("addresses", List.of());
-            model.addAttribute("username", null);
+            model.addAttribute(ADDRESSES, List.of());
+            model.addAttribute(USER_NAME, null);
         }
 
         return "order/order-prepare";
@@ -152,8 +157,8 @@ public class OrderController {
         List<OrderListResponse> orders =
                 (orderPage != null) ? orderPage.content() : List.of();
 
-        model.addAttribute("orderPage", orderPage); // 페이징 정보 전체
-        model.addAttribute("orders", orders);       // 실제 주문 리스트
+        model.addAttribute("orderPage", orderPage);
+        model.addAttribute("orders", orders);
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", size);
 
@@ -197,5 +202,31 @@ public class OrderController {
         model.addAttribute("isMember", false);
 
         return "order/non-member-detail";
+    }
+
+    /**
+     * 주문 반품
+     */
+    @PostMapping("/{orderId}/return")
+    @ResponseBody
+    public ResponseEntity<?> returnOrder(
+            @PathVariable Long orderId,
+            @RequestBody OrderReturnRequest request
+    ) {
+        log.info("반품 신청 요청 - orderId: {}, returnType: {}", orderId, request.returnType());
+
+        try {
+            ResponseEntity<OrderReturnResponse> response = orderFeignClient.returnOrder(orderId, request);
+
+            log.info("반품 신청 완료 - orderId: {}, statusCode: {}, response: {}",
+                    orderId, response.getStatusCode(), response.getBody());
+
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (feign.FeignException e) {
+            log.error("반품 신청 실패 - orderId: {}, statusCode: {}, error: {}",
+                    orderId, e.status(), e.contentUTF8());
+
+            return ResponseEntity.status(e.status()).body(e.contentUTF8());
+        }
     }
 }

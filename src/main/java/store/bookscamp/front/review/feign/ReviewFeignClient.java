@@ -55,4 +55,9 @@ public interface ReviewFeignClient {
     // 리뷰 수정
     @PutMapping("/api-server/member/review")
     ResponseEntity<Void> updateReview(@RequestBody ReviewUpdateRequest request);
+
+    // AI 리뷰 한줄평
+    @GetMapping("/api-server/review/book/{bookId}/ai")
+    ResponseEntity<String> getAiReview(@PathVariable Long bookId);
+
 }

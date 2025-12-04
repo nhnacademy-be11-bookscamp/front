@@ -55,8 +55,17 @@
                                     <span style="width: 100px; color: #6f6f6f; font-weight: 600;">재고</span>
                                     <span style="color: #333;">
                                         <span th:text="${book.stock + '권'}">10권</span>
-                                        <span th:if="${book.stock > 0 and book.stock <= 10}" style="margin-left: 10px; color: #ff9800; font-weight: 600;">품절임박</span>
-                                        <span th:if="${book.stock == 0}" style="margin-left: 10px; color: #dc3545; font-weight: 600;">품절</span>
+
+                                        <th:block th:if="${book.status.name() == 'DISCONTINUED'}">
+                                            <span style="margin-left: 10px; color: #999; font-weight: 700; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px; font-size: 12px;">
+                                                판매중지
+                                            </span>
+                                        </th:block>
+
+                                        <th:block th:unless="${book.status.name() == 'DISCONTINUED'}">
+                                            <span th:if="${book.stock == 0}" style="margin-left: 10px; color: #dc3545; font-weight: 600;">품절</span>
+                                            <span th:if="${book.stock > 0 and book.stock <= 10}" style="margin-left: 10px; color: #ff9800; font-weight: 600;">품절임박</span>
+                                        </th:block>
                                     </span>
                                 </li>
                                 <li style="padding: 8px 0; display: flex;">
@@ -163,7 +172,7 @@
                         </div>
                         <div>
                             <button type="button" class="site-btn" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600;"
-                                    th:disabled="${book.stock == 0}"
+                                    th:disabled="${book.stock == 0 or book.status.name() == 'DISCONTINUED'}"
                                     th:attr="data-book-id=${book.id}"
                                     onclick="directBuy(this)">
                                 <i class="fa fa-credit-card"></i> 바로 구매
@@ -198,6 +207,19 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- AI 리뷰 한줄평 -->
+            <div th:if="${aiReview != null and aiReview != ''}"
+                 style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    💡
+                    <h4 style="font-size: 18px; font-weight: 600; color: #374151;">AI 리뷰 한줄평</h4>
+                </div>
+
+                <p th:text="${aiReview}"
+                   style="font-size: 15px; color: #4b5563; line-height: 1.5;"></p>
             </div>
 
             <div class="row" style="margin-top: 60px;">
@@ -702,8 +724,14 @@
             addToCartBtn.addEventListener('click', async function () {
 
                 const bookId = /*[[${book.id}]]*/ null;
+                const bookStatus = /*[[${book.status.name()}]]*/ '';
                 const quantity = parseInt(document.getElementById('quantity').value, 10);
                 const stock = parseInt(document.getElementById('quantity').dataset.stock);
+
+                if (bookStatus === 'DISCONTINUED') {
+                    alert('판매가 중지된 도서입니다.');
+                    return;
+                }
 
                 if (stock === 0) {
                     alert('재고가 없어 장바구니에 담을 수 없습니다.');

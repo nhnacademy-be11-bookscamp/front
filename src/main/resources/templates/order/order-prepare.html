@@ -998,6 +998,59 @@
             document.getElementById('new-default').checked = false;
         }
 
+        // 배송지 목록 새로고침
+        async function refreshAddressList() {
+            try {
+                const response = await fetch('/mypage/address', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const addressList = document.getElementById('address-list');
+
+                    if (data.addresses && data.addresses.length > 0) {
+                        console.log('배송지 목록 정렬 전:', data.addresses);
+
+                        // 기본 배송지를 제일 위로 정렬
+                        const sortedAddresses = data.addresses.sort((a, b) => {
+                            const aIsDefault = a.isDefault || a.is_default;
+                            const bIsDefault = b.isDefault || b.is_default;
+                            console.log(`정렬 비교: ${a.label}(${aIsDefault}) vs ${b.label}(${bIsDefault})`);
+                            if (aIsDefault && !bIsDefault) return -1;
+                            if (!aIsDefault && bIsDefault) return 1;
+                            return 0;
+                        });
+
+                        console.log('배송지 목록 정렬 후:', sortedAddresses);
+
+                        addressList.innerHTML = sortedAddresses.map(addr => `
+                            <div class="address-item ${addr.isDefault || addr.is_default ? 'default' : ''}"
+                                 data-zipcode="${addr.zipCode || addr.zip_code}"
+                                 data-road="${addr.roadNameAddress || addr.road_name_address}"
+                                 data-detail="${addr.detailAddress || addr.detail_address}"
+                                 onclick="selectAddress(this)">
+                                <div class="address-item-header">
+                                    <div class="address-item-label">${addr.label}</div>
+                                    ${addr.isDefault || addr.is_default ? '<span class="address-badge">기본</span>' : ''}
+                                </div>
+                                <div class="address-item-info">
+                                    <div>[${addr.zipCode || addr.zip_code}] ${addr.roadNameAddress || addr.road_name_address}</div>
+                                    <div>${addr.detailAddress || addr.detail_address}</div>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        addressList.innerHTML = '<div style="text-align: center; padding: 40px; color: #9ca3af;">등록된 배송지가 없습니다.</div>';
+                    }
+                }
+            } catch (error) {
+                console.error('배송지 목록 새로고침 실패:', error);
+            }
+        }
+
         // 새 배송지 저장
         async function saveNewAddress() {
             if (!isMember || !username) return;
@@ -1014,7 +1067,7 @@
             }
 
             try {
-                const response = await fetch(`/mypage/${username}/address`, {
+                const response = await fetch('/mypage/address', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -1029,7 +1082,13 @@
 
                 if (response.ok) {
                     alert('배송지가 추가되었습니다.');
-                    location.reload();
+                    // 새로 추가된 배송지를 입력 폼에 자동으로 채우기
+                    document.getElementById('postcode').value = postcode;
+                    document.getElementById('road-address').value = road;
+                    document.getElementById('detail-address').value = detail;
+                    // 배송지 목록 새로고침
+                    await refreshAddressList();
+                    hideAddAddressForm();
                 } else {
                     throw new Error('배송지 추가 실패');
                 }

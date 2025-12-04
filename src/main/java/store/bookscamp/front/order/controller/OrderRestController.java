@@ -3,6 +3,8 @@ package store.bookscamp.front.order.controller;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +16,8 @@ import store.bookscamp.front.order.dto.OrderCreateResponse;
 import store.bookscamp.front.order.dto.OrderReturnRequest;
 import store.bookscamp.front.order.dto.OrderReturnResponse;
 import store.bookscamp.front.order.feign.OrderFeignClient;
+
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @RestController
@@ -55,8 +59,12 @@ public class OrderRestController {
             log.error("반품 신청 실패 - orderId: {}, statusCode: {}, error: {}",
                     orderId, e.status(), e.contentUTF8());
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8));
+
             return ResponseEntity
                     .status(e.status())
+                    .headers(headers)
                     .body(e.contentUTF8());
         }
     }

@@ -1,5 +1,6 @@
 package store.bookscamp.front.order.controller;
 
+import feign.FeignException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -204,12 +205,9 @@ public class OrderController {
         return "order/non-member-detail";
     }
 
-    /**
-     * 주문 반품
-     */
     @PostMapping("/{orderId}/return")
     @ResponseBody
-    public ResponseEntity<?> returnOrder(
+    public ResponseEntity<Object> returnOrder(
             @PathVariable Long orderId,
             @RequestBody OrderReturnRequest request
     ) {
@@ -222,11 +220,13 @@ public class OrderController {
                     orderId, response.getStatusCode(), response.getBody());
 
             return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
-        } catch (feign.FeignException e) {
+        } catch (FeignException e) {
             log.error("반품 신청 실패 - orderId: {}, statusCode: {}, error: {}",
                     orderId, e.status(), e.contentUTF8());
 
-            return ResponseEntity.status(e.status()).body(e.contentUTF8());
+            return ResponseEntity
+                    .status(e.status())
+                    .body(e.contentUTF8());
         }
     }
 }

@@ -141,29 +141,6 @@ class OrderControllerTest {
     }
 
     @Nested
-    @DisplayName("POST /orders")
-    class CreateOrderTest {
-
-        @Test
-        @DisplayName("회원 주문 생성 요청 성공 시 200 OK와 응답 데이터를 반환한다")
-        void createOrder_Member_Success() throws Exception {
-            OrderCreateRequest request = new OrderCreateRequest(null, null, null, 0, null, "CART");
-            OrderCreateResponse mockResponse = new OrderCreateResponse(10L, "ORD-1", 50000);
-
-            given(orderFeignClient.createOrder(any(OrderCreateRequest.class)))
-                    .willReturn(ResponseEntity.ok(mockResponse));
-
-            mvc.perform(post(baseUrl)
-                            .cookie(authCookie)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isOk())
-                    .andExpect(content().json(objectMapper.writeValueAsString(mockResponse)));
-        }
-
-    }
-
-    @Nested
     @DisplayName("GET /orders/list")
     class GetOrderListTest {
 

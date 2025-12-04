@@ -31,6 +31,7 @@ import store.bookscamp.front.book.controller.request.AladinCreateRequest;
 import store.bookscamp.front.book.controller.request.BookCreateRequest;
 import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookDetailResponse;
+import store.bookscamp.front.book.controller.response.BookIndexResponse; // [추가]
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
 import store.bookscamp.front.book.controller.response.BookWishListResponse;
@@ -291,7 +292,7 @@ class BookControllerTest {
                         .principal(new UsernamePasswordAuthenticationToken(mockUser, null)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("book/detail"))
-                .andExpect(model().attribute("isLikedByCurrentUser", true)); // 이제 성공할 것임
+                .andExpect(model().attribute("isLikedByCurrentUser", true));
     }
 
     @Test
@@ -305,6 +306,25 @@ class BookControllerTest {
         mvc.perform(get("/books/new"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("book/latestBooks"))
+                .andExpect(model().attribute("responsePage", mockPage));
+    }
+
+    // [추가됨] 베스트 셀러 페이지 조회 테스트
+    @Test
+    @DisplayName("[GET] 베스트 셀러 페이지 조회 - 성공")
+    void bestSeller_success() throws Exception {
+        // given
+        // BookIndexResponse는 실제 DTO를 사용하거나 빈 리스트여도 됨
+        RestPageImpl<BookIndexResponse> mockPage = createRestResponse(Collections.emptyList());
+
+        when(bookFeignClient.getBestSellers(any(Pageable.class)))
+                .thenReturn(ResponseEntity.ok(mockPage));
+
+        // when & then
+        mvc.perform(get("/books/best"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("book/bestseller"))
+                .andExpect(model().attributeExists("responsePage"))
                 .andExpect(model().attribute("responsePage", mockPage));
     }
 

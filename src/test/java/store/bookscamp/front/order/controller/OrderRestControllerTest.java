@@ -21,6 +21,8 @@ import store.bookscamp.front.order.dto.OrderReturnRequest;
 import store.bookscamp.front.order.dto.OrderReturnResponse;
 import store.bookscamp.front.order.feign.OrderFeignClient;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -48,6 +50,7 @@ class OrderRestControllerTest {
     @BeforeEach
     void setup() {
         mvc = MockMvcBuilders.standaloneSetup(orderRestController)
+                .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
                 .build();
     }
 
@@ -115,8 +118,11 @@ class OrderRestControllerTest {
             // when & then
             mvc.perform(post(baseUrl + "/{orderId}/return", orderId)
                             .contentType(MediaType.APPLICATION_JSON)
+                            .characterEncoding(StandardCharsets.UTF_8)
+                            .accept(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
+                    .andExpect(content().encoding(StandardCharsets.UTF_8))
                     .andExpect(content().string("반품 기한이 초과되었습니다."));
         }
     }

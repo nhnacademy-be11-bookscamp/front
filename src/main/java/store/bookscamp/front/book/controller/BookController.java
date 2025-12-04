@@ -18,6 +18,7 @@ import store.bookscamp.front.book.controller.request.AladinCreateRequest;
 import store.bookscamp.front.book.controller.request.BookCreateRequest;
 import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookDetailResponse;
+import store.bookscamp.front.book.controller.response.BookIndexResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
 import store.bookscamp.front.book.controller.response.BookWishListResponse;
@@ -283,5 +284,17 @@ public class BookController {
         model.addAttribute("responsePage", responsePage);
 
         return "book/latestBooks";
+    }
+
+    @GetMapping("/books/best")
+    public String bestSeller(
+            Model model,
+            @PageableDefault(size = 9, page = 0) Pageable pageable
+    ){
+        RestPageImpl<BookIndexResponse> responsePage = bookFeignClient.getBestSellers(pageable).getBody();
+
+        model.addAttribute("responsePage", responsePage);
+
+        return "book/bestseller";
     }
 }

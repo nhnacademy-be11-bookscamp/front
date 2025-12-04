@@ -1,6 +1,5 @@
 package store.bookscamp.front.book.feign;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;

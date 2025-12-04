@@ -209,6 +209,19 @@
                 </div>
             </div>
 
+            <!-- AI 리뷰 한줄평 -->
+            <div th:if="${aiReview != null and aiReview != ''}"
+                 style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    💡
+                    <h4 style="font-size: 18px; font-weight: 600; color: #374151;">AI 리뷰 한줄평</h4>
+                </div>
+
+                <p th:text="${aiReview}"
+                   style="font-size: 15px; color: #4b5563; line-height: 1.5;"></p>
+            </div>
+
             <div class="row" style="margin-top: 60px;">
                 <div class="col-lg-12">
                     <div style="background: white; padding: 40px; border: 1px solid #ebebeb; border-radius: 4px;">

@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.DisabledException; // [추가]
 import org.springframework.util.StreamUtils; // [추가] Spring 유틸 사용
 import store.bookscamp.front.auth.service.TokenRefreshService;
+import store.bookscamp.front.common.exception.RefreshTokenExpiredException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -52,11 +53,12 @@ public class FeignErrorDecoder implements ErrorDecoder {
                         response.status(),
                         "Token refreshed, retrying request.",
                         response.request().httpMethod(),
-                        (Date) null,
+                        (Long) null,
                         response.request()
                 );
             } else {
                 log.error("Token refresh failed. Returning default error. MethodKey: {}", methodKey);
+                throw new RefreshTokenExpiredException("Refresh failed");
             }
         }
 

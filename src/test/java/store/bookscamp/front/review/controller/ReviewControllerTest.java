@@ -143,7 +143,7 @@ class ReviewControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/mypage/reviews"));
 
-        verify(minioService).deleteFile(eq("remove1"), eq("review"));
+        verify(minioService).deleteFile("remove1", "review");
         verify(reviewFeignClient).updateReview(any(ReviewUpdateRequest.class));
     }
 }

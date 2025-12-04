@@ -2,7 +2,6 @@ package store.bookscamp.front.packaging.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import store.bookscamp.front.packaging.controller.response.PackagingGetResponse;
 import store.bookscamp.front.packaging.service.PackagingService;
@@ -69,12 +67,5 @@ public class PackagingController {
                                   @RequestPart(value = "files", required = false) List<MultipartFile> files) {
         packagingService.update(id, name, price, files);
         return "redirect:/admin/packagings/" + id;
-    }
-
-    @PostMapping("/admin/packagings/{id}/delete")
-    @ResponseBody
-    public ResponseEntity<Void> deletePackaging(@PathVariable Long id) {
-        packagingService.delete(id);
-        return ResponseEntity.noContent().build();
     }
 }

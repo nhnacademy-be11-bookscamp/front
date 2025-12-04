@@ -156,6 +156,13 @@
                              th:text="${#numbers.formatInteger(order.finalPaymentAmount(), 3, 'COMMA')} + '원'">
                         </div>
                     </div>
+                    <!-- 결제 취소 버튼 (PENDING 상태일 때만 표시) -->
+                    <div th:if="${order.orderStatus() == 'PENDING'}">
+                        <button type="button" class="btn btn-warning cancel-payment-btn"
+                                th:attr="data-order-id=${order.orderId()}">
+                            결제 취소
+                        </button>
+                    </div>
                     <!-- 반품 가능한 상태일 때만 반품 버튼 표시 -->
                     <div th:if="${order.orderStatus() == 'SHIPPED' || order.orderStatus() == 'DELIVERED'}">
                         <button type="button" class="btn btn-danger return-btn" data-bs-toggle="modal" data-bs-target="#returnModal"
@@ -337,6 +344,56 @@
             let selectedReturnType = null;
             let currentOrderId = null;
 
+            // 결제 취소 버튼 클릭 이벤트
+            const cancelPaymentBtn = document.querySelector('.cancel-payment-btn');
+            if (cancelPaymentBtn) {
+                cancelPaymentBtn.addEventListener('click', async function() {
+                    const orderId = this.getAttribute('data-order-id');
+
+                    if (!confirm('정말로 결제를 취소하시겠습니까?\n\n취소 시 다음과 같이 처리됩니다:\n• 주문 상태가 취소로 변경됩니다\n• 재고가 자동으로 복구됩니다\n• 사용한 포인트와 쿠폰이 복구됩니다\n• 결제 금액이 환불됩니다')) {
+                        return;
+                    }
+
+                    // 버튼 비활성화 (중복 요청 방지)
+                    cancelPaymentBtn.disabled = true;
+                    const originalText = cancelPaymentBtn.textContent;
+                    cancelPaymentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>처리 중...';
+
+                    try {
+                        const response = await fetch('/payments/cancel', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                orderId: parseInt(orderId),
+                                cancelReason: '사용자 요청'
+                            }),
+                            credentials: 'include'
+                        });
+
+                        if (response.ok) {
+                            alert('결제가 취소되었습니다.\n\n• 주문 상태: 취소됨\n• 재고: 자동 복구\n• 포인트/쿠폰: 복구 완료\n• 결제 금액: 환불 처리됨');
+                            window.location.reload();
+                        } else {
+                            const errorMessage = await response.text();
+                            alert(errorMessage || '결제 취소에 실패했습니다.');
+
+                            // 버튼 상태 복원
+                            cancelPaymentBtn.disabled = false;
+                            cancelPaymentBtn.textContent = originalText;
+                        }
+                    } catch (error) {
+                        console.error('결제 취소 오류:', error);
+                        alert('결제 취소 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+
+                        // 버튼 상태 복원
+                        cancelPaymentBtn.disabled = false;
+                        cancelPaymentBtn.textContent = originalText;
+                    }
+                });
+            }
+
             // 반품 버튼 클릭 시 주문 ID 저장
             const returnBtn = document.querySelector('.return-btn');
             if (returnBtn) {
@@ -401,22 +458,8 @@
                         // 페이지 새로고침
                         window.location.reload();
                     } else {
-                        const errorData = await response.json();
-                        let errorMessage = '반품 신청에 실패했습니다.';
-
-                        if (errorData.message) {
-                            if (errorData.message.includes('PERIOD_EXPIRED')) {
-                                errorMessage = '반품 가능 기간이 지났습니다.';
-                            } else if (errorData.message.includes('NOT_FOUND')) {
-                                errorMessage = '주문 정보를 찾을 수 없습니다.';
-                            } else if (errorData.message.includes('INVALID_STATUS')) {
-                                errorMessage = '반품 가능한 주문 상태가 아닙니다.';
-                            } else {
-                                errorMessage = errorData.message;
-                            }
-                        }
-
-                        alert(errorMessage);
+                        const errorMessage = await response.text();
+                        alert(errorMessage || '반품 신청에 실패했습니다.');
 
                         // 버튼 상태 복원
                         confirmReturnBtn.disabled = false;

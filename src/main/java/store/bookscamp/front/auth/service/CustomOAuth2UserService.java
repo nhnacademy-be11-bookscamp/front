@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -82,6 +83,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, Object> getPaycoMemberInfo(OAuth2UserRequest userRequest) {
         String userInfoUri = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUri();
         String accessToken = userRequest.getAccessToken().getTokenValue();
@@ -90,18 +92,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("client_id", clientId);
         headers.set("access_token", accessToken);
-
         headers.set("Content-Type", "application/json");
 
-        String emptyJsonBody = "{}";
-        HttpEntity<String> entity = new HttpEntity<>(emptyJsonBody, headers);
+        HttpEntity<String> entity = new HttpEntity<>("{}", headers);
 
         try {
-            ResponseEntity<Map> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     userInfoUri,
                     HttpMethod.POST,
                     entity,
-                    Map.class
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
             );
 
             Map<String, Object> responseBody = response.getBody();
@@ -113,12 +113,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 throw new OAuth2AuthenticationException("Payco 응답에 'header' 필드가 없습니다.");
             }
             Map<String, Object> header = (Map<String, Object>) responseBody.get("header");
-            Object isSuccessfulValue = header.get("isSuccessful");
 
-            if (!(isSuccessfulValue instanceof Boolean) || !((Boolean) isSuccessfulValue)) {
+            Object isSuccessfulValue = header.get("isSuccessful");
+            if (!(isSuccessfulValue instanceof Boolean isSuccessful) || !isSuccessful) {
                 String msg = (String) header.get("resultMessage");
-                log.warn("Payco API가 오류를 반환했습니다 (isSuccessful=false 또는 missing): {}", msg);
-                throw new OAuth2AuthenticationException("Payco API가 오류를 반환했습니다: " + msg);
+                throw new OAuth2AuthenticationException("Payco API 오류: " + msg);
             }
 
             if (!responseBody.containsKey("data")) {
@@ -133,8 +132,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return (Map<String, Object>) data.get("member");
 
         } catch (Exception e) {
-            log.error("Payco 사용자 정보 조회 중 치명적 오류 발생", e);
-            throw new OAuth2AuthenticationException("Payco 사용자 정보 조회 중 오류가 발생했습니다: " + e.getMessage());
+            log.error("Payco 사용자 정보 조회 중 오류", e);
+            throw new OAuth2AuthenticationException("Payco 사용자 정보 조회 실패: " + e.getMessage());
         }
     }
 

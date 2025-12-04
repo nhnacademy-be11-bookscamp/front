@@ -37,7 +37,8 @@ class CategoryLayoutAdviceTest {
         List<CategoryListResponse> result = categoryLayoutAdvice.addCategoriesToModel();
 
         // then
-        assertThat(result).hasSize(2);
-        assertThat(result).isEqualTo(mockList);
+        assertThat(result)
+                .hasSize(2)
+                .isEqualTo(mockList);
     }
 }

@@ -8,15 +8,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import store.bookscamp.front.order.dto.OrderDetailResponse;
 import store.bookscamp.front.order.dto.OrderListResponse;
-import store.bookscamp.front.order.dto.OrderStatusUpdateRequest;
-import store.bookscamp.front.order.dto.OrderStatusUpdateResponse;
 import store.bookscamp.front.order.dto.PageResponse;
 import store.bookscamp.front.order.feign.OrderFeignClient;
 
@@ -79,21 +74,5 @@ public class AdminController {
         model.addAttribute("order", response.getBody());
         model.addAttribute("isAdmin", true);
         return "admin/order-detail";
-    }
-
-    @PostMapping("/orders/{orderId}/status")
-    @ResponseBody
-    public ResponseEntity<OrderStatusUpdateResponse> updateOrderStatus(
-            @PathVariable Long orderId,
-            @RequestBody OrderStatusUpdateRequest request
-    ) {
-        log.info("주문 상태 변경 요청 - orderId: {}, newStatus: {}", orderId, request.orderStatus());
-
-        ResponseEntity<OrderStatusUpdateResponse> response = orderFeignClient.updateOrderStatus(orderId, request);
-
-        log.info("주문 상태 변경 완료 - orderId: {}, statusCode: {}, response: {}",
-                orderId, response.getStatusCode(), response.getBody());
-
-        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 }

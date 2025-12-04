@@ -42,15 +42,19 @@ class PackagingControllerTest {
     @InjectMocks
     private PackagingController packagingController;
 
+    // [추가됨] 삭제 기능을 담당하는 RestController도 주입
+    @InjectMocks
+    private PackagingRestController packagingRestController;
+
     private final String baseUrl = "/admin/packagings";
     private final Long testId = 1L;
 
     @BeforeEach
     void setup() {
-        mvc = MockMvcBuilders.standaloneSetup(packagingController).build();
+        // [변경됨] standaloneSetup에 두 컨트롤러를 모두 등록해야 합니다.
+        mvc = MockMvcBuilders.standaloneSetup(packagingController, packagingRestController).build();
     }
 
-    // 변경됨: 파라미터 제거
     private PackagingGetResponse createResponse() {
         return new PackagingGetResponse();
     }
@@ -64,8 +68,8 @@ class PackagingControllerTest {
         void showList_Success() throws Exception {
             // given
             List<PackagingGetResponse> mockList = List.of(
-                    createResponse(), // 변경됨: 인자 제거
-                    createResponse()  // 변경됨: 인자 제거
+                    createResponse(),
+                    createResponse()
             );
             given(packagingService.getAll()).willReturn(mockList);
 
@@ -87,7 +91,7 @@ class PackagingControllerTest {
         @DisplayName("포장재 상세 조회 성공 시 객체를 Model에 담아 반환한다")
         void showDetail_Success() throws Exception {
             // given
-            PackagingGetResponse mockResponse = createResponse(); // 변경됨: 인자 제거
+            PackagingGetResponse mockResponse = createResponse();
             given(packagingService.get(testId)).willReturn(mockResponse);
 
             mvc.perform(get(baseUrl + "/{id}", testId))
@@ -169,7 +173,7 @@ class PackagingControllerTest {
         @DisplayName("포장재 수정 폼 조회 성공 시 기존 데이터를 Model에 담아 반환한다")
         void showUpdate_Success() throws Exception {
             // given
-            PackagingGetResponse mockResponse = createResponse(); // 변경됨: 인자 제거
+            PackagingGetResponse mockResponse = createResponse();
             given(packagingService.get(testId)).willReturn(mockResponse);
 
             // when & then
@@ -242,6 +246,7 @@ class PackagingControllerTest {
         @Test
         @DisplayName("포장재 삭제 성공 시 204 No Content를 반환한다")
         void deletePackaging_Success() throws Exception {
+            // PackagingRestController가 등록되었으므로 이제 POST 요청을 인식함
             mvc.perform(post(baseUrl + "/{id}/delete", testId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())

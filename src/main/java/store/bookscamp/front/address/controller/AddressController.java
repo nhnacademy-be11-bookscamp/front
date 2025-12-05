@@ -43,7 +43,10 @@ public class AddressController {
     @GetMapping(produces = "application/json")
     @ResponseBody
     public ResponseEntity<AddressListResponse> getAddressesJson() {
-        return addressFeignClient.getAddresses();
+        ResponseEntity<AddressListResponse> response = addressFeignClient.getAddresses();
+        return ResponseEntity
+                .status(response.getStatusCode())
+                .body(response.getBody());
     }
 
     @GetMapping("/new")

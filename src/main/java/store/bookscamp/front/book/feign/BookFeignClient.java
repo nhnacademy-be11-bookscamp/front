@@ -84,4 +84,9 @@ public interface BookFeignClient {
     ResponseEntity<RestPageImpl<BookSortResponse>> getNewBooks(
             @PageableDefault(size = 9, sort = "publishDate,desc") Pageable pageable
     );
+
+    @GetMapping("/api-server/books/best")
+    ResponseEntity<RestPageImpl<BookIndexResponse>> getBestSellers(
+            @PageableDefault(size = 9, page = 0) Pageable pageable
+    );
 }

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>베스트 셀러 | 북스캠프</title>
+    <style>
+        /* 책 카드 그리드 스타일 (신간 페이지와 동일) */
+        .book-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .book-card {
+            background: #fff;
+            border: 1px solid #ebebeb;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            position: relative; /* 순위 배지 위치 잡기 위해 */
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #7fad39;
+        }
+
+        .book-card__thumb {
+            width: 100%;
+            height: 260px;
+            position: relative;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .book-card__thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 베스트 셀러 순위 배지 스타일 */
+        .badge-rank {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: #d10024; /* 강렬한 빨간색 */
+            color: white;
+            padding: 8px 12px;
+            font-size: 16px;
+            font-weight: 800;
+            border-bottom-right-radius: 12px;
+            z-index: 2;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* 1~3위는 금/은/동 색상 적용 (선택사항) */
+        .rank-1 { background-color: #FFD700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); font-size: 18px; } /* Gold */
+        .rank-2 { background-color: #C0C0C0; } /* Silver */
+        .rank-3 { background-color: #CD7F32; } /* Bronze */
+
+        .book-card__info {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-card__title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            line-height: 1.4;
+            height: 2.8em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .book-card__title a { color: inherit; text-decoration: none; }
+
+        .book-card__meta {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .book-card__price {
+            margin-top: auto;
+            font-weight: 700;
+            color: #7fad39;
+            font-size: 1.1rem;
+        }
+
+        .book-card__price .regular-price {
+            font-size: 0.9rem;
+            color: #bbb;
+            text-decoration: line-through;
+            margin-right: 5px;
+            font-weight: 400;
+        }
+
+        /* 페이지네이션 스타일 */
+        .product__pagination {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .product__pagination a {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #b2b2b2;
+            font-size: 14px;
+            color: #b2b2b2;
+            font-weight: 700;
+            line-height: 28px;
+            text-align: center;
+            margin-right: 6px;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .product__pagination a.active,
+        .product__pagination a:hover {
+            background: #7fad39;
+            border-color: #7fad39;
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+
+<section class="hero" layout:fragment="hero">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-3">
+                <div class="hero__categories">
+                    <div class="hero__categories__all">
+                        <i class="fa fa-bars"></i>
+                        <span>전체 카테고리</span>
+                    </div>
+                    <ul th:if="${categories != null}" th:replace="~{fragment/category :: categoryList(${categories})}">
+                        <li><a href="#">카테고리 로딩 중...</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+
+                <div class="hero__search">
+                    <div class="hero__search__phone">
+                        <div class="hero__search__phone__icon">
+                            <i class="fa fa-phone"></i>
+                        </div>
+                        <div class="hero__search__phone__text">
+                            <h5>간단질문환영</h5>
+                            <span>이용택TA 24시간</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title product__discount__title" style="margin-top: 20px; margin-bottom: 0;">
+                    <h2>🏆 베스트 셀러</h2>
+                </div>
+
+                <div class="book-grid-container">
+                    <div class="book-card" th:each="book, iterStat : ${responsePage.content}">
+
+                        <div class="badge-rank"
+                             th:classappend="${(responsePage.number * responsePage.size) + iterStat.count <= 3} ? 'rank-' + ${(responsePage.number * responsePage.size) + iterStat.count}"
+                             th:text="${(responsePage.number * responsePage.size) + iterStat.count}">
+                            1
+                        </div>
+
+                        <div class="book-card__thumb">
+                            <a th:href="@{/books/{id}(id=${book.id})}">
+                                <img th:src="${book.thumbnail != null ? book.thumbnail : '/img/no-image.png'}"
+                                     th:alt="${book.title}">
+                            </a>
+                        </div>
+                        <div class="book-card__info">
+                            <h5 class="book-card__title">
+                                <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">책 제목</a>
+                            </h5>
+                            <div class="book-card__meta">
+                                <span th:text="${book.contributors}">저자</span> |
+                                <span th:text="${book.publisher}">출판사</span>
+                            </div>
+                            <div class="book-card__price">
+                                <span class="regular-price"
+                                      th:if="${book.salePrice < book.regularPrice}"
+                                      th:text="${#numbers.formatInteger(book.regularPrice, 0, 'COMMA') + '원'}">
+                                    15,000원
+                                </span>
+                                <span th:text="${#numbers.formatInteger(book.salePrice, 0, 'COMMA') + '원'}">
+                                    12,000원
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(responsePage.content)}"
+                     style="text-align: center; padding: 80px 0; color: #999;">
+                    <p>등록된 베스트 셀러 정보가 없습니다.</p>
+                </div>
+
+                <div class="product__pagination" th:if="${!responsePage.empty and responsePage.totalPages > 0}">
+
+                    <a th:if="${!responsePage.first}"
+                       th:href="@{/books/best(page=${responsePage.number - 1}, size=${responsePage.size})}">
+                        <i class="fa fa-long-arrow-left"></i>
+                    </a>
+
+                    <a th:each="pageNumber : ${#numbers.sequence(0, responsePage.totalPages - 1)}"
+                       th:text="${pageNumber + 1}"
+                       th:href="@{/books/best(page=${pageNumber}, size=${responsePage.size})}"
+                       th:classappend="${pageNumber == responsePage.number} ? 'active'">
+                        1
+                    </a>
+
+                    <a th:if="${!responsePage.last}"
+                       th:href="@{/books/best(page=${responsePage.number + 1}, size=${responsePage.size})}">
+                        <i class="fa fa-long-arrow-right"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<div layout:fragment="content"></div>
+
+</body>
+</html>

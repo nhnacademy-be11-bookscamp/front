@@ -44,8 +44,9 @@ class FeignErrorDecoderTest {
 
         Exception exception = feignErrorDecoder.decode("methodKey", response);
 
-        assertThat(exception).isNotInstanceOf(RetryableException.class);
-        assertThat(exception).isNotInstanceOf(RefreshTokenExpiredException.class);
+        assertThat(exception)
+                .isNotInstanceOf(RetryableException.class)
+                .isNotInstanceOf(RefreshTokenExpiredException.class);
     }
 
     @Test
@@ -103,7 +104,8 @@ class FeignErrorDecoderTest {
 
         Exception exception = feignErrorDecoder.decode("methodKey", response);
 
-        assertThat(exception).isNotInstanceOf(RetryableException.class);
-        assertThat(exception).isNotInstanceOf(RefreshTokenExpiredException.class);
+        assertThat(exception)
+                .isNotInstanceOf(RetryableException.class)
+                .isNotInstanceOf(RefreshTokenExpiredException.class);
     }
 }

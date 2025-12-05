@@ -18,6 +18,8 @@ import store.bookscamp.front.deliverypolicy.service.DeliveryPolicyService;
 @RequiredArgsConstructor
 public class DeliveryPolicyController {
 
+    private static final String ATTRIBUTE_IS_NEW = "isNew";
+
     private final DeliveryPolicyService service;
 
     @GetMapping("/admin/delivery-policy")
@@ -30,10 +32,10 @@ public class DeliveryPolicyController {
             );
             model.addAttribute("policy", policy);
             model.addAttribute("form", form);
-            model.addAttribute("isNew", false);
+            model.addAttribute(ATTRIBUTE_IS_NEW, false);
         } catch (Exception ex) {
             model.addAttribute("form", new DeliveryPolicyCreateRequest());
-            model.addAttribute("isNew", true);
+            model.addAttribute(ATTRIBUTE_IS_NEW, true);
         }
 
         return "admin/delivery-policy";
@@ -50,19 +52,17 @@ public class DeliveryPolicyController {
             try {
                 DeliveryPolicyResponse policy = service.getDeliveryPolicy();
                 model.addAttribute("policy", policy);
-                model.addAttribute("isNew", false);
+                model.addAttribute(ATTRIBUTE_IS_NEW, false);
             } catch (Exception ex) {
-                model.addAttribute("isNew", true);
+                model.addAttribute(ATTRIBUTE_IS_NEW, true);
             }
             return "admin/delivery-policy";
         }
 
         try {
-            // 정책이 이미 있으면 → 수정
             service.updateDeliveryPolicy(form);
             ra.addFlashAttribute("successMessage", "수정되었습니다.");
         } catch (Exception ex) {
-            // 정책이 없어서 update 실패 → 생성 시도
             service.createDeliveryPolicy(
                     new DeliveryPolicyCreateRequest(
                             form.freeDeliveryThreshold(),

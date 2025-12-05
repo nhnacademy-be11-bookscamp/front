@@ -10,15 +10,60 @@
         <style>
             .btn-rainbow {
                 background: linear-gradient(to right, #e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6);
-                background-size: 200% auto; /* 호버 효과를 위함 */
+                background-size: 200% auto;
                 transition: background-position 0.5s ease;
-                color: white; /* 텍스트 색상 */
-                border: none; /* 테두리 제거 */
+                color: white;
+                border: none;
             }
             .btn-rainbow:hover {
-                background-position: right center; /* 그라데이션 이동 */
+                background-position: right center;
                 color: white;
             }
+
+            /* --- 등급 뱃지 스타일 시작 --- */
+            .rank-badge {
+                display: inline-block;
+                padding: 4px 15px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 700;
+                text-align: center;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+                min-width: 80px; /* 뱃지 너비 통일감 */
+                text-transform: uppercase;
+            }
+
+            /* 1. STANDARD: 초록색 (기본) */
+            .rank-badge.rank-standard {
+                background-color: #2ecc71;
+                color: white;
+            }
+
+            /* 2. GOLD: 금색 그라데이션 + 텍스트 그림자 */
+            .rank-badge.rank-gold {
+                background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+                color: #fff;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+                border: 1px solid #eebb00;
+            }
+
+            /* 3. PLATINUM: 다이아몬드 느낌 (영롱한 하늘빛 + 광택 효과) - 교체됨 */
+            .rank-badge.rank-platinum {
+                background: linear-gradient(45deg, #E0F7FA 0%, #80DEEA 50%, #4DD0E1 100%);
+                color: #006064; /* 가독성을 위한 짙은 청록색 텍스트 */
+                border: 1px solid #26C6DA;
+                box-shadow: 0 0 10px rgba(38, 198, 218, 0.5); /* 빛나는 효과 */
+                font-weight: 800;
+            }
+
+            /* 4. ROYAL: 은색 메탈 느낌 - 교체됨 */
+            .rank-badge.rank-royal {
+                background: linear-gradient(135deg, #e0e0e0 0%, #909090 100%);
+                color: #333;
+                border: 1px solid #bdbdbd;
+            }
+            /* --- 등급 뱃지 스타일 끝 --- */
         </style>
     </th:block>
 
@@ -81,12 +126,36 @@
                                             <span th:text="${#temporals.format(memberInfo.birthDate, 'yyyy-MM-dd')}" style="color: #333; font-weight: 500;">1990-01-01</span>
                                         </div>
                                     </div>
+
                                     <div class="col-lg-6" style="margin-bottom: 15px;">
                                         <div style="display: flex; align-items: center;">
-                                            <span style="width: 100px; color: #6f6f6f; font-weight: 600;">포인트</span>
+                                            <span style="width: 100px; color: #6f6f6f; font-weight: 600;">회원 등급</span>
+                                            <span class="rank-badge"
+                                                  th:classappend="${rank != null ? 'rank-' + #strings.toLowerCase(rank.name) : 'rank-standard'}"
+                                                  th:text="${rank != null ? rank.name : 'STANDARD'}">
+                                                STANDARD
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6" style="margin-bottom: 15px;">
+                                        <div style="display: flex; align-items: center;">
+                                            <span style="width: 100px; color: #6f6f6f; font-weight: 600;">보유 포인트</span>
                                             <span style="color: #7fad39; font-weight: 700; font-size: 18px;">
                                                 <i class="fa fa-coins"></i>
                                                 <span th:text="${#numbers.formatInteger(memberInfo.point, 1, 'COMMA')}">10000</span> P
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6" style="margin-bottom: 15px;">
+                                        <div style="display: flex; align-items: center;">
+                                            <span style="width: 100px; color: #6f6f6f; font-weight: 600;">적립률</span>
+                                            <span th:if="${rank != null}" style="color: #333; font-weight: 500;">
+                                                구매 금액의 <span th:text="${rank.value}" style="color: #7fad39; font-weight: 700;"></span>%
+                                            </span>
+                                            <span th:unless="${rank != null}" style="color: #333; font-weight: 500;">
+                                                기본 적립
                                             </span>
                                         </div>
                                     </div>
@@ -111,7 +180,7 @@
                                     </a>
                                 </div>
                                 <div class="col-12 col-md-3" style="margin-bottom: 10px;">
-                                    <a th:href="@{/mypage/{username}/address(username=${memberInfo.username})}"
+                                    <a th:href="@{/mypage/address}"
                                        class="site-btn"
                                        style="display: block; text-align: center; background: #00B050; text-decoration: none; padding: 12px;">
                                         <i class="fa fa-map-marker"></i> 주소 관리
@@ -126,14 +195,36 @@
                                 </div>
                             </div>
                             <div class="row" style="margin-bottom: 30px;">
-                                <div class="col-lg-12" style="margin-bottom: 10px;">
+
+                                <!-- 포인트 내역 버튼 -->
+                                <div class="col-12 col-md-4" style="margin-bottom: 10px;">
                                     <a th:href="@{/mypage/points}"
                                        class="site-btn"
-                                       style="display: block; text-align: center; background: #7fad39; text-decoration: none; padding: 12px;">
-                                        <i class="fa fa-coins"></i> 포인트 내역 조회
+                                       style="display: block; text-align: center; width: 100%; background: #7fad39; padding: 12px;">
+                                        <i class="fa fa-coins"></i> 포인트 내역
                                     </a>
                                 </div>
+
+                                <!-- 내 리뷰 버튼 -->
+                                <div class="col-12 col-md-4" style="margin-bottom: 10px;">
+                                    <a th:href="@{/mypage/reviews}"
+                                       class="site-btn"
+                                       style="display: block; text-align: center; width: 100%; background: #FF6F9E; padding: 12px; color: #fff;">
+                                        <i class="fa fa-comment-dots"></i> 내 리뷰
+                                    </a>
+                                </div>
+
+                                <!-- 주문내역조회 버튼 -->
+                                <div class="col-12 col-md-4" style="margin-bottom: 10px;">
+                                    <a th:href="@{/orders/list}"
+                                       class="site-btn"
+                                       style="display: block; text-align: center; width: 100%; background: #495057; padding: 12px; color: #fff;">
+                                        <i class="fa fa-list-alt"></i> 주문내역조회
+                                    </a>
+                                </div>
+
                             </div>
+
                         </div>
 
                         <div style="padding: 20px; background: #fff3cd; border: 1px solid #dc3545; border-radius: 4px; margin-top: 30px;">
@@ -180,10 +271,10 @@
                 return;
             }
 
-            const url = `/member`;
+            const url = `/members/delete`;
 
             try {
-                const response = await fetch(url, { method: 'DELETE' });
+                const response = await fetch(url, { method: 'POST' });
 
                 if (response.ok) {
                     alert('회원 탈퇴가 성공적으로 처리되었습니다. 이용해 주셔서 감사합니다.');

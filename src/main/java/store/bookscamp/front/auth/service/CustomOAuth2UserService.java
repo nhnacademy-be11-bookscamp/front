@@ -3,18 +3,15 @@ package store.bookscamp.front.auth.service;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -24,11 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate; // [수정] Import
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import store.bookscamp.front.admin.repository.AdminLoginFeignClient;
+import store.bookscamp.front.auth.repository.AuthFeignClient;
 import store.bookscamp.front.auth.dto.AccessTokenResponse;
-import store.bookscamp.front.auth.dto.LoginAuthDetails;
 import store.bookscamp.front.auth.dto.OauthLoginRequest;
-import store.bookscamp.front.auth.user.CustomMemberDetails;
 import store.bookscamp.front.member.controller.MemberFeignClient;
 
 import java.util.UUID;
@@ -42,7 +37,7 @@ import java.util.HashMap; // [수정] Import
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MemberFeignClient memberFeignClient;
-    private final AdminLoginFeignClient adminLoginFeignClient;
+    private final AuthFeignClient authFeignClient;
     private final RestTemplate restTemplate;
 
     @Override
@@ -88,6 +83,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, Object> getPaycoMemberInfo(OAuth2UserRequest userRequest) {
         String userInfoUri = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUri();
         String accessToken = userRequest.getAccessToken().getTokenValue();
@@ -96,18 +92,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("client_id", clientId);
         headers.set("access_token", accessToken);
-
         headers.set("Content-Type", "application/json");
 
-        String emptyJsonBody = "{}";
-        HttpEntity<String> entity = new HttpEntity<>(emptyJsonBody, headers);
+        HttpEntity<String> entity = new HttpEntity<>("{}", headers);
 
         try {
-            ResponseEntity<Map> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     userInfoUri,
                     HttpMethod.POST,
                     entity,
-                    Map.class
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
             );
 
             Map<String, Object> responseBody = response.getBody();
@@ -119,12 +113,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 throw new OAuth2AuthenticationException("Payco 응답에 'header' 필드가 없습니다.");
             }
             Map<String, Object> header = (Map<String, Object>) responseBody.get("header");
-            Object isSuccessfulValue = header.get("isSuccessful");
 
-            if (!(isSuccessfulValue instanceof Boolean) || !((Boolean) isSuccessfulValue)) {
+            Object isSuccessfulValue = header.get("isSuccessful");
+            if (!(isSuccessfulValue instanceof Boolean isSuccessful) || !isSuccessful) {
                 String msg = (String) header.get("resultMessage");
-                log.warn("Payco API가 오류를 반환했습니다 (isSuccessful=false 또는 missing): {}", msg);
-                throw new OAuth2AuthenticationException("Payco API가 오류를 반환했습니다: " + msg);
+                throw new OAuth2AuthenticationException("Payco API 오류: " + msg);
             }
 
             if (!responseBody.containsKey("data")) {
@@ -139,8 +132,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return (Map<String, Object>) data.get("member");
 
         } catch (Exception e) {
-            log.error("Payco 사용자 정보 조회 중 치명적 오류 발생", e);
-            throw new OAuth2AuthenticationException("Payco 사용자 정보 조회 중 오류가 발생했습니다: " + e.getMessage());
+            log.error("Payco 사용자 정보 조회 중 오류", e);
+            throw new OAuth2AuthenticationException("Payco 사용자 정보 조회 실패: " + e.getMessage());
         }
     }
 
@@ -179,7 +172,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         ResponseEntity<AccessTokenResponse> authResponse;
 
         try {
-            authResponse = adminLoginFeignClient.oauthLogin(loginRequest);
+            authResponse = authFeignClient.oauthLogin(loginRequest);
         } catch (Exception e) {
             log.error("OAuth2 기존 회원 로그인(토큰 발급) 실패", e);
             throw new OAuth2AuthenticationException("서버 오류로 토큰 발급에 실패했습니다.");

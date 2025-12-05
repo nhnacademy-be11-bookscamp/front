@@ -62,6 +62,7 @@
                                    th:value="${session.oauth_mobile}"
                                    required
                                    placeholder="010-1234-5678"
+                                   maxlength="13"
                                    th:readonly="${session.oauth_mobile != null and session.oauth_mobile != ''}">
                         </div>
                     </div>
@@ -92,6 +93,41 @@
                 </div>
             </form>
         </div>
-    </div>
+    </section>
+</div>
+<th:block layout:fragment="extra-js">
+    <script th:inline="javascript">
+        const phoneInput = document.getElementById('phone');
+
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function (e) {
+                // 1. 입력된 값에서 숫자만 추출
+                let value = e.target.value.replace(/[^0-9]/g, '');
+
+                // 2. 최대 글자수 제한 (휴대폰 번호 11자리 + 하이픈 2개 = 총 13자리 넘어가지 않도록 방지)
+                // 숫자가 11자리를 넘으면 뒤에는 잘라버립니다.
+                if (value.length > 11) {
+                    value = value.substring(0, 11);
+                }
+
+                let result = '';
+
+                // 3. 3-4-4 구조로 하이픈 강제 삽입
+                if (value.length < 4) {
+                    // 3자리 이하일 때 (010)
+                    result = value;
+                } else if (value.length < 8) {
+                    // 7자리 이하일 때 (010-1234)
+                    result = value.substring(0, 3) + '-' + value.substring(3);
+                } else {
+                    // 8자리 이상일 때 (010-1234-5678)
+                    result = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7);
+                }
+
+                e.target.value = result;
+            });
+        }
+    </script>
+</th:block>
 </body>
 </html>

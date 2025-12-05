@@ -1,6 +1,5 @@
 package store.bookscamp.front.order.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record OrderPrepareResponse(
@@ -28,8 +27,7 @@ public record OrderPrepareResponse(
     ) {}
 
     public record PackagingInfo(
-            @JsonProperty("id")
-            Long packagingId,
+            Long id,
             String name,
             Integer price
     ) {}

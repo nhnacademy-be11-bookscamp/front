@@ -35,6 +35,7 @@
                                 <th>유형</th>
                                 <th>포인트</th>
                                 <th>주문 ID</th>
+                                <th>비고</th>
                                 <th>일시</th>
                             </tr>
                             </thead>
@@ -46,14 +47,23 @@
                             </tr>
 
                             <tr th:each="p : ${points}">
+                                <!-- 적립 / 사용 -->
                                 <td th:text="${p.pointType == T(store.bookscamp.front.pointhistory.PointType).EARN ? '적립' : '사용'}"></td>
 
-                                <td th:classappend="${p.pointType == T(store.bookscamp.front.pointhistory.PointType).EARN ? 'text-success' : 'text-danger'}"
-                                    th:text="${p.pointType == T(store.bookscamp.front.pointhistory.PointType).EARN ? '+' + p.pointAmount : '-' + p.pointAmount}">
+                                <!-- 금액: 적립 +값 / 사용 -절대값 -->
+                                <td th:classappend="${p.pointAmount > 0 ? 'text-success' : 'text-danger'}"
+                                    th:text="${p.pointAmount > 0
+                                        ? '+' + p.pointAmount
+                                        : '-' + T(java.lang.Math).abs(p.pointAmount)}">
                                 </td>
 
+                                <!-- 주문 ID -->
                                 <td th:text="${p.orderId != null ? p.orderId : '-'}"></td>
 
+                                <!-- 비고 -->
+                                <td th:text="${p.description != null ? p.description : '-'}"></td>
+
+                                <!-- 날짜 -->
                                 <td th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
                             </tr>
 

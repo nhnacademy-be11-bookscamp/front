@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/no-sidebar}">
+<head>
+    <meta charset="UTF-8">
+    <title>휴면 해제 | 북스캠프</title>
+    <style>
+        /* 디자인은 그대로 유지 */
+        .dormant-card { background: #ffffff; padding: 50px 40px; border: 1px solid #ebebeb; border-radius: 4px; text-align: center; }
+        .dormant-icon { font-size: 50px; color: #7fad39; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <section class="checkout spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3">
+                    <div class="dormant-card">
+                        <div class="dormant-icon"><i class="fa fa-user-lock"></i></div>
+                        <h4>휴면 계정 해제</h4>
+
+                        <div th:if="${param.error}" style="color: red; margin-bottom: 15px; font-weight: bold;">
+                            <p th:if="${param.error[0] == 'invalid'}">인증번호가 틀렸거나 만료되었습니다.</p>
+                        </div>
+
+                        <form th:if="${param.sent == null}" action="/dormant/send" method="post">
+                            <div style="margin-bottom: 20px;">
+                                <p>해제할 아이디: <strong th:text="${param.username}"></strong></p>
+                                <input type="hidden" name="username" th:value="${param.username}">
+                            </div>
+
+                            <button type="submit" class="site-btn" style="width: 100%;">
+                                <i class="fa fa-paper-plane"></i> 인증번호 발송
+                            </button>
+                        </form>
+
+                        <form th:if="${param.sent != null}" action="/dormant/verify" method="post">
+                            <p style="color: #7fad39;">인증번호가 발송되었습니다.</p>
+
+                            <input type="hidden" name="username" th:value="${param.username}">
+
+                            <div class="checkout__input">
+                                <input type="text" name="code" placeholder="인증번호 6자리" required
+                                       style="text-align: center; letter-spacing: 4px; font-size: 18px;" maxlength="6">
+                            </div>
+
+                            <button type="submit" class="site-btn" style="width: 100%; background: #333;">
+                                <i class="fa fa-check-circle"></i> 인증 확인
+                            </button>
+
+                            <div style="margin-top: 15px;">
+                                <a th:href="@{/dormant(username=${param.username})}" style="color: #999; text-decoration: underline;">
+                                    인증번호 다시 받기
+                                </a>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

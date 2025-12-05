@@ -10,20 +10,17 @@ import store.bookscamp.front.address.controller.response.AddressListResponse;
 @FeignClient(name = "addressApiClient", url = "${gateway.base-url}")
 public interface AddressFeignClient {
 
-    @GetMapping("/api-server/member/{username}/address")
-    ResponseEntity<AddressListResponse> getAddresses(@PathVariable("username") String username);
+    @GetMapping("/api-server/member/address")
+    ResponseEntity<AddressListResponse> getAddresses();
 
-    @PostMapping(value = "/api-server/member/{username}/address")
-    ResponseEntity<Void> createAddress(@PathVariable("username") String username,
-                                       @RequestBody AddressCreateRequest request);
+    @PostMapping(value = "/api-server/member/address")
+    ResponseEntity<Void> createAddress(@RequestBody AddressCreateRequest request);
 
-    @PutMapping("/api-server/member/{username}/address/{addressId}")
+    @PutMapping("/api-server/member/address/{addressId}")
     ResponseEntity<Void> updateAddress(
-            @PathVariable("username") String username,
             @PathVariable("addressId") Long addressId,
             @RequestBody AddressUpdateRequest request);
 
-    @DeleteMapping("/api-server/member/{username}/address/{addressId}")
-    ResponseEntity<Void> deleteAddress(@PathVariable("username") String username,
-                                       @PathVariable("addressId") Long addressId);
+    @DeleteMapping("/api-server/member/address/{addressId}")
+    ResponseEntity<Void> deleteAddress(@PathVariable("addressId") Long addressId);
 }

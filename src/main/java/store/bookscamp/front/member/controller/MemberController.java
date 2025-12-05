@@ -1,40 +1,40 @@
 package store.bookscamp.front.member.controller;
 
 import feign.FeignException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.member.controller.request.MemberCreateRequest;
-import store.bookscamp.front.member.controller.request.MemberPasswordUpdateRequest;
 import store.bookscamp.front.member.controller.request.MemberUpdateRequest;
 import store.bookscamp.front.member.controller.response.MemberGetResponse;
+import store.bookscamp.front.member.controller.response.MemberPageResponse;
+import store.bookscamp.front.rank.controller.request.RankGetRequest;
+import store.bookscamp.front.rank.feign.RankFeignClient;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class MemberController {
 
+    private static final String ERROR_MESSAGE = "errorMessage";
+    private static final String MEMBER_INFO = "memberInfo";
+
     private final MemberFeignClient memberFeignClient;
+    private final RankFeignClient rankFeignClient;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -64,7 +64,7 @@ public class MemberController {
     public ModelAndView editInfo() {
         MemberGetResponse memberInfo = memberFeignClient.getMember();
         ModelAndView mav = new ModelAndView("member/edit-info");
-        mav.addObject("memberInfo",memberInfo);
+        mav.addObject(MEMBER_INFO,memberInfo);
         return mav;
     }
 
@@ -72,34 +72,18 @@ public class MemberController {
     public ModelAndView changePassword(){
         MemberGetResponse memberInfo = memberFeignClient.getMember();
         ModelAndView mav = new ModelAndView("member/change-password");
-        mav.addObject("memberInfo",memberInfo);
+        mav.addObject(MEMBER_INFO,memberInfo);
         return mav;
     }
 
     @GetMapping("/mypage")
     public ModelAndView getMember(){
         MemberGetResponse memberInfo = memberFeignClient.getMember();
+        RankGetRequest rank = rankFeignClient.getRank().getBody();
         ModelAndView modelAndView = new ModelAndView("member/mypage");
-        modelAndView.addObject("memberInfo",memberInfo);
+        modelAndView.addObject(MEMBER_INFO,memberInfo);
+        modelAndView.addObject("rank", rank);
         return modelAndView;
-    }
-
-    @GetMapping("/members/check-id")
-    @ResponseBody
-    public ResponseEntity<String> checkId(@RequestParam("id") String id) {
-        try {
-
-            return memberFeignClient.checkIdDuplicate(id);
-
-        } catch (FeignException e) {
-            return ResponseEntity
-                    .status(e.status())
-                    .body(e.contentUTF8());
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("서버 내부 오류가 발생했습니다: " + e.getMessage());
-        }
     }
 
     @PostMapping("/members")
@@ -127,9 +111,10 @@ public class MemberController {
                 errorMessage = e.contentUTF8();
 
             } catch (Exception ex) {
+                log.warn("Feign 에러 메시지 파싱 실패: {}", ex.getMessage());
             }
 
-            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
+            redirectAttributes.addFlashAttribute(ERROR_MESSAGE, errorMessage);
             return "redirect:/signup";
         }
     }
@@ -155,9 +140,9 @@ public class MemberController {
             return "redirect:/login";
         } catch (FeignException e) {
             if (e.status() == 409) {
-                redirectAttributes.addFlashAttribute("errorMessage", "이미 가입된 이메일 또는 전화번호입니다.");
+                redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "이미 가입된 이메일 또는 전화번호입니다.");
             } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "회원가입 중 오류 발생");
+                redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "회원가입 중 오류 발생");
             }
             return "redirect:/signup/social";
         }
@@ -170,27 +155,19 @@ public class MemberController {
             return "redirect:/mypage";
         } catch (FeignException e) {
             String errorMessage = "회원 정보 수정 중 오류가 발생했습니다. 다시 시도해 주세요.";
-            model.addAttribute("errorMessage", errorMessage);
+            model.addAttribute(ERROR_MESSAGE, errorMessage);
             return "redirect:/mypage/edit-info";
         }
     }
 
-    @PutMapping("/members/change-password")
-    public ResponseEntity<Void> updatePassword(@PathVariable String id,@RequestBody MemberPasswordUpdateRequest request){
-        memberFeignClient.updatePassword(request);
-        return ResponseEntity.ok().build();
-    }
+    @GetMapping("/admin/members")
+    public String getMemberList( @PageableDefault(size = 10, page = 0) Pageable pageable,Model model){
+        ResponseEntity<RestPageImpl<MemberPageResponse>> responseEntity = memberFeignClient.getAllMembers(pageable);
 
-    @DeleteMapping("/member")
-    public ResponseEntity<Void> deleteMember(HttpServletRequest request,
-                                             HttpServletResponse response){
-        memberFeignClient.deleteMember();
+        RestPageImpl<MemberPageResponse> memberPage = responseEntity.getBody();
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null) {
-            new SecurityContextLogoutHandler().logout(request, response, auth);
-        }
-
-        return ResponseEntity.ok().build();
+        model.addAttribute("members", memberPage);
+        
+        return "admin/member-list";
     }
 }

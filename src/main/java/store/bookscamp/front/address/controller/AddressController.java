@@ -1,20 +1,10 @@
 package store.bookscamp.front.address.controller;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import store.bookscamp.front.address.controller.request.AddressCreateRequest;
@@ -22,62 +12,64 @@ import store.bookscamp.front.address.controller.request.AddressUpdateRequest;
 import store.bookscamp.front.address.controller.response.AddressListResponse;
 import store.bookscamp.front.address.feign.AddressFeignClient;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/mypage/{username}/address")
+@RequestMapping("/mypage/address")
 public class AddressController {
 
     private final AddressFeignClient addressFeignClient;
 
+    private static final String REDIRECT_TO_LIST = "redirect:/mypage/address";
+
     @Value("${app.api.prefix}")
     private String apiPrefix;
 
-    @GetMapping
-    public ModelAndView getAddresses(@PathVariable("username") String username) {
+    @ModelAttribute("apiPrefix")
+    public String getApiPrefix() {
+        return apiPrefix;
+    }
 
-        AddressListResponse body = addressFeignClient.getAddresses(username).getBody();
+    @GetMapping
+    public ModelAndView getAddresses() {
+        AddressListResponse body = addressFeignClient.getAddresses().getBody();
 
         ModelAndView mav = new ModelAndView("member/address/list");
-        mav.addObject("apiPrefix", apiPrefix);
-        mav.addObject("username", username);
-        mav.addObject("addresses", body == null ? java.util.List.of() : body.addresses());
+        mav.addObject("addresses", body == null ? List.of() : body.addresses());
         return mav;
     }
 
     @GetMapping(produces = "application/json")
     @ResponseBody
-    public ResponseEntity<AddressListResponse> getAddressesJson(@PathVariable("username") String username) {
-        return addressFeignClient.getAddresses(username);
+    public ResponseEntity<AddressListResponse> getAddressesJson() {
+        ResponseEntity<AddressListResponse> response = addressFeignClient.getAddresses();
+        return ResponseEntity
+                .status(response.getStatusCode())
+                .body(response.getBody());
     }
 
     @GetMapping("/new")
-    public ModelAndView showCreateAddressForm(@PathVariable String username) {
+    public ModelAndView showCreateAddressForm() {
         ModelAndView mav = new ModelAndView("member/address/new");
-        mav.addObject("apiPrefix", apiPrefix);
-        mav.addObject("username", username);
-        mav.addObject("form", new AddressCreateRequest(null, null, null, null, null));
+        mav.addObject("form", new AddressCreateRequest());
         return mav;
     }
 
     @PostMapping
-    public String create(@PathVariable String username,
-                         @ModelAttribute("form") AddressCreateRequest form) {
-        addressFeignClient.createAddress(username, form);
-
-        return "redirect:/mypage/" + username + "/address";
+    public String create(@ModelAttribute("form") AddressCreateRequest form) {
+        addressFeignClient.createAddress(form);
+        return REDIRECT_TO_LIST;
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Void> createJson(@PathVariable String username,
-                                           @RequestBody AddressCreateRequest form) {
-        return addressFeignClient.createAddress(username, form);
+    public ResponseEntity<Void> createJson(@RequestBody AddressCreateRequest form) {
+        return addressFeignClient.createAddress(form);
     }
 
-    // 예: /members/{u}/address/{id}/edit?label=집&roadNameAddress=서울시..&zipCode=12345
     @GetMapping("/{id}/edit")
-    public ModelAndView showEditForm(@PathVariable String username,
-                                     @PathVariable Integer id,
+    public ModelAndView showEditForm(@PathVariable Long id,
                                      @RequestParam String label,
                                      @RequestParam String roadNameAddress,
                                      @RequestParam Integer zipCode,
@@ -85,31 +77,25 @@ public class AddressController {
                                      @RequestParam String detailAddress) {
 
         ModelAndView mav = new ModelAndView("member/address/edit");
-        mav.addObject("apiPrefix", apiPrefix);
-        mav.addObject("username", username);
         mav.addObject("id", id);
         mav.addObject("form", new AddressUpdateRequest(label, roadNameAddress, zipCode, isDefault, detailAddress));
         return mav;
-
-
     }
 
     @PutMapping("/{id}/edit")
-    public String update(@PathVariable String username,
-                         @PathVariable Long id,
+    public String update(@PathVariable Long id,
                          @ModelAttribute("form") AddressUpdateRequest form,
                          RedirectAttributes ra) {
-        addressFeignClient.updateAddress(username, id, form);
+        addressFeignClient.updateAddress(id, form);
         ra.addFlashAttribute("message", "주소가 수정되었습니다!");
-        return "redirect:/mypage/" + username + "/address";
+        return REDIRECT_TO_LIST;
     }
 
     @DeleteMapping("/{id}/delete")
-    public String delete(@PathVariable String username,
-                         @PathVariable Long id,
+    public String delete(@PathVariable Long id,
                          RedirectAttributes ra) {
-        addressFeignClient.deleteAddress(username, id);
+        addressFeignClient.deleteAddress(id);
         ra.addFlashAttribute("message", "주소가 삭제되었습니다!");
-        return "redirect:/mypage/" + username + "/address";
+        return REDIRECT_TO_LIST;
     }
 }

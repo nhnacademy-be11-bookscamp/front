@@ -1,8 +1,9 @@
 package store.bookscamp.front.book.feign;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import store.bookscamp.front.book.controller.request.AladinCreateRequest;
 import store.bookscamp.front.book.controller.request.BookCreateRequest;
 import store.bookscamp.front.book.controller.request.BookUpdateRequest;
+import store.bookscamp.front.book.controller.response.BookCouponResponse;
 import store.bookscamp.front.book.controller.response.BookIndexResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
@@ -55,7 +57,8 @@ public interface BookFeignClient {
             @RequestParam(required = false) String keyWord,
             @RequestParam(value = "sortType", required = false) String sortType,
             @RequestParam(value = "page", required = false) Integer page,
-            @RequestParam(value = "size", required = false) Integer size
+            @RequestParam(value = "size", required = false) Integer size,
+            @RequestParam(value = "role", required = false) String role
     );
 
     @GetMapping("/api-server/bookDetail/{id}")
@@ -69,4 +72,21 @@ public interface BookFeignClient {
 
     @DeleteMapping("/api-server/wishlist/{itemId}")
     ResponseEntity<Void> deleteWishList(@PathVariable Long itemId);
+
+    @GetMapping("/api-server/admin/books/coupon")
+    ResponseEntity<RestPageImpl<BookCouponResponse>> getBooks(
+            @RequestParam("keyword") String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    );
+
+    @GetMapping("/api-server/books/newBooks")
+    ResponseEntity<RestPageImpl<BookSortResponse>> getNewBooks(
+            @PageableDefault(size = 9, sort = "publishDate,desc") Pageable pageable
+    );
+
+    @GetMapping("/api-server/books/best")
+    ResponseEntity<RestPageImpl<BookIndexResponse>> getBestSellers(
+            @PageableDefault(size = 9, page = 0) Pageable pageable
+    );
 }

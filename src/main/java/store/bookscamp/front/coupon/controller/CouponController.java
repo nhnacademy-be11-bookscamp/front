@@ -2,11 +2,10 @@ package store.bookscamp.front.coupon.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import store.bookscamp.front.book.feign.BookFeignClient;
 import store.bookscamp.front.coupon.controller.response.CouponResponse;
 import store.bookscamp.front.coupon.feign.CouponFeignClient;
 
@@ -14,7 +13,7 @@ import store.bookscamp.front.coupon.feign.CouponFeignClient;
 @RequiredArgsConstructor
 public class CouponController {
 
-
+    private final BookFeignClient bookFeignClient;
     private final CouponFeignClient couponFeignClient;
 
     @GetMapping("/admin/coupons/new")

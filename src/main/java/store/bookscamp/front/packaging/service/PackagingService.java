@@ -1,5 +1,6 @@
 package store.bookscamp.front.packaging.service;
 
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,13 +19,12 @@ public class PackagingService {
     private final PackagingFeignClient packagingFeignClient;
 
     private List<String> uploadOne(List<MultipartFile> files) {
-        if (files == null || files.isEmpty()) {return null;}
+        if (files == null || files.isEmpty()) {return Collections.emptyList();}
         files.removeIf(MultipartFile::isEmpty);
-        if (files.isEmpty()) {return null;}
+        if (files.isEmpty()) {return Collections.emptyList();}
 
         List<String> urls = minioService.uploadFiles(files, "package");
-        // 리스트로 받지만 실사용은 1장만 하게 됨
-        // 넘어온 값이 여러 개면 1장만 사용하도록 함
+
         return (urls.size() > 1) ? urls.subList(0, 1) : urls;
     }
 

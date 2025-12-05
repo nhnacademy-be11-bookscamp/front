@@ -23,24 +23,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewController {
 
+    private static final String REVIEW = "review";
+
     private final ReviewFeignClient reviewFeignClient;
     private final MinioService minioService;
 
-    // 작성 가능한 리뷰
-    @GetMapping("/mypage/reviewable")
-    public String getReviewableItems(Model model) {
-
-        List<ReviewableItemResponse> items = reviewFeignClient.getReviewableItems().getBody();
-        model.addAttribute("items", items);
-        return "review/reviewable";
-    }
-
-    // 작성된 리뷰
     @GetMapping("/mypage/reviews")
-    public String getMyReviews(Model model) {
+    public String getAllReviewPages(Model model) {
 
-        List<MyReviewResponse> reviews = reviewFeignClient.getMyReviews().getBody();
-        model.addAttribute("reviews", reviews);
+        List<ReviewableItemResponse> reviewable = reviewFeignClient.getReviewableItems().getBody();
+        List<MyReviewResponse> written = reviewFeignClient.getMyReviews().getBody();
+
+        model.addAttribute("reviewable", reviewable);
+        model.addAttribute("written", written);
+
         return "review/my-reviews";
     }
 
@@ -57,7 +53,7 @@ public class ReviewController {
     public String getUpdatePage(@PathVariable Long reviewId, Model model) {
 
         MyReviewResponse review = reviewFeignClient.getUpdateReview(reviewId).getBody();
-        model.addAttribute("review", review);
+        model.addAttribute(REVIEW, review);
         return "review/update";
     }
 
@@ -72,7 +68,7 @@ public class ReviewController {
         }
 
         if (files != null && !files.isEmpty()) {
-            req.setImageUrls(minioService.uploadFiles(files, "review"));
+            req.setImageUrls(minioService.uploadFiles(files, REVIEW));
         }
 
         reviewFeignClient.createReview(req);
@@ -90,20 +86,17 @@ public class ReviewController {
         }
 
         if (files != null && !files.isEmpty()) {
-            req.setImageUrls(minioService.uploadFiles(files, "review"));
+            req.setImageUrls(minioService.uploadFiles(files, REVIEW));
         }
 
         List<String> removedUrls = req.getRemovedImageUrls();
         if (removedUrls != null && !removedUrls.isEmpty()) {
             for (String url : removedUrls) {
-                minioService.deleteFile(url, "review");
+                minioService.deleteFile(url, REVIEW);
             }
         }
 
         reviewFeignClient.updateReview(req);
-
         return "redirect:/mypage/reviews";
     }
-
-    // todo: 도서 상세 페이지 리뷰 조회
 }

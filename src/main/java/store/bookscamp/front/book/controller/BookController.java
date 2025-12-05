@@ -1,9 +1,10 @@
 package store.bookscamp.front.book.controller;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import store.bookscamp.front.book.controller.request.AladinCreateRequest;
 import store.bookscamp.front.book.controller.request.BookCreateRequest;
 import store.bookscamp.front.book.controller.request.BookUpdateRequest;
 import store.bookscamp.front.book.controller.response.BookDetailResponse;
+import store.bookscamp.front.book.controller.response.BookIndexResponse;
 import store.bookscamp.front.book.controller.response.BookInfoResponse;
 import store.bookscamp.front.book.controller.response.BookSortResponse;
 import store.bookscamp.front.book.controller.response.BookWishListResponse;
@@ -27,12 +29,18 @@ import store.bookscamp.front.common.pagination.RestPageImpl;
 import store.bookscamp.front.book.feign.AladinFeignClient;
 import store.bookscamp.front.book.feign.BookFeignClient;
 import store.bookscamp.front.common.service.MinioService;
+import store.bookscamp.front.pointhistory.controller.response.PageResponse;
+import store.bookscamp.front.review.controller.response.BookReviewResponse;
+import store.bookscamp.front.review.feign.ReviewFeignClient;
 import store.bookscamp.front.tag.TagFeignClient;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class BookController {
+
+    private static final String REDIRECT_ADMIN_BOOKS = "redirect:/admin/books";
 
     @Value("${app.api.prefix}")
     private String apiPrefix;
@@ -42,13 +50,14 @@ public class BookController {
     private final BookFeignClient bookFeignClient;
     private final TagFeignClient tagFeignClient;
     private final BookLikeFeignClient bookLikeFeignClient;
+    private final ReviewFeignClient reviewFeignClient;
 
     @GetMapping("/admin/books")
     public String adminBooksHome(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String keyWord,
             @RequestParam(defaultValue = "id") String sortType,
-            @PageableDefault(size = 20, page = 0) Pageable pageable,
+            @PageableDefault(size = 10, page = 0) Pageable pageable,
             Model model
     ) {
         ResponseEntity<RestPageImpl<BookSortResponse>> response = bookFeignClient.getBooks(
@@ -56,12 +65,12 @@ public class BookController {
                 keyWord,
                 sortType,
                 pageable.getPageNumber(),
-                pageable.getPageSize()
+                pageable.getPageSize(),
+                "admin"
         );
 
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
-
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("keyWord", keyWord);
         model.addAttribute("sortType", sortType);
@@ -99,7 +108,7 @@ public class BookController {
 
         bookFeignClient.createBook(req, req.getPublishDate());
 
-        return "redirect:/admin/books";
+        return REDIRECT_ADMIN_BOOKS;
     }
 
     // 알라딘 등록
@@ -110,6 +119,10 @@ public class BookController {
         BookDetailResponse detail = aladinFeignClient.getBookDetail(isbn);
         List<TagGetResponse> tags = tagFeignClient.getAll(0, 1000).getContent();
 
+        String originalCover = detail.getCover();
+        if (originalCover != null) {
+            detail.setCover(originalCover.replace("sum", "500"));
+        }
         model.addAttribute("aladinBook", detail);
         model.addAttribute("tags", tags);
 
@@ -121,12 +134,12 @@ public class BookController {
 
         bookFeignClient.createAladinBook(req, req.getImgUrls());
 
-        return "redirect:/admin/books";
+        return REDIRECT_ADMIN_BOOKS;
     }
 
     // 도서 수정
 
-    @GetMapping("admin/books/{id}/update")
+    @GetMapping("admin/books/{id}")
     public String showUpdatePage(@PathVariable Long id, Model model) {
 
         BookInfoResponse book = bookFeignClient.getBookDetail(id);
@@ -139,7 +152,7 @@ public class BookController {
         return "book/update";
     }
 
-    @PutMapping(value = "/admin/books/{id}/update")
+    @PutMapping(value = "/admin/books/{id}")
     public String updateBook(
             @PathVariable Long id,
             @ModelAttribute BookUpdateRequest req,
@@ -171,7 +184,7 @@ public class BookController {
     @DeleteMapping("/admin/books")
     public String deleteBook(@RequestParam Long id) {
         bookFeignClient.deleteBook(id);
-        return "redirect:/admin/books";
+        return REDIRECT_ADMIN_BOOKS;
     }
 
     // 도서 목록 조회, 상세페이지
@@ -190,9 +203,10 @@ public class BookController {
                 keyWord,
                 sortType,
                 pageable.getPageNumber(),
-                pageable.getPageSize()
+                pageable.getPageSize(),
+                "user"
         );
-        System.out.println(response.getBody().getContent());
+        log.debug(response.getBody().getContent().toString());
 
         RestPageImpl<BookSortResponse> booksPage = response.getBody();
         model.addAttribute("booksPage", booksPage);
@@ -203,10 +217,11 @@ public class BookController {
         return "book/list";
     }
 
-    @GetMapping({"/books/{id}","/admin/books/{id}"})
+    @GetMapping("/books/{id}")
     public String bookDetail(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable("id") Long id,
+            @RequestParam(defaultValue = "0") int page,
             Model model
     ){
 
@@ -219,14 +234,25 @@ public class BookController {
 
         boolean likeStatus = false;
 
-        if(userDetails != null) {
-            ResponseEntity<BookLikeStatusResponse> status = bookLikeFeignClient.getLikeStatus(id);
-            likeStatus = status.getBody().liked();
+        if (userDetails != null) {
+            likeStatus = Optional.ofNullable(bookLikeFeignClient.getLikeStatus(id))
+                    .map(ResponseEntity::getBody)
+                    .map(BookLikeStatusResponse::liked)
+                    .orElse(false);
         }
 
         model.addAttribute("isLikedByCurrentUser", likeStatus);
 
         model.addAttribute("apiPrefix", apiPrefix);
+
+        String aiReview = reviewFeignClient.getAiReview(id).getBody();
+        model.addAttribute("aiReview", aiReview);
+
+        PageResponse<BookReviewResponse> reviews = reviewFeignClient.getBookReviews(id, page, 3).getBody();
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("reviewCount", reviews != null ? reviews.getTotalElements() : 0L);
+        Double avgScore = reviewFeignClient.getBookAverageScore(id).getBody();
+        model.addAttribute("avgScore", avgScore);
 
         return "book/detail";
     }
@@ -246,5 +272,29 @@ public class BookController {
         model.addAttribute("apiPrefix", apiPrefix);
 
         return "member/wishlist";
+    }
+
+    @GetMapping("/books/new")
+    public String newBooks(
+            Model model,
+            @PageableDefault(size = 9, sort = "publishDate,desc") Pageable pageable
+    ){
+        RestPageImpl<BookSortResponse> responsePage = bookFeignClient.getNewBooks(pageable).getBody();
+
+        model.addAttribute("responsePage", responsePage);
+
+        return "book/latestBooks";
+    }
+
+    @GetMapping("/books/best")
+    public String bestSeller(
+            Model model,
+            @PageableDefault(size = 9, page = 0) Pageable pageable
+    ){
+        RestPageImpl<BookIndexResponse> responsePage = bookFeignClient.getBestSellers(pageable).getBody();
+
+        model.addAttribute("responsePage", responsePage);
+
+        return "book/bestseller";
     }
 }

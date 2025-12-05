@@ -20,6 +20,10 @@ public class PointHistoryController {
 
         PageResponse<PointHistoryResponse> response = pointHistoryFeignClient.getMyPointHistories(page, 10).getBody();
 
+        if (response == null) {
+            response = PageResponse.empty();
+        }
+
         model.addAttribute("points", response.getContent());
         model.addAttribute("page", response);
 

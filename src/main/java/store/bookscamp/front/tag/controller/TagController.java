@@ -16,12 +16,12 @@ import store.bookscamp.front.tag.controller.request.TagCreateRequest;
 import store.bookscamp.front.tag.controller.request.TagUpdateRequest;
 import store.bookscamp.front.tag.controller.response.TagGetResponse;
 
-import java.util.List;
-
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/admin")
 public class TagController {
+
+    private static final String REDIRECT_ADMIN_TAGS = "redirect:/admin/tags";
 
     private final TagFeignClient tagFeignClient;
 
@@ -51,20 +51,20 @@ public class TagController {
             model.addAttribute("error", "이미 존재하는 태그입니다.");
             return "tags/tag";
         }
-         return "redirect:/admin/tags";
+         return REDIRECT_ADMIN_TAGS;
     }
 
     @PostMapping("/tags/{id}")
     public String updateTag(@PathVariable Long id,
                             @RequestParam("name") String name) {
         tagFeignClient.updateTag(id, new TagUpdateRequest(name));
-        return "redirect:/admin/tags";
+        return REDIRECT_ADMIN_TAGS;
     }
 
     @PostMapping("/tags/{id}/delete")
     public String deleteTag(@PathVariable Long id) {
         tagFeignClient.deleteTag(id);
-        return "redirect:/admin/tags";
+        return REDIRECT_ADMIN_TAGS;
     }
 
 }

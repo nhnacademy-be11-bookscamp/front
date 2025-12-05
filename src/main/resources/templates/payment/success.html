@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>결제 성공 | 북스캠프</title>
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 80px auto;
+            text-align: center;
+            padding: 60px 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #10b981;
+            margin-bottom: 30px;
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        .success-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+
+        .success-message {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .order-info {
+            background: #f9fafb;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .order-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .order-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .order-info-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .order-info-value {
+            font-weight: 700;
+            color: #0064FF;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0064FF 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 100, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            border-color: #0064FF;
+            color: #0064FF;
+        }
+
+        .loading {
+            display: inline-block;
+            font-size: 16px;
+            color: #6b7280;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0064FF;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+<section layout:fragment="hero" class="hero" style="display: none;"></section>
+
+<div layout:fragment="content">
+    <div class="success-container" id="processing-container">
+        <div class="spinner"></div>
+        <div class="loading">결제 승인 처리 중입니다...</div>
+    </div>
+
+    <div class="success-container" id="success-container" style="display: none;">
+        <div class="success-icon">✅</div>
+        <h1 class="success-title">결제가 완료되었습니다!</h1>
+        <p class="success-message">
+            주문이 정상적으로 처리되었습니다.<br>
+            주문 내역은 마이페이지에서 확인하실 수 있습니다.
+        </p>
+
+        <div class="order-info">
+            <div class="order-info-row">
+                <span class="order-info-label">주문번호</span>
+                <span class="order-info-value" id="order-number">-</span>
+            </div>
+            <div class="order-info-row">
+                <span class="order-info-label">결제금액</span>
+                <span class="order-info-value" id="paid-amount">-</span>
+            </div>
+            <div class="order-info-row">
+                <span class="order-info-label">결제일시</span>
+                <span class="order-info-value" id="paid-at">-</span>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn btn-secondary" onclick="location.href='/'">메인으로</button>
+            <button class="btn btn-primary" onclick="location.href='/orders/list'">주문 내역</button>
+        </div>
+    </div>
+
+    <div class="success-container" id="error-container" style="display: none;">
+        <div style="font-size: 80px; color: #ef4444; margin-bottom: 30px;">❌</div>
+        <h1 class="success-title">결제 승인 실패</h1>
+        <p class="success-message" id="error-message">
+            결제 승인 처리 중 오류가 발생했습니다.<br>
+            고객센터로 문의해주세요.
+        </p>
+
+        <div class="btn-container">
+            <button class="btn btn-primary" onclick="location.href='/'">메인으로</button>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-js">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // URL 파라미터에서 결제 정보 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentKey = urlParams.get('paymentKey');
+        const orderNumber = urlParams.get('orderId'); // 토스에서는 orderId로 넘어옴
+        const amount = parseInt(urlParams.get('amount'));
+
+        async function confirmPayment() {
+            try {
+                const response = await fetch('/payments/confirm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        paymentKey: paymentKey,
+                        orderNumber: orderNumber,
+                        amount: amount
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || '결제 승인에 실패했습니다.');
+                }
+
+                const result = await response.json();
+
+                // 성공 화면 표시
+                document.getElementById('processing-container').style.display = 'none';
+                document.getElementById('success-container').style.display = 'block';
+
+                // 주문 정보 표시
+                document.getElementById('order-number').textContent = orderNumber;
+                document.getElementById('paid-amount').textContent = result.paidAmount.toLocaleString() + '원';
+
+                // paidAt을 사람이 읽기 쉬운 형식으로 변환
+                const paidAt = new Date(result.paidAt);
+                document.getElementById('paid-at').textContent = paidAt.toLocaleString('ko-KR');
+
+            } catch (error) {
+                console.error('결제 승인 오류:', error);
+
+                // 에러 화면 표시
+                document.getElementById('processing-container').style.display = 'none';
+                document.getElementById('error-container').style.display = 'block';
+                document.getElementById('error-message').innerHTML =
+                    error.message + '<br>고객센터로 문의해주세요.';
+            }
+        }
+
+        // 페이지 로드 시 결제 승인 요청
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!paymentKey || !orderNumber || amount === null) {
+                alert('잘못된 접근입니다.');
+                location.href = '/';
+                return;
+            }
+
+            if (paymentKey === 'ZERO_PAYMENT' && amount === 0) {
+                document.getElementById('processing-container').style.display = 'none';
+                document.getElementById('success-container').style.display = 'block';
+
+                document.getElementById('order-number').textContent = orderNumber;
+                document.getElementById('paid-amount').textContent = '0원';
+                document.getElementById('paid-at').textContent = new Date().toLocaleString('ko-KR');
+            } else {
+                confirmPayment();
+            }
+        });
+        /*]]>*/
+    </script>
+</th:block>
+</body>
+</html>

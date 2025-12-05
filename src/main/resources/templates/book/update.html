@@ -214,7 +214,7 @@
                     <div class="book-edit-container">
                         <h4><i class="fa fa-edit"></i> 도서 수정</h4>
 
-                        <form th:action="@{'/admin/books/' + ${book.id} + '/update'}"
+                        <form th:action="@{'/admin/books/' + ${book.id}}"
                               method="post" enctype="multipart/form-data">
 
                             <input type="hidden" name="_method" value="put">

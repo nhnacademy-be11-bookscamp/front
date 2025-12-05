@@ -1,5 +1,6 @@
 package store.bookscamp.front.address.controller;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -64,8 +65,15 @@ public class AddressController {
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Void> createJson(@RequestBody AddressCreateRequest form) {
-        return addressFeignClient.createAddress(form);
+    public ResponseEntity<String> createJson(@RequestBody AddressCreateRequest form) {
+        try {
+            ResponseEntity<Void> response = addressFeignClient.createAddress(form);
+            return ResponseEntity.status(response.getStatusCode()).build();
+        } catch (FeignException e) {
+            return ResponseEntity
+                    .status(e.status())
+                    .body(e.contentUTF8());
+        }
     }
 
     @GetMapping("/{id}/edit")

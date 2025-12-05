@@ -515,7 +515,7 @@
 
                                 <!-- 액션 버튼 -->
                                 <div class="book-actions">
-                                    <a th:href="@{/admin/books/{id}/update(id=${book.id})}" class="btn-edit">
+                                    <a th:href="@{/admin/books/{id}(id=${book.id})}" class="btn-edit">
                                         수정
                                     </a>
                                     <form th:action="@{/admin/books}" method="post"

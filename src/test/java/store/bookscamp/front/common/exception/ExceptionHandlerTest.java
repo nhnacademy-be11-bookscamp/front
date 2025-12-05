@@ -2,7 +2,6 @@ package store.bookscamp.front.common.exception;
 
 import feign.FeignException;
 import feign.Request;
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 class ExceptionHandlerTest {
 
@@ -55,7 +53,6 @@ class ExceptionHandlerTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         // RequestDispatcher Mocking (MockRequest는 기본적으로 getRequestDispatcher를 지원하지만 검증을 위해)
-        RequestDispatcher dispatcher = mock(RequestDispatcher.class);
         request.getRequestDispatcher("/error/forbidden"); // 실제로는 내부 설정이지만, Mock객체 주입이 어려우므로 Spy 대신 속성 확인 위주로 진행
 
         // MockRequest는 Dispatcher 로직을 내부적으로 처리하거나 무시하므로,
